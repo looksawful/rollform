@@ -1,10 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { diceShapes, initialConfig, presets } from '../src/lib/catalog.ts';
+import { configForQuery, diceShapes, initialConfig, presets } from '../src/lib/catalog.ts';
 import { addCartItem, changeQuantity, makeOrderText, readCart } from '../src/lib/orders.ts';
 
 test('prototype product configuration contains only the three selectable parameters', () => {
   assert.deepEqual(Object.keys(initialConfig), ['shape', 'shell', 'font']);
+});
+
+test('all preset links restore exact choices and invalid links fall back', () => {
+  for (const preset of presets) {
+    assert.deepEqual(configForQuery(preset.id, null), preset.config);
+    assert.notStrictEqual(configForQuery(preset.id, null), preset.config);
+  }
+  assert.deepEqual(configForQuery(null, 'd8'), { ...initialConfig, shape: 'd8' });
+  assert.deepEqual(configForQuery('invalid', 'd6'), { ...initialConfig, shape: 'd6' });
+  assert.deepEqual(configForQuery(null, 'invalid'), initialConfig);
 });
 
 test('seven geometries, demonstration presets are not presented as stock', () => {
