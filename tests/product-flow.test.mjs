@@ -1,20 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { configForQuery, diceShapes, initialConfig, presets } from '../src/lib/catalog.ts';
+import { configFromParams, diceShapes, initialConfig, presets } from '../src/lib/catalog.ts';
 import { addCartItem, changeQuantity, makeOrderText, readCart } from '../src/lib/orders.ts';
 
 test('prototype product configuration contains only the three selectable parameters', () => {
   assert.deepEqual(Object.keys(initialConfig), ['shape', 'shell', 'font']);
 });
 
-test('all preset links restore exact choices and invalid links fall back', () => {
+test('config URL restores valid choices and ignores malformed values', () => {
+  const selected = configFromParams(new URLSearchParams('shape=d10&shell=%23A62D35&font=mono'));
+  assert.deepEqual(selected, { shape: 'd10', shell: '#A62D35', font: 'mono' });
+  assert.deepEqual(configFromParams(new URLSearchParams('shape=invalid&shell=red&font=bad')), initialConfig);
+  assert.deepEqual(configFromParams(new URLSearchParams()), initialConfig);
+});
+
+test('each preset link restores its original configuration and edits override it', () => {
   for (const preset of presets) {
-    assert.deepEqual(configForQuery(preset.id, null), preset.config);
-    assert.notStrictEqual(configForQuery(preset.id, null), preset.config);
+    assert.deepEqual(configFromParams(new URLSearchParams(`preset=${preset.id}`)), preset.config);
   }
-  assert.deepEqual(configForQuery(null, 'd8'), { ...initialConfig, shape: 'd8' });
-  assert.deepEqual(configForQuery('invalid', 'd6'), { ...initialConfig, shape: 'd6' });
-  assert.deepEqual(configForQuery(null, 'invalid'), initialConfig);
+  assert.deepEqual(configFromParams(new URLSearchParams('preset=demo-8&font=serif')), { ...presets[7].config, font: 'serif' });
+  assert.deepEqual(configFromParams(new URLSearchParams('preset=missing&shape=d8')), { ...initialConfig, shape: 'd8' });
 });
 
 test('seven geometries, demonstration presets are not presented as stock', () => {
@@ -54,7 +59,7 @@ test('cart hydration rejects malformed and legacy entries instead of crashing', 
 
 test('quantity updates and draft order do not imply payment or delivery', () => {
   const saved = addCartItem([], { origin: { kind: 'preorder_custom' }, config: initialConfig });
-  assert.equal(changeQuantity(saved, saved[0].id, -1).length, 0);
+  assert.equal(changeQuantity(saved, saved[0].id, -1)[0].quantity, 1);
   assert.equal(changeQuantity(saved, saved[0].id, +1)[0].quantity, 2);
   const text = makeOrderText(saved);
   assert.match(text, /Свой вариант/);

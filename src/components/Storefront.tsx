@@ -12,6 +12,7 @@ export default function Storefront() {
   const modelRef = useRef<HTMLDivElement>(null);
   const scrollAngle = useRef(0);
   const [shapeIndex, setShapeIndex] = useState(5);
+  const [spinning, setSpinning] = useState(true);
   const heroShape = diceShapes[shapeIndex];
   const heroConfig = { ...initialConfig, shape: heroShape };
 
@@ -19,8 +20,9 @@ export default function Storefront() {
     <HeroScroll hero={heroRef} model={modelRef} scrollAngle={scrollAngle} />
     <section ref={heroRef} className="wrapper hero split" aria-labelledby="hero-title">
       <div className="hero-object" ref={modelRef}>
-        <DiceViewer config={heroConfig} scrollAngleRef={scrollAngle} onSelect={() => setShapeIndex(i => (i + 1) % 7)} />
+        <DiceViewer config={heroConfig} scrollAngleRef={scrollAngle} autoRotate={spinning} onSelect={() => setShapeIndex(i => (i + 1) % 7)} />
         <span className="object-label">3D / {heroShape.toUpperCase()}</span>
+        <button className="object-pause" type="button" aria-pressed={!spinning} onClick={() => setSpinning(value => !value)}>{spinning ? 'Пауза' : 'Вращать'}</button>
         <button className="object-action" onClick={() => setShapeIndex(i => (i + 1) % 7)}>Следующая форма <span aria-hidden="true">↗</span></button>
       </div>
       <div className="hero-copy stack">

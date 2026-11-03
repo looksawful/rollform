@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { MutableRefObject } from 'react';
-import type { Texture, Material, BufferGeometry } from 'three';
+import type { KeyboardEvent, MutableRefObject } from 'react';
+import type { BufferGeometry, LineSegments, Material, Mesh, Texture } from 'three';
 import type { DiceConfig } from '@/lib/catalog';
 import { buildGeometry, faceLabel, facePlacements } from '@/lib/diceGeometry';
 
@@ -10,13 +10,27 @@ type Props = {
   config: DiceConfig;
   onSelect?: () => void;
   scrollAngleRef?: MutableRefObject<number>;
+  autoRotate?: boolean;
+  interactive?: boolean;
 };
 
-export default function DiceViewer({ config, onSelect, scrollAngleRef }: Props) {
+export default function DiceViewer({
+  config, onSelect, scrollAngleRef, autoRotate = false, interactive = false,
+}: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const selectRef = useRef(onSelect);
-  selectRef.current = onSelect;
+  const configRef = useRef(config);
+  const spinRef = useRef(autoRotate);
+  const updateRef = useRef<((next: DiceConfig) => void) | null>(null);
+  const rotateRef = useRef<((x: number, y: number, reset?: boolean) => void) | null>(null);
+  const wakeRef = useRef<(() => void) | null>(null);
   const [fallback, setFallback] = useState(false);
+  selectRef.current = onSelect;
+  configRef.current = config;
+  spinRef.current = autoRotate;
+
+  useEffect(() => { updateRef.current?.(config); }, [config]);
+  useEffect(() => { wakeRef.current?.(); }, [autoRotate]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -30,7 +44,7 @@ export default function DiceViewer({ config, onSelect, scrollAngleRef }: Props) 
         if (closed) return;
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(39, 1, 0.1, 100);
-        camera.position.set(0, 0, 7.7);
+        camera.position.set(0, 0, 6.6);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -43,124 +57,272 @@ export default function DiceViewer({ config, onSelect, scrollAngleRef }: Props) 
         const dice = new THREE.Group();
         dice.rotation.set(-0.38, 0.4, 0.12);
         scene.add(dice);
-        const geometry = buildGeometry(config.shape);
-        const surface = new THREE.MeshBasicMaterial({ color: config.shell, side: THREE.DoubleSide });
-        dice.add(new THREE.Mesh(geometry, surface));
-        const edges = new THREE.EdgesGeometry(geometry, 22);
-        const edgeMaterial = new THREE.LineBasicMaterial({ color: '#ffffff' });
-        dice.add(new THREE.LineSegments(edges, edgeMaterial));
+        scene.add(new THREE.AmbientLight(0xffffff, 1.6));
+        const key = new THREE.DirectionalLight(0xffffff, 2.1);
+        key.position.set(4, 6, 7);
+        scene.add(key);
+        const fill = new THREE.DirectionalLight(0xffffff, 0.65);
+        fill.position.set(-5, -3, -2);
+        scene.add(fill);
 
+        const surface = new THREE.MeshStandardMaterial({
+          color: '#191919', roughness: 0.72, metalness: 0.03,
+          flatShading: true, side: THREE.DoubleSide,
+        });
+        const edgeMaterial = new THREE.LineBasicMaterial({ color: '#dddddd' });
+        let geometry: BufferGeometry | undefined;
+        let edgeGeometry: BufferGeometry | undefined;
+        let body: Mesh | undefined;
+        let edgeLines: LineSegments | undefined;
         const textureSet: Texture[] = [];
         const materialSet: Material[] = [];
         const labelGeometries: BufferGeometry[] = [];
-        facePlacements(geometry, config.shape).forEach((face, index) => {
-          const labelCanvas = document.createElement('canvas');
-          labelCanvas.width = labelCanvas.height = 256;
-          const ctx = labelCanvas.getContext('2d');
-          if (!ctx) return;
-          const label = faceLabel(config.shape, index);
-          const family = config.font === 'mono' ? 'monospace'
-            : config.font === 'serif' ? 'Georgia, serif' : 'Inter, Arial, sans-serif';
-          ctx.font = `700 ${label.length > 1 ? 110 : 150}px ${family}`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillStyle = '#ffffff';
-          ctx.fillText(label, 128, 135);
-          const texture = new THREE.CanvasTexture(labelCanvas);
-          texture.colorSpace = THREE.SRGBColorSpace;
-          const material = new THREE.MeshBasicMaterial({
-            map: texture, transparent: true, depthWrite: false,
-            side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2,
-          });
-          const width = ({ d4: 0.66, d6: 0.92, d8: 0.74, d10: 0.72,
-            d12: 0.82, d20: 0.7, 'd%': 0.72 } as const)[config.shape];
-          const plane = new THREE.PlaneGeometry(width, width);
-          const text = new THREE.Mesh(plane, material);
-          text.position.copy(face.center).addScaledVector(face.normal, 0.032);
-          text.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), face.normal);
-          dice.add(text);
-          textureSet.push(texture);
-          materialSet.push(material);
-          labelGeometries.push(plane);
-        });
+        const labels: Mesh[] = [];
+        let renderedShape: DiceConfig['shape'] | undefined;
+        let renderedFont: DiceConfig['font'] | undefined;
+        let renderedShell: string | undefined;
 
-        let activePointer = false;
-        let moved = false;
-        let lastX = 0;
-        let lastY = 0;
-        let lastTouch = 0;
-        let previousScrollAngle = 0;
+        const clearShape = () => {
+          labels.forEach(label => dice.remove(label));
+          labels.length = 0;
+          textureSet.forEach(texture => texture.dispose());
+          materialSet.forEach(material => material.dispose());
+          labelGeometries.forEach(item => item.dispose());
+          textureSet.length = materialSet.length = labelGeometries.length = 0;
+          if (body) dice.remove(body);
+          if (edgeLines) dice.remove(edgeLines);
+          geometry?.dispose();
+          edgeGeometry?.dispose();
+        };
+
+        const buildShape = (next: DiceConfig) => {
+          const shapeChanged = renderedShape !== next.shape;
+          clearShape();
+          geometry = buildGeometry(next.shape);
+          body = new THREE.Mesh(geometry, surface);
+          dice.add(body);
+          edgeGeometry = new THREE.EdgesGeometry(geometry, 22);
+          edgeLines = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+          dice.add(edgeLines);
+          facePlacements(geometry, next.shape).forEach((face, index) => {
+            const image = document.createElement('canvas');
+            image.width = image.height = 256;
+            const ctx = image.getContext('2d');
+            if (!ctx) return;
+            const label = faceLabel(next.shape, index);
+            const family = next.font === 'mono' ? 'monospace'
+              : next.font === 'serif' ? 'Georgia, serif' : 'Inter, Arial, sans-serif';
+            ctx.font = '700 ' + (label.length > 1 ? 120 : 156) + 'px ' + family;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(label, 128, 135);
+            const texture = new THREE.CanvasTexture(image);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            const material = new THREE.MeshBasicMaterial({
+              map: texture, transparent: true, depthWrite: false,
+              side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2,
+            });
+            const width = ({ d4: 0.83, d6: 0.92, d8: 0.77, d10: 0.74,
+              d12: 0.82, d20: 0.72, 'd%': 0.74 } as const)[next.shape];
+            const plane = new THREE.PlaneGeometry(width, width);
+            const text = new THREE.Mesh(plane, material);
+            text.position.copy(face.center).addScaledVector(face.normal, 0.034);
+            text.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), face.normal);
+            dice.add(text);
+            labels.push(text);
+            textureSet.push(texture);
+            materialSet.push(material);
+            labelGeometries.push(plane);
+          });
+          if (shapeChanged && renderedShape !== undefined) dice.rotation.set(-0.38, 0.4, 0.12);
+          renderedShape = next.shape;
+          renderedFont = next.font;
+        };
+
+        const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
         let frame = 0;
+        let visible = true;
+        let lost = false;
+        let dirty = true;
+        let previousScrollAngle = scrollAngleRef?.current ?? 0;
+        let lastScroll = -Infinity;
+        let lastTouch = 0;
+        let pointerId: number | null = null;
+        let moved = false;
+        let startX = 0, startY = 0, lastX = 0, lastY = 0;
+
+        const draw = () => {
+          frame = 0;
+          if (closed || lost || document.hidden || !visible) return;
+          const angle = scrollAngleRef?.current ?? 0;
+          const delta = angle - previousScrollAngle;
+          previousScrollAngle = angle;
+          if (!motion.matches && Math.abs(delta) > 0.00001) {
+            dice.rotation.y += delta;
+            dice.rotation.x += delta * 0.38;
+            dirty = true;
+          }
+          if (spinRef.current && !motion.matches && pointerId === null &&
+            performance.now() - lastTouch > 1400) {
+            dice.rotation.y += 0.0026;
+            dice.rotation.x += 0.00025;
+            dirty = true;
+          }
+          if (dirty) { renderer.render(scene, camera); dirty = false; }
+          if ((!motion.matches && spinRef.current) ||
+            (scrollAngleRef && !motion.matches && performance.now() - lastScroll < 1200)) {
+            frame = requestAnimationFrame(draw);
+          }
+        };
+        const wake = () => {
+          dirty = true;
+          if (!frame && !closed && !lost && !document.hidden && visible) frame = requestAnimationFrame(draw);
+        };
+        const stop = () => { cancelAnimationFrame(frame); frame = 0; };
+
+        const update = (next: DiceConfig) => {
+          if (next.shape !== renderedShape || next.font !== renderedFont) buildShape(next);
+          if (next.shell !== renderedShell) {
+            surface.color.set(next.shell === '#000000' ? '#191919' : next.shell);
+            renderedShell = next.shell;
+          }
+          wake();
+        };
+        updateRef.current = update;
+        update(configRef.current);
+
+        const rotate = (x: number, y: number, reset = false) => {
+          if (reset) dice.rotation.set(-0.38, 0.4, 0.12);
+          else { dice.rotation.y += x; dice.rotation.x += y; }
+          lastTouch = performance.now();
+          wake();
+        };
+        rotateRef.current = rotate;
+        wakeRef.current = wake;
+
         const onPointerDown = (event: PointerEvent) => {
-          activePointer = true; moved = false; lastX = event.clientX; lastY = event.clientY;
+          if (pointerId !== null || event.button !== 0) return;
+          pointerId = event.pointerId;
+          moved = false;
+          startX = lastX = event.clientX;
+          startY = lastY = event.clientY;
           canvas.setPointerCapture(event.pointerId);
           canvas.style.cursor = 'grabbing';
         };
         const onPointerMove = (event: PointerEvent) => {
-          if (!activePointer) return;
+          if (pointerId !== event.pointerId) return;
           const dx = event.clientX - lastX, dy = event.clientY - lastY;
-          if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
-          dice.rotation.y += dx * 0.011;
-          dice.rotation.x += dy * 0.011;
-          lastX = event.clientX; lastY = event.clientY;
+          if (Math.hypot(event.clientX - startX, event.clientY - startY) > 6) moved = true;
+          rotate(dx * 0.011, dy * 0.011);
+          lastX = event.clientX;
+          lastY = event.clientY;
+        };
+        const endPointer = (event: PointerEvent, cancelled: boolean) => {
+          if (pointerId !== event.pointerId) return;
+          pointerId = null;
           lastTouch = performance.now();
+          if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+          canvas.style.cursor = 'grab';
+          if (!cancelled && !moved) selectRef.current?.();
         };
-        const onPointerUp = () => {
-          if (!activePointer) return;
-          activePointer = false; canvas.style.cursor = 'grab'; lastTouch = performance.now();
-          if (!moved) selectRef.current?.();
-        };
+        const onPointerUp = (event: PointerEvent) => endPointer(event, false);
+        const onPointerCancel = (event: PointerEvent) => endPointer(event, true);
         canvas.addEventListener('pointerdown', onPointerDown);
         canvas.addEventListener('pointermove', onPointerMove);
         canvas.addEventListener('pointerup', onPointerUp);
-        canvas.addEventListener('pointercancel', onPointerUp);
+        canvas.addEventListener('pointercancel', onPointerCancel);
 
-        const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const onLost = (event: Event) => {
+          event.preventDefault();
+          lost = true;
+          stop();
+          canvas.style.visibility = 'hidden';
+          setFallback(true);
+        };
+        const onRestored = () => {
+          lost = false;
+          canvas.style.visibility = '';
+          setFallback(false);
+          resize();
+          wake();
+        };
+        canvas.addEventListener('webglcontextlost', onLost);
+        canvas.addEventListener('webglcontextrestored', onRestored);
+
         const resize = () => {
-          const w = host.clientWidth || 250, h = host.clientHeight || 250;
+          if (lost) return;
+          const w = Math.max(1, host.clientWidth), h = Math.max(1, host.clientHeight);
           renderer.setSize(w, h, false);
           camera.aspect = w / h;
           camera.updateProjectionMatrix();
+          wake();
         };
         const observer = new ResizeObserver(resize);
-        observer.observe(host); resize();
-        const draw = () => {
-          const angle = scrollAngleRef?.current ?? 0;
-          const delta = angle - previousScrollAngle;
-          dice.rotation.y += delta;
-          dice.rotation.x += delta * 0.38;
-          previousScrollAngle = angle;
-          if (!activePointer && !motion.matches && performance.now() - lastTouch > 1400) {
-            dice.rotation.y += 0.0026;
-            dice.rotation.x += 0.00025;
-          }
-          renderer.render(scene, camera);
-          frame = requestAnimationFrame(draw);
-        };
-        draw();
+        observer.observe(host);
+        const visibility = new IntersectionObserver(([entry]) => {
+          visible = entry.isIntersecting;
+          if (visible) wake();
+          else stop();
+        });
+        visibility.observe(host);
+        const onVisibility = () => { if (document.hidden) stop(); else wake(); };
+        const onScroll = () => { lastScroll = performance.now(); wake(); };
+        document.addEventListener('visibilitychange', onVisibility);
+        if (scrollAngleRef) window.addEventListener('scroll', onScroll, { passive: true });
+        motion.addEventListener('change', wake);
+        resize();
+
         cleanup = () => {
-          cancelAnimationFrame(frame); observer.disconnect();
+          stop();
+          observer.disconnect();
+          visibility.disconnect();
+          document.removeEventListener('visibilitychange', onVisibility);
+          if (scrollAngleRef) window.removeEventListener('scroll', onScroll);
+          motion.removeEventListener('change', wake);
           canvas.removeEventListener('pointerdown', onPointerDown);
           canvas.removeEventListener('pointermove', onPointerMove);
           canvas.removeEventListener('pointerup', onPointerUp);
-          canvas.removeEventListener('pointercancel', onPointerUp);
-          textureSet.forEach(t => t.dispose());
-          materialSet.forEach(m => m.dispose());
-          labelGeometries.forEach(g => g.dispose());
-          edges.dispose(); edgeMaterial.dispose(); geometry.dispose(); surface.dispose();
-          renderer.dispose(); canvas.remove();
+          canvas.removeEventListener('pointercancel', onPointerCancel);
+          canvas.removeEventListener('webglcontextlost', onLost);
+          canvas.removeEventListener('webglcontextrestored', onRestored);
+          if (updateRef.current === update) updateRef.current = null;
+          if (rotateRef.current === rotate) rotateRef.current = null;
+          if (wakeRef.current === wake) wakeRef.current = null;
+          clearShape();
+          surface.dispose();
+          edgeMaterial.dispose();
+          renderer.dispose();
+          canvas.remove();
         };
         if (closed) cleanup();
-        setFallback(false);
+        else setFallback(false);
       } catch (error) {
         if (!closed) { console.warn('3D preview unavailable', error); setFallback(true); }
       }
     })();
     return () => { closed = true; cleanup?.(); };
-  }, [config, scrollAngleRef]);
+  }, [scrollAngleRef]);
+
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!interactive) return;
+    const turn = 0.2;
+    switch (event.key) {
+      case 'ArrowLeft': rotateRef.current?.(-turn, 0); break;
+      case 'ArrowRight': rotateRef.current?.(turn, 0); break;
+      case 'ArrowUp': rotateRef.current?.(0, -turn); break;
+      case 'ArrowDown': rotateRef.current?.(0, turn); break;
+      case 'Home': rotateRef.current?.(0, 0, true); break;
+      default: return;
+    }
+    event.preventDefault();
+  };
 
   return <div ref={hostRef} className="dice-canvas"
-    role="img" aria-label={`3D модель ${config.shape.toUpperCase()}, `}>
-    {fallback && <div className="canvas-fallback">{config.shape.toUpperCase()}</div>}
+    role={interactive ? 'group' : 'img'} tabIndex={interactive ? 0 : undefined}
+    aria-label={'3D модель ' + config.shape.toUpperCase() +
+      (interactive ? '. Стрелки поворачивают, Home сбрасывает поворот' : '')}
+    onKeyDown={onKeyDown}>
+    {fallback && <div className="canvas-fallback" style={{ backgroundColor: config.shell, color: '#ffffff' }}>{config.shape.toUpperCase()}</div>}
   </div>;
 }

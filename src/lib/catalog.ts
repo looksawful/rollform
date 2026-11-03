@@ -27,6 +27,18 @@ export const fontNames: Record<FontStyle, string> = {
   grotesk: 'Гротеск', mono: 'Моно', serif: 'Антиква',
 };
 
+export function configFromParams(params: Pick<URLSearchParams, 'get'>): DiceConfig {
+  const shape = params.get('shape');
+  const shell = params.get('shell');
+  const font = params.get('font');
+  const base = presets.find(preset => preset.id === params.get('preset'))?.config ?? initialConfig;
+  return {
+    shape: diceShapes.find(x => x === shape) ?? base.shape,
+    shell: shellColors.find(x => x.value === shell)?.value ?? base.shell,
+    font: font === 'grotesk' || font === 'mono' || font === 'serif' ? font : base.font,
+  };
+}
+
 // Placeholder presets only. No confirmed stock, price, lead time or production claims.
 const shapes: DiceShape[] = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd%', 'd20', 'd6'];
 export const presets: Preset[] = shapes.map((shape, index) => ({
@@ -40,9 +52,3 @@ export const presets: Preset[] = shapes.map((shape, index) => ({
   },
   fulfillment: { kind: 'preorder' },
 }));
-
-/** Restore an existing preset, or a safe direct-link shape. */
-export function configForQuery(id: string | null, shape: string | null): DiceConfig {
-  const preset = presets.find(item => item.id === id);
-  return preset ? { ...preset.config } : { ...initialConfig, shape: diceShapes.find(value => value === shape) ?? initialConfig.shape };
-}

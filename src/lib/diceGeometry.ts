@@ -64,7 +64,7 @@ export function facePlacements(geometry: THREE.BufferGeometry, shape: DiceShape)
   }
   const expanded = geometry.index ? geometry.toNonIndexed() : geometry;
   const pos = expanded.getAttribute('position');
-  const groups = new Map<string, { normal: THREE.Vector3; weighted: THREE.Vector3; area: number }>();
+  const groups: { normal: THREE.Vector3; weighted: THREE.Vector3; area: number }[] = [];
   for (let i = 0; i < pos.count; i += 3) {
     const a = new THREE.Vector3().fromBufferAttribute(pos, i);
     const b = new THREE.Vector3().fromBufferAttribute(pos, i + 1);
@@ -73,19 +73,20 @@ export function facePlacements(geometry: THREE.BufferGeometry, shape: DiceShape)
     const area = cross.length() * 0.5;
     if (area === 0) continue;
     const normal = cross.normalize();
-    const key = [normal.x, normal.y, normal.z].map(v => v.toFixed(3)).join(',');
     const centroid = a.add(b).add(c).multiplyScalar(1 / 3);
-    const group = groups.get(key);
+    // Float rounding near a boundary must not split one planar face into two.
+    const group = groups.find(face => face.normal.dot(normal) > 1 - 1e-5);
     if (group) { group.weighted.addScaledVector(centroid, area); group.area += area; }
-    else groups.set(key, { normal, weighted: centroid.multiplyScalar(area), area });
+    else groups.push({ normal, weighted: centroid.multiplyScalar(area), area });
   }
   if (expanded !== geometry) expanded.dispose();
-  return [...groups.values()].map(({ normal, weighted, area }) => ({
+  return groups.map(({ normal, weighted, area }) => ({
     normal, center: weighted.divideScalar(area),
   }));
 }
 
 export function faceLabel(shape: DiceShape, index: number): string {
+  if (shape === 'd6') return ['1', '6', '2', '5', '3', '4'][index];
   if (shape === 'd%') return String(index * 10).padStart(2, '0');
   return String(index + 1);
 }

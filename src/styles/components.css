@@ -113,4 +113,5 @@
     border: var(--line);
     background: var(--paper);
   }
+  .quantity button:disabled { opacity: 0.35; cursor: not-allowed; }
 }
