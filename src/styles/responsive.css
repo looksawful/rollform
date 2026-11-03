@@ -1,0 +1,29 @@
+/* Content-first exceptions. Intrinsic .split/.auto-grid do most of the work. */
+@layer components {
+  @media (width <= 56rem) {
+    .hero { padding-block: 1rem 4rem; }
+    .hero-object { min-block-size: clamp(21rem, 65vw, 32rem); }
+    .hero h1 { font-size: clamp(3.2rem, 9vw, 5.8rem); }
+  }
+
+  @media (width <= 36rem) {
+    .topbar-inner { --cluster-gap: 0.5rem; min-block-size: 4.25rem; }
+
+    .hero-object { min-block-size: 22rem; }
+    .hero-copy { --stack-space: 1.2rem; }
+    .hero h1 { font-size: clamp(3.2rem, 12vw, 4.7rem); }
+    .section-head { align-items: flex-start; }
+    .footer-inner { padding-block: 1.5rem; }
+  }
+
+  /* A product's copy adapts to its own width, not the viewport width. */
+  @container (width < 18rem) {
+    .product-copy h3 { font-size: 1.1rem; }
+    .product-bottom { --cluster-gap: 0.4rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :is(.button, .dice-glyph) { transition: none; }
+    .hero-object { will-change: auto; }
+  }
+}

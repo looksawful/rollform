@@ -1,0 +1,27 @@
+/* Global decisions only. Pattern-specific knobs intentionally stay undefined
+   until a consumer provides them, with local fallbacks in patterns.css. */
+@layer theme {
+  :root {
+    --ink: #000000;
+    --paper: #ffffff;
+    --line: 1px solid var(--ink);
+
+    --ff-body: Inter, Arial, Helvetica, sans-serif;
+    --ff-label: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --fs-body: 1rem;
+    --fs-display: clamp(3.65rem, 6.4vw, 7.75rem);
+    --fs-heading: clamp(3.4rem, 6.6vw, 6.5rem);
+    --fs-label: 0.75rem;
+
+    --gutter: clamp(1.25rem, 3.5vw, 4.5rem);
+    --content-max: 94rem;
+    --measure: 65ch;
+    --header-height: 5.25rem;
+
+    --space-1: 0.5rem;
+    --space-2: 1rem;
+    --space-3: 1.5rem;
+    --space-4: clamp(2rem, 4vw, 4.5rem);
+    --space-5: clamp(4.5rem, 9vw, 10rem);
+  }
+}

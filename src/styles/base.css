@@ -1,0 +1,39 @@
+/* Low-specificity foundations: no component-specific rules here. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: auto; /* ScrollTrigger owns the pinned transition. */
+    color-scheme: light;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--ff-body);
+    font-size: var(--fs-body);
+    line-height: 1.4;
+  }
+
+  :where(button, input, textarea) { font: inherit; }
+  :where(button) { cursor: pointer; }
+  :where(a) { color: inherit; text-decoration: none; }
+  :where(h1, h2, h3, p) { margin: 0; }
+
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+  }
+
+  ::selection {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  :where(#catalog, #about, #contacts) { scroll-margin-block-start: 5rem; }
+}
