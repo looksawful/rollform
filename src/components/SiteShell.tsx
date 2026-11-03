@@ -23,7 +23,12 @@ function SiteChrome({ children }: { children: ReactNode }) {
         </nav>
         <div className="header-actions">
           <Link href="/cart" className="cart-trigger" aria-current={activeRoute === 'cart' ? 'page' : undefined}>Корзина <span>({count})</span></Link>
-          <details className="mobile-navigation">
+          <details className="mobile-navigation" onKeyDown={event => {
+            if (event.key === 'Escape' && event.currentTarget.open) {
+              event.currentTarget.open = false;
+              event.currentTarget.querySelector('summary')?.focus();
+            }
+          }}>
             <summary>Меню <span aria-hidden="true">☰</span></summary>
             <nav aria-label="Мобильное меню" className="mobile-nav-list">
               {links.map(link => <Link href={link.href} key={link.href} aria-current={link.href === `/${activeRoute}` ? 'page' : undefined} onClick={event => {
