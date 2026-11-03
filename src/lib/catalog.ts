@@ -5,19 +5,15 @@ export type FontStyle = 'grotesk' | 'mono' | 'serif';
 /** Values describe the on-screen prototype, not confirmed manufacturing options. */
 export type DiceConfig = {
   shape: DiceShape;
-  size: 22 | 28 | 36;
   shell: '#000000' | '#196641' | '#A62D35' | '#215BA8';
-  ink: '#ffffff';
   font: FontStyle;
-  roundness: number;
 };
 
 export type Fulfillment = { kind: 'preorder' } | { kind: 'in_stock'; available: number };
 export type Preset = { id: string; title: string; config: DiceConfig; fulfillment: Fulfillment };
 
 export const initialConfig: DiceConfig = {
-  shape: 'd20', size: 28, shell: '#000000', ink: '#ffffff',
-  font: 'grotesk', roundness: 0,
+  shape: 'd20', shell: '#000000', font: 'grotesk',
 };
 
 export const shellColors: { name: string; value: DiceConfig['shell'] }[] = [

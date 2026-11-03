@@ -5,14 +5,14 @@ import { useRef, useState } from 'react';
 import DiceViewer from './DiceViewer';
 import HeroScroll from './HeroScroll';
 import ProductCard from './ProductCard';
-import { initialConfig, presets } from '@/lib/catalog';
+import { diceShapes, initialConfig, presets } from '@/lib/catalog';
 
 export default function Storefront() {
   const heroRef = useRef<HTMLElement>(null);
   const modelRef = useRef<HTMLDivElement>(null);
   const scrollAngle = useRef(0);
   const [shapeIndex, setShapeIndex] = useState(5);
-  const heroShape = presets[shapeIndex % 7].config.shape;
+  const heroShape = diceShapes[shapeIndex];
   const heroConfig = { ...initialConfig, shape: heroShape };
 
   return <>

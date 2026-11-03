@@ -59,57 +59,7 @@
   .button-outline:hover { color: var(--paper); background: var(--ink); }
   .button-fill { inline-size: 100%; }
 
-  /* Overlay content is conditional in React; hidden panels aren't in tab order. */
-  .overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    justify-content: flex-end;
-    background: rgb(0 0 0 / 53%);
-  }
-
-  .panel {
-    display: flex;
-    flex-direction: column;
-    inline-size: min(100%, 30rem);
-    min-block-size: 100%;
-    max-block-size: 100%;
-    overflow-y: auto;
-    border-inline-start: var(--line);
-    background: var(--paper);
-  }
-
-  .panel-header {
-    --cluster-justify: space-between;
-    padding: 1.25rem;
-    border-block-end: var(--line);
-  }
-
-  .panel-header h2 { font-size: 1.6rem; letter-spacing: -0.04em; }
-
-  .icon-button {
-    display: grid;
-    place-items: center;
-    inline-size: 2.4rem;
-    block-size: 2.4rem;
-    border: var(--line);
-    background: var(--paper);
-    font-size: 1.5rem;
-  }
-
-  .panel-body {
-    --stack-space: 1.65rem;
-    flex-grow: 1;
-    padding: 1.5rem 1.25rem;
-  }
-
   .panel-note { font-size: 0.85rem; }
-
-  .panel-footer {
-    padding: 1.25rem;
-    border-block-start: var(--line);
-  }
 
   .field { --stack-space: 0.55rem; }
   .field > span { font-size: 0.83rem; font-weight: 700; }
@@ -145,13 +95,6 @@
 
   .field input[type="range"] { inline-size: 100%; accent-color: var(--ink); }
 
-  .cart-row {
-    --cluster-gap: 0.8rem;
-    flex-wrap: nowrap;
-    border-block-end: var(--line);
-    padding-block-end: 1.25rem;
-  }
-
   .cart-swatch {
     display: grid;
     place-items: center;
@@ -162,8 +105,6 @@
     font-size: 0.8rem;
   }
 
-  .cart-name { --stack-space: 0.15rem; flex: 1; font-size: 0.85rem; }
-  .cart-name small { font-size: 0.75rem; }
   .quantity { --cluster-gap: 0.6rem; flex-wrap: nowrap; }
 
   .quantity button {

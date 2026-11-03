@@ -8,13 +8,11 @@ import { buildGeometry, faceLabel, facePlacements } from '@/lib/diceGeometry';
 
 type Props = {
   config: DiceConfig;
-  miniature?: boolean;
-  autoRotate?: boolean;
   onSelect?: () => void;
   scrollAngleRef?: MutableRefObject<number>;
 };
 
-export default function DiceViewer({ config, miniature = false, autoRotate = true, onSelect, scrollAngleRef }: Props) {
+export default function DiceViewer({ config, onSelect, scrollAngleRef }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const selectRef = useRef(onSelect);
   selectRef.current = onSelect;
@@ -45,11 +43,11 @@ export default function DiceViewer({ config, miniature = false, autoRotate = tru
         const dice = new THREE.Group();
         dice.rotation.set(-0.38, 0.4, 0.12);
         scene.add(dice);
-        const geometry = buildGeometry(config.shape, config.roundness);
+        const geometry = buildGeometry(config.shape);
         const surface = new THREE.MeshBasicMaterial({ color: config.shell, side: THREE.DoubleSide });
         dice.add(new THREE.Mesh(geometry, surface));
         const edges = new THREE.EdgesGeometry(geometry, 22);
-        const edgeMaterial = new THREE.LineBasicMaterial({ color: config.ink });
+        const edgeMaterial = new THREE.LineBasicMaterial({ color: '#ffffff' });
         dice.add(new THREE.LineSegments(edges, edgeMaterial));
 
         const textureSet: Texture[] = [];
@@ -66,7 +64,7 @@ export default function DiceViewer({ config, miniature = false, autoRotate = tru
           ctx.font = `700 ${label.length > 1 ? 110 : 150}px ${family}`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillStyle = config.ink;
+          ctx.fillStyle = '#ffffff';
           ctx.fillText(label, 128, 135);
           const texture = new THREE.CanvasTexture(labelCanvas);
           texture.colorSpace = THREE.SRGBColorSpace;
@@ -85,7 +83,6 @@ export default function DiceViewer({ config, miniature = false, autoRotate = tru
           materialSet.push(material);
           labelGeometries.push(plane);
         });
-        dice.scale.setScalar(config.size / 28 * (miniature ? 0.88 : 1));
 
         let activePointer = false;
         let moved = false;
@@ -133,8 +130,8 @@ export default function DiceViewer({ config, miniature = false, autoRotate = tru
           dice.rotation.y += delta;
           dice.rotation.x += delta * 0.38;
           previousScrollAngle = angle;
-          if (autoRotate && !activePointer && !motion.matches && performance.now() - lastTouch > 1400) {
-            dice.rotation.y += miniature ? 0.001 : 0.0026;
+          if (!activePointer && !motion.matches && performance.now() - lastTouch > 1400) {
+            dice.rotation.y += 0.0026;
             dice.rotation.x += 0.00025;
           }
           renderer.render(scene, camera);
@@ -160,10 +157,10 @@ export default function DiceViewer({ config, miniature = false, autoRotate = tru
       }
     })();
     return () => { closed = true; cleanup?.(); };
-  }, [config, miniature, autoRotate, scrollAngleRef]);
+  }, [config, scrollAngleRef]);
 
-  return <div ref={hostRef} className={`dice-canvas ${miniature ? 'dice-canvas-small' : ''}`}
-    role="img" aria-label={`3D модель ${config.shape.toUpperCase()}, ${config.size} мм`}>
+  return <div ref={hostRef} className="dice-canvas"
+    role="img" aria-label={`3D модель ${config.shape.toUpperCase()}, `}>
     {fallback && <div className="canvas-fallback">{config.shape.toUpperCase()}</div>}
   </div>;
 }

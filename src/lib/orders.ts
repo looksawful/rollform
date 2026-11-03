@@ -10,8 +10,7 @@ export type CartItem = { id: string; origin: CartOrigin; config: DiceConfig; qua
 export const CART_KEY = 'rollform:demo-cart:v2';
 
 export function sameConfig(a: DiceConfig, b: DiceConfig) {
-  return a.shape === b.shape && a.size === b.size && a.shell === b.shell &&
-    a.ink === b.ink && a.font === b.font && a.roundness === b.roundness;
+  return a.shape === b.shape && a.shell === b.shell && a.font === b.font;
 }
 
 function sameOrigin(a: CartOrigin, b: CartOrigin) {
@@ -39,9 +38,8 @@ function validConfig(value: unknown): value is DiceConfig {
   if (!value || typeof value !== 'object') return false;
   const x = value as Partial<DiceConfig>;
   return diceShapes.includes(x.shape as DiceConfig['shape']) &&
-    [22, 28, 36].includes(x.size as number) && shellColors.some(c => c.value === x.shell) &&
-    x.ink === '#ffffff' && ['grotesk', 'mono', 'serif'].includes(x.font as FontStyle) &&
-    typeof x.roundness === 'number' && x.roundness >= 0 && x.roundness <= 0.24;
+    shellColors.some(c => c.value === x.shell) &&
+    ['grotesk', 'mono', 'serif'].includes(x.font as FontStyle);
 }
 
 function validOrigin(value: unknown): value is CartOrigin {

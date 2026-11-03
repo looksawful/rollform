@@ -1,16 +1,13 @@
 import * as THREE from 'three';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import type { DiceShape } from './catalog';
 
 export type FacePlacement = { normal: THREE.Vector3; center: THREE.Vector3 };
 
 /** Regular / equilateral solids and a ten-faced pentagonal trapezohedron. */
-export function buildGeometry(shape: DiceShape, roundness = 0): THREE.BufferGeometry {
+export function buildGeometry(shape: DiceShape): THREE.BufferGeometry {
   switch (shape) {
     case 'd4': return new THREE.TetrahedronGeometry(1.65, 0);
-    case 'd6': return roundness > 0
-      ? new RoundedBoxGeometry(2, 2, 2, 4, Math.min(0.25, roundness))
-      : new THREE.BoxGeometry(2, 2, 2);
+    case 'd6': return new THREE.BoxGeometry(2, 2, 2);
     case 'd8': return new THREE.OctahedronGeometry(1.55, 0);
     case 'd10': case 'd%': return tenSidedGeometry();
     case 'd12': return new THREE.DodecahedronGeometry(1.55, 0);

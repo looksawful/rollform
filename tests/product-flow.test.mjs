@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 import { diceShapes, initialConfig, presets } from '../src/lib/catalog.ts';
 import { addCartItem, changeQuantity, makeOrderText, readCart } from '../src/lib/orders.ts';
 
+test('prototype product configuration contains only the three selectable parameters', () => {
+  assert.deepEqual(Object.keys(initialConfig), ['shape', 'shell', 'font']);
+});
+
 test('seven geometries, demonstration presets are not presented as stock', () => {
   assert.deepEqual(diceShapes, ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd%']);
   assert.ok(presets.length > 0);
