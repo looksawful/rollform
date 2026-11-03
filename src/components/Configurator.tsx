@@ -3,10 +3,8 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import DiceViewer from './DiceViewer';
 import { useCart } from './CartState';
-import { configFromParams, diceShapes, fontNames, shellColors } from '@/lib/catalog';
-import type { DiceConfig, FontStyle } from '@/lib/catalog';
-
-const fonts: FontStyle[] = ['grotesk', 'mono', 'serif'];
+import { configFromParams, diceShapes, fontNames, fontStyles, shellColors } from '@/lib/catalog';
+import type { DiceConfig } from '@/lib/catalog';
 
 export default function Configurator() {
   const router = useRouter();
@@ -27,7 +25,7 @@ export default function Configurator() {
       <div className="configure-controls stack">
         <div className="field stack"><h2>Форма</h2><div className="pill-list">{diceShapes.map(shape => <button key={shape} type="button" aria-pressed={config.shape === shape} className={config.shape === shape ? 'is-active' : ''} onClick={() => change('shape', shape)}>{shape.toUpperCase()}</button>)}</div></div>
         <div className="field stack"><h2>Цвет</h2><div className="pill-list">{shellColors.map(color => <button key={color.value} type="button" aria-pressed={config.shell === color.value} className={config.shell === color.value ? 'is-active' : ''} onClick={() => change('shell', color.value)}><span className="swatch" style={{ background: color.value }}/> {color.name}</button>)}</div></div>
-        <div className="field stack"><h2>Шрифт</h2><div className="pill-list">{fonts.map(font => <button key={font} type="button" aria-pressed={config.font === font} className={config.font === font ? 'is-active' : ''} onClick={() => change('font', font)}>{fontNames[font]}</button>)}</div></div>
+        <div className="field stack"><h2>Шрифт</h2><div className="pill-list">{fontStyles.map(font => <button key={font} type="button" aria-pressed={config.font === font} className={config.font === font ? 'is-active' : ''} onClick={() => change('font', font)}>{fontNames[font]}</button>)}</div></div>
         <p className="panel-note">Параметры экспериментальные. Заказ здесь не отправляется.</p>
         <button type="button" className="button button-black button-fill" onClick={addCustom}>В корзину <span aria-hidden="true">↗</span></button>
       </div>

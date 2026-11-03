@@ -1,10 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { configFromParams, diceShapes, initialConfig, presets } from '../src/lib/catalog.ts';
+import { configFromParams, diceShapes, fontNames, fontStyles, initialConfig, presets } from '../src/lib/catalog.ts';
 import { addCartItem, changeQuantity, makeOrderText, readCart } from '../src/lib/orders.ts';
 
 test('prototype product configuration contains only the three selectable parameters', () => {
   assert.deepEqual(Object.keys(initialConfig), ['shape', 'shell', 'font']);
+});
+
+test('every offered font is accepted by URL and cart validation', () => {
+  assert.deepEqual(fontStyles, Object.keys(fontNames));
+  for (const font of fontStyles) {
+    const config = { ...initialConfig, font };
+    assert.deepEqual(configFromParams(new URLSearchParams('font=' + font)), config);
+    assert.deepEqual(readCart(JSON.stringify([{ id: font, quantity: 1,
+      origin: { kind: 'preorder_custom' }, config }] ))[0].config, config);
+  }
 });
 
 test('config URL restores valid choices and ignores malformed values', () => {

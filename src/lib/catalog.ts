@@ -1,6 +1,7 @@
 export const diceShapes = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd%'] as const;
 export type DiceShape = (typeof diceShapes)[number];
-export type FontStyle = 'grotesk' | 'mono' | 'serif';
+export const fontStyles = ['grotesk', 'mono', 'serif'] as const;
+export type FontStyle = (typeof fontStyles)[number];
 
 /** Values describe the on-screen prototype, not confirmed manufacturing options. */
 export type DiceConfig = {
@@ -35,7 +36,7 @@ export function configFromParams(params: Pick<URLSearchParams, 'get'>): DiceConf
   return {
     shape: diceShapes.find(x => x === shape) ?? base.shape,
     shell: shellColors.find(x => x.value === shell)?.value ?? base.shell,
-    font: font === 'grotesk' || font === 'mono' || font === 'serif' ? font : base.font,
+    font: fontStyles.find(x => x === font) ?? base.font,
   };
 }
 
@@ -48,7 +49,7 @@ export const presets: Preset[] = shapes.map((shape, index) => ({
     ...initialConfig,
     shape,
     shell: shellColors[index % shellColors.length].value,
-    font: (['grotesk', 'mono', 'serif'] as const)[index % 3],
+    font: fontStyles[index % fontStyles.length],
   },
   fulfillment: { kind: 'preorder' },
 }));

@@ -88,14 +88,17 @@ export default function DiceViewer({
           const geometry = buildGeometry(next.shape);
           dice.add(new THREE.Mesh(geometry, surface));
           dice.add(new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 22), edgeMaterial));
+          const family = next.font === 'mono' ? 'monospace'
+            : next.font === 'serif' ? 'Georgia, serif' : 'Inter, Arial, sans-serif';
+          const width = ({ d4: 0.83, d6: 0.92, d8: 0.77, d10: 0.74,
+            d12: 0.82, d20: 0.72, 'd%': 0.74 } as const)[next.shape];
+          const front = new THREE.Vector3(0, 0, 1);
           facePlacements(geometry, next.shape).forEach((face, index) => {
             const image = document.createElement('canvas');
             image.width = image.height = 256;
             const ctx = image.getContext('2d');
             if (!ctx) return;
             const label = faceLabel(next.shape, index);
-            const family = next.font === 'mono' ? 'monospace'
-              : next.font === 'serif' ? 'Georgia, serif' : 'Inter, Arial, sans-serif';
             ctx.font = '700 ' + (label.length > 1 ? 120 : 156) + 'px ' + family;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -107,12 +110,10 @@ export default function DiceViewer({
               map: texture, transparent: true, depthWrite: false,
               side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2,
             });
-            const width = ({ d4: 0.83, d6: 0.92, d8: 0.77, d10: 0.74,
-              d12: 0.82, d20: 0.72, 'd%': 0.74 } as const)[next.shape];
             const plane = new THREE.PlaneGeometry(width, width);
             const text = new THREE.Mesh(plane, material);
             text.position.copy(face.center).addScaledVector(face.normal, 0.034);
-            text.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), face.normal);
+            text.quaternion.setFromUnitVectors(front, face.normal);
             dice.add(text);
           });
           if (shapeChanged && renderedShape !== undefined) dice.rotation.set(-0.38, 0.4, 0.12);

@@ -1,5 +1,5 @@
-import { diceShapes, shellColors } from './catalog.ts';
-import type { DiceConfig, FontStyle } from './catalog.ts';
+import { diceShapes, fontStyles, shellColors } from './catalog.ts';
+import type { DiceConfig } from './catalog.ts';
 
 export type CartOrigin =
   | { kind: 'in_stock'; presetId: string }
@@ -40,7 +40,7 @@ function validConfig(value: unknown): value is DiceConfig {
   const x = value as Partial<DiceConfig>;
   return diceShapes.includes(x.shape as DiceConfig['shape']) &&
     shellColors.some(c => c.value === x.shell) &&
-    ['grotesk', 'mono', 'serif'].includes(x.font as FontStyle);
+    fontStyles.includes(x.font as DiceConfig['font']);
 }
 
 function validOrigin(value: unknown): value is CartOrigin {
