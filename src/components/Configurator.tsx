@@ -23,7 +23,7 @@ export default function Configurator() {
   return <section className="wrapper section page-section">
     <div className="stack page-heading"><span className="kicker">КОНСТРУКТОР / ДЕМО</span><h1 className="page-title">Свой кубик</h1><p className="page-intro">Выберите форму, цвет и начертание. Превью иллюстративное, не производственная спецификация.</p></div>
     <div className="configure-layout">
-      <div className="configure-preview"><DiceViewer config={config} /><div className="preview-label cluster"><span>3D / {config.shape.toUpperCase()}</span><span>Поверните кубик мышью</span></div></div>
+      <div className="configure-preview"><DiceViewer config={config} interactive /><div className="preview-label cluster"><span>3D / {config.shape.toUpperCase()}</span><span>Перетащите / стрелки</span></div></div>
       <div className="configure-controls stack">
         <div className="field stack"><h2>Форма</h2><div className="pill-list">{diceShapes.map(shape => <button key={shape} type="button" aria-pressed={config.shape === shape} className={config.shape === shape ? 'is-active' : ''} onClick={() => change('shape', shape)}>{shape.toUpperCase()}</button>)}</div></div>
         <div className="field stack"><h2>Цвет</h2><div className="pill-list">{shellColors.map(color => <button key={color.value} type="button" aria-pressed={config.shell === color.value} className={config.shell === color.value ? 'is-active' : ''} onClick={() => change('shell', color.value)}><span className="swatch" style={{ background: color.value }}/> {color.name}</button>)}</div></div>
