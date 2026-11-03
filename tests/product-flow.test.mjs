@@ -14,6 +14,16 @@ test('config URL restores valid choices and ignores malformed values', () => {
   assert.deepEqual(configFromParams(new URLSearchParams()), initialConfig);
 });
 
+test('every catalog preset preserves its shape, shell and font through the URL', () => {
+  for (const preset of presets) {
+    const params = new URLSearchParams({ preset: preset.id });
+    assert.deepEqual(configFromParams(params), preset.config, preset.id);
+  }
+  const edited = new URLSearchParams({ preset: presets[1].id, shell: '#A62D35', font: 'serif' });
+  assert.deepEqual(configFromParams(edited), { ...presets[1].config, shell: '#A62D35', font: 'serif' });
+  assert.deepEqual(configFromParams(new URLSearchParams('preset=missing&shape=d6')), { ...initialConfig, shape: 'd6' });
+});
+
 test('seven geometries, demonstration presets are not presented as stock', () => {
   assert.deepEqual(diceShapes, ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd%']);
   assert.ok(presets.length > 0);
