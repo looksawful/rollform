@@ -31,7 +31,6 @@
     background: var(--paper);
     color: var(--ink);
   }
-  .product-index { margin: 0; }
   .product-color-dot {
     display: inline-block;
     vertical-align: -0.05em;

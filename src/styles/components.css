@@ -62,7 +62,6 @@
   .panel-note { font-size: 0.85rem; }
 
   .field { --stack-space: 0.55rem; }
-  .field > span { font-size: 0.83rem; font-weight: 700; }
 
   .pill-list {
     display: flex;
@@ -82,18 +81,6 @@
     background: var(--ink);
     color: var(--paper);
   }
-
-  .pill-list button:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  .field :is(input:not([type="range"]), textarea) {
-    inline-size: 100%;
-    border: var(--line);
-    padding: 0.8rem;
-    background: var(--paper);
-    color: var(--ink);
-  }
-
-  .field input[type="range"] { inline-size: 100%; accent-color: var(--ink); }
 
   .cart-swatch {
     display: grid;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import type { MutableRefObject, RefObject } from 'react';
 
 type Props = {
@@ -11,10 +11,8 @@ type Props = {
 
 /** Only the hero is pinned/snapped. Scrolling the long catalog stays free. */
 export default function HeroScroll({ hero, model, scrollAngle }: Props) {
-  const initialized = useRef(false);
   useEffect(() => {
-    if (initialized.current || !hero.current || !model.current) return;
-    initialized.current = true;
+    if (!hero.current || !model.current) return;
     let destroyed = false;
     let dispose: (() => void) | undefined;
     (async () => {
@@ -58,7 +56,7 @@ export default function HeroScroll({ hero, model, scrollAngle }: Props) {
       }, hero.current);
       dispose = () => { media.revert(); context.revert(); };
     })().catch(error => console.warn('GSAP unavailable', error));
-    return () => { destroyed = true; dispose?.(); initialized.current = false; };
+    return () => { destroyed = true; dispose?.(); };
   }, [hero, model, scrollAngle]);
   return null;
 }
