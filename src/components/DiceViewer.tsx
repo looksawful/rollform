@@ -123,6 +123,7 @@ export default function DiceViewer({
 
         const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
         let frame = 0;
+        let lastRender = -Infinity;
         let visible = true;
         let lost = false;
         let dirty = true;
@@ -133,7 +134,7 @@ export default function DiceViewer({
         let moved = false;
         let startX = 0, startY = 0, lastX = 0, lastY = 0;
 
-        const draw = () => {
+        const draw = (now: number) => {
           frame = 0;
           if (closed || lost || document.hidden || !visible) return;
           const angle = scrollAngleRef?.current ?? 0;
@@ -150,7 +151,11 @@ export default function DiceViewer({
             dice.rotation.x += 0.00025;
             dirty = true;
           }
-          if (dirty) { renderer.render(scene, camera); dirty = false; }
+          if (dirty && (!propsRef.current.autoRotate || now - lastRender >= 1000 / 60)) {
+            renderer.render(scene, camera);
+            lastRender = now;
+            dirty = false;
+          }
           if ((!motion.matches && propsRef.current.autoRotate) ||
             (scrollAngleRef && !motion.matches && performance.now() - lastScroll < 1200)) {
             frame = requestAnimationFrame(draw);
