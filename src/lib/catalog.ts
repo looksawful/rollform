@@ -27,6 +27,17 @@ export const fontNames: Record<FontStyle, string> = {
   grotesk: 'Гротеск', mono: 'Моно', serif: 'Антиква',
 };
 
+export function configFromParams(params: Pick<URLSearchParams, 'get'>): DiceConfig {
+  const shape = params.get('shape');
+  const shell = params.get('shell');
+  const font = params.get('font');
+  return {
+    shape: diceShapes.find(x => x === shape) ?? initialConfig.shape,
+    shell: shellColors.find(x => x.value === shell)?.value ?? initialConfig.shell,
+    font: font === 'grotesk' || font === 'mono' || font === 'serif' ? font : initialConfig.font,
+  };
+}
+
 // Placeholder presets only. No confirmed stock, price, lead time or production claims.
 const shapes: DiceShape[] = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd%', 'd20', 'd6'];
 export const presets: Preset[] = shapes.map((shape, index) => ({
