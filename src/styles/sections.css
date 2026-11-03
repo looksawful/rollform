@@ -71,8 +71,8 @@
   .hero h1 {
     font-size: var(--fs-display);
     font-weight: 900;
-    line-height: 0.91;
-    letter-spacing: -0.088em;
+    line-height: 0.96;
+    letter-spacing: -0.06em;
     text-wrap: balance;
     overflow-wrap: anywhere;
   }
@@ -98,7 +98,7 @@
     font-size: var(--fs-heading);
     font-weight: 900;
     line-height: 0.95;
-    letter-spacing: -0.08em;
+    letter-spacing: -0.055em;
   }
 
   .section-head p { font-size: 0.875rem; }
