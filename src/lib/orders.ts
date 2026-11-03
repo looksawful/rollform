@@ -30,8 +30,9 @@ export function addCartItem(items: CartItem[], input: AddInput): CartItem[] {
 
 export function changeQuantity(items: CartItem[], id: string, delta: number) {
   if (!Number.isInteger(delta)) return items;
-  return items.map(item => item.id === id ? { ...item, quantity: Math.max(0, Math.min(99, item.quantity + delta)) } : item)
-    .filter(item => item.quantity > 0);
+  return items.map(item => item.id === id
+    ? { ...item, quantity: Math.max(1, Math.min(99, item.quantity + delta)) }
+    : item);
 }
 
 function validConfig(value: unknown): value is DiceConfig {
