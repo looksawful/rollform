@@ -26,7 +26,10 @@ function SiteChrome({ children }: { children: ReactNode }) {
           <details className="mobile-navigation">
             <summary aria-label="Открыть меню">Меню <span aria-hidden="true">☰</span></summary>
             <nav aria-label="Мобильное меню" className="mobile-nav-list">
-              {links.map(link => <Link href={link.href} key={link.href}>{link.label}</Link>)}
+              {links.map(link => <Link href={link.href} key={link.href} onClick={event => {
+                const details = event.currentTarget.closest('details');
+                if (details) details.open = false;
+              }}>{link.label}</Link>)}
             </nav>
           </details>
         </div>

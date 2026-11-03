@@ -97,7 +97,7 @@
   .cart-entry-copy p { font-size: 0.82rem; }
   .cart-entry-actions { --stack-space: 0.5rem; align-items: end; }
   .cart-entry-actions .quantity { white-space: nowrap; }
-  .text-action { padding: 0; background: none; border: none; border-block-end: 1px solid; font-size: 0.78rem; }
+  .text-action { min-block-size: 2.75rem; padding: 0; background: none; border: none; border-block-end: 1px solid; font-size: 0.78rem; }
   .order-draft { --stack-space: 0.9rem; border: var(--line); padding: 1.5rem; align-self: start; }
   .order-draft h2 { font-size: 1.6rem; }
   .order-draft p { font-size: 0.85rem; }

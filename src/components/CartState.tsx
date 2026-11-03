@@ -31,10 +31,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     items,
     count: items.reduce((total, item) => total + item.quantity, 0),
     add(config, origin, available) {
-      try {
-        setItems(current => addCartItem(current, { config, origin, available }));
-        return true;
-      } catch { return false; }
+      const input = { config, origin, available };
+      // React can run state updaters later; exceptions inside them cannot be caught here.
+      if (origin.kind === 'in_stock') {
+        try { addCartItem(items, input); } catch { return false; }
+      }
+      setItems(current => {
+        try { return addCartItem(current, input); } catch { return current; }
+      });
+      return true;
     },
     change(id, delta) { setItems(current => changeQuantity(current, id, delta)); },
     remove(id) { setItems(current => current.filter(item => item.id !== id)); },

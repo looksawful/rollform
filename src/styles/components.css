@@ -167,8 +167,8 @@
   .quantity { --cluster-gap: 0.6rem; flex-wrap: nowrap; }
 
   .quantity button {
-    inline-size: 1.8rem;
-    block-size: 1.8rem;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
     border: var(--line);
     background: var(--paper);
   }
