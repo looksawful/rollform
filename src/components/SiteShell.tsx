@@ -24,9 +24,9 @@ function SiteChrome({ children }: { children: ReactNode }) {
         <div className="header-actions">
           <Link href="/cart" className="cart-trigger" aria-current={pathname === '/cart' ? 'page' : undefined}>Корзина <span>({count})</span></Link>
           <details className="mobile-navigation">
-            <summary aria-label="Открыть меню">Меню <span aria-hidden="true">☰</span></summary>
+            <summary>Меню <span aria-hidden="true">☰</span></summary>
             <nav aria-label="Мобильное меню" className="mobile-nav-list">
-              {links.map(link => <Link href={link.href} key={link.href} onClick={event => {
+              {links.map(link => <Link href={link.href} key={link.href} aria-current={pathname === link.href ? 'page' : undefined} onClick={event => {
                 const details = event.currentTarget.closest('details');
                 if (details) details.open = false;
               }}>{link.label}</Link>)}
