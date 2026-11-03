@@ -2,7 +2,7 @@
 @layer components {
   @media (width <= 56rem) {
     .hero { padding-block: 1rem 4rem; }
-    .hero-object { min-block-size: clamp(21rem, 65vw, 32rem); }
+    .hero-object { min-block-size: clamp(21rem, 48vw, 26rem); }
     .hero h1 { font-size: clamp(3.2rem, 9vw, 5.8rem); }
   }
 
