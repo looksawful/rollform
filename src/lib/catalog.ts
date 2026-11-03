@@ -40,3 +40,9 @@ export const presets: Preset[] = shapes.map((shape, index) => ({
   },
   fulfillment: { kind: 'preorder' },
 }));
+
+/** Restore an existing preset, or a safe direct-link shape. */
+export function configForQuery(id: string | null, shape: string | null): DiceConfig {
+  const preset = presets.find(item => item.id === id);
+  return preset ? { ...preset.config } : { ...initialConfig, shape: diceShapes.find(value => value === shape) ?? initialConfig.shape };
+}
