@@ -28,13 +28,14 @@ export const fontNames: Record<FontStyle, string> = {
 };
 
 export function configFromParams(params: Pick<URLSearchParams, 'get'>): DiceConfig {
+  const base = presets.find(item => item.id === params.get('preset'))?.config ?? initialConfig;
   const shape = params.get('shape');
   const shell = params.get('shell');
   const font = params.get('font');
   return {
-    shape: diceShapes.find(x => x === shape) ?? initialConfig.shape,
-    shell: shellColors.find(x => x.value === shell)?.value ?? initialConfig.shell,
-    font: font === 'grotesk' || font === 'mono' || font === 'serif' ? font : initialConfig.font,
+    shape: diceShapes.find(x => x === shape) ?? base.shape,
+    shell: shellColors.find(x => x.value === shell)?.value ?? base.shell,
+    font: font === 'grotesk' || font === 'mono' || font === 'serif' ? font : base.font,
   };
 }
 

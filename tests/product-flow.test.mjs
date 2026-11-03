@@ -14,6 +14,15 @@ test('config URL restores valid choices and ignores malformed values', () => {
   assert.deepEqual(configFromParams(new URLSearchParams()), initialConfig);
 });
 
+test('preset link restores every offered variant without breaking explicit overrides', () => {
+  for (const preset of presets) {
+    assert.deepEqual(configFromParams(new URLSearchParams('preset=' + preset.id)), preset.config);
+  }
+  const first = presets[0];
+  assert.deepEqual(configFromParams(new URLSearchParams('preset=' + first.id + '&shape=d8')), { ...first.config, shape: 'd8' });
+  assert.deepEqual(configFromParams(new URLSearchParams('preset=missing&shape=d6')), { ...initialConfig, shape: 'd6' });
+});
+
 test('seven geometries, demonstration presets are not presented as stock', () => {
   assert.deepEqual(diceShapes, ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd%']);
   assert.ok(presets.length > 0);
