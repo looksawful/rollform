@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, MutableRefObject } from 'react';
-import type { BufferGeometry, LineSegments, Material, Mesh, Texture } from 'three';
 import type { DiceConfig } from '@/lib/catalog';
 import { buildGeometry, faceLabel, facePlacements } from '@/lib/diceGeometry';
 
@@ -18,19 +17,15 @@ export default function DiceViewer({
   config, onSelect, scrollAngleRef, autoRotate = false, interactive = false,
 }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const selectRef = useRef(onSelect);
-  const configRef = useRef(config);
-  const spinRef = useRef(autoRotate);
-  const updateRef = useRef<((next: DiceConfig) => void) | null>(null);
-  const rotateRef = useRef<((x: number, y: number, reset?: boolean) => void) | null>(null);
-  const wakeRef = useRef<(() => void) | null>(null);
+  const propsRef = useRef({ config, onSelect, autoRotate });
+  const viewerRef = useRef<{
+    update: (config: DiceConfig) => void;
+    rotate: (x: number, y: number, reset?: boolean) => void;
+  } | null>(null);
   const [fallback, setFallback] = useState(false);
-  selectRef.current = onSelect;
-  configRef.current = config;
-  spinRef.current = autoRotate;
+  propsRef.current = { config, onSelect, autoRotate };
 
-  useEffect(() => { updateRef.current?.(config); }, [config]);
-  useEffect(() => { wakeRef.current?.(); }, [autoRotate]);
+  useEffect(() => { viewerRef.current?.update(config); }, [config, autoRotate]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -70,40 +65,29 @@ export default function DiceViewer({
           flatShading: true, side: THREE.DoubleSide,
         });
         const edgeMaterial = new THREE.LineBasicMaterial({ color: '#dddddd' });
-        let geometry: BufferGeometry | undefined;
-        let edgeGeometry: BufferGeometry | undefined;
-        let body: Mesh | undefined;
-        let edgeLines: LineSegments | undefined;
-        const textureSet: Texture[] = [];
-        const materialSet: Material[] = [];
-        const labelGeometries: BufferGeometry[] = [];
-        const labels: Mesh[] = [];
         let renderedShape: DiceConfig['shape'] | undefined;
         let renderedFont: DiceConfig['font'] | undefined;
-        let renderedShell: string | undefined;
 
         const clearShape = () => {
-          labels.forEach(label => dice.remove(label));
-          labels.length = 0;
-          textureSet.forEach(texture => texture.dispose());
-          materialSet.forEach(material => material.dispose());
-          labelGeometries.forEach(item => item.dispose());
-          textureSet.length = materialSet.length = labelGeometries.length = 0;
-          if (body) dice.remove(body);
-          if (edgeLines) dice.remove(edgeLines);
-          geometry?.dispose();
-          edgeGeometry?.dispose();
+          // Keep shared surface/edge materials; release only geometry and label textures.
+          dice.children.forEach(child => {
+            if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+              child.geometry.dispose();
+              if (child.material instanceof THREE.MeshBasicMaterial) {
+                child.material.map?.dispose();
+                child.material.dispose();
+              }
+            }
+          });
+          dice.clear();
         };
 
         const buildShape = (next: DiceConfig) => {
           const shapeChanged = renderedShape !== next.shape;
           clearShape();
-          geometry = buildGeometry(next.shape);
-          body = new THREE.Mesh(geometry, surface);
-          dice.add(body);
-          edgeGeometry = new THREE.EdgesGeometry(geometry, 22);
-          edgeLines = new THREE.LineSegments(edgeGeometry, edgeMaterial);
-          dice.add(edgeLines);
+          const geometry = buildGeometry(next.shape);
+          dice.add(new THREE.Mesh(geometry, surface));
+          dice.add(new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 22), edgeMaterial));
           facePlacements(geometry, next.shape).forEach((face, index) => {
             const image = document.createElement('canvas');
             image.width = image.height = 256;
@@ -130,10 +114,6 @@ export default function DiceViewer({
             text.position.copy(face.center).addScaledVector(face.normal, 0.034);
             text.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), face.normal);
             dice.add(text);
-            labels.push(text);
-            textureSet.push(texture);
-            materialSet.push(material);
-            labelGeometries.push(plane);
           });
           if (shapeChanged && renderedShape !== undefined) dice.rotation.set(-0.38, 0.4, 0.12);
           renderedShape = next.shape;
@@ -163,14 +143,14 @@ export default function DiceViewer({
             dice.rotation.x += delta * 0.38;
             dirty = true;
           }
-          if (spinRef.current && !motion.matches && pointerId === null &&
+          if (propsRef.current.autoRotate && !motion.matches && pointerId === null &&
             performance.now() - lastTouch > 1400) {
             dice.rotation.y += 0.0026;
             dice.rotation.x += 0.00025;
             dirty = true;
           }
           if (dirty) { renderer.render(scene, camera); dirty = false; }
-          if ((!motion.matches && spinRef.current) ||
+          if ((!motion.matches && propsRef.current.autoRotate) ||
             (scrollAngleRef && !motion.matches && performance.now() - lastScroll < 1200)) {
             frame = requestAnimationFrame(draw);
           }
@@ -183,14 +163,10 @@ export default function DiceViewer({
 
         const update = (next: DiceConfig) => {
           if (next.shape !== renderedShape || next.font !== renderedFont) buildShape(next);
-          if (next.shell !== renderedShell) {
-            surface.color.set(next.shell === '#000000' ? '#191919' : next.shell);
-            renderedShell = next.shell;
-          }
+          surface.color.set(next.shell === '#000000' ? '#191919' : next.shell);
           wake();
         };
-        updateRef.current = update;
-        update(configRef.current);
+        update(propsRef.current.config);
 
         const rotate = (x: number, y: number, reset = false) => {
           if (reset) dice.rotation.set(-0.38, 0.4, 0.12);
@@ -198,8 +174,7 @@ export default function DiceViewer({
           lastTouch = performance.now();
           wake();
         };
-        rotateRef.current = rotate;
-        wakeRef.current = wake;
+        viewerRef.current = { update, rotate };
 
         const onPointerDown = (event: PointerEvent) => {
           if (pointerId !== null || event.button !== 0) return;
@@ -224,7 +199,7 @@ export default function DiceViewer({
           lastTouch = performance.now();
           if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
           canvas.style.cursor = 'grab';
-          if (!cancelled && !moved) selectRef.current?.();
+          if (!cancelled && !moved) propsRef.current.onSelect?.();
         };
         const onPointerUp = (event: PointerEvent) => endPointer(event, false);
         const onPointerCancel = (event: PointerEvent) => endPointer(event, true);
@@ -286,9 +261,7 @@ export default function DiceViewer({
           canvas.removeEventListener('pointercancel', onPointerCancel);
           canvas.removeEventListener('webglcontextlost', onLost);
           canvas.removeEventListener('webglcontextrestored', onRestored);
-          if (updateRef.current === update) updateRef.current = null;
-          if (rotateRef.current === rotate) rotateRef.current = null;
-          if (wakeRef.current === wake) wakeRef.current = null;
+          if (viewerRef.current?.update === update) viewerRef.current = null;
           clearShape();
           surface.dispose();
           edgeMaterial.dispose();
@@ -308,11 +281,11 @@ export default function DiceViewer({
     if (!interactive) return;
     const turn = 0.2;
     switch (event.key) {
-      case 'ArrowLeft': rotateRef.current?.(-turn, 0); break;
-      case 'ArrowRight': rotateRef.current?.(turn, 0); break;
-      case 'ArrowUp': rotateRef.current?.(0, -turn); break;
-      case 'ArrowDown': rotateRef.current?.(0, turn); break;
-      case 'Home': rotateRef.current?.(0, 0, true); break;
+      case 'ArrowLeft': viewerRef.current?.rotate(-turn, 0); break;
+      case 'ArrowRight': viewerRef.current?.rotate(turn, 0); break;
+      case 'ArrowUp': viewerRef.current?.rotate(0, -turn); break;
+      case 'ArrowDown': viewerRef.current?.rotate(0, turn); break;
+      case 'Home': viewerRef.current?.rotate(0, 0, true); break;
       default: return;
     }
     event.preventDefault();
