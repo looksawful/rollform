@@ -18,7 +18,7 @@ export default function ProductCard({ product, index }: { product: Preset; index
     if (ok) router.push('/cart');
   };
   return <article className="product stack">
-    <div className="product-visual pile" aria-label={`Превью: ${product.title}`}>
+    <div className="product-visual pile">
       <span className="product-index">{String(index + 1).padStart(2, '0')} / {product.config.shape.toUpperCase()}</span>
       <DiceGlyph shape={product.config.shape} />
       <span className="product-status">{inStock ? 'В наличии' : soldOut ? 'Нет в наличии' : 'Предзаказ · демо'}</span>
@@ -27,6 +27,6 @@ export default function ProductCard({ product, index }: { product: Preset; index
       <div className="stack product-copy"><h3>{product.title}</h3><p><span className="product-color-dot" style={{ background: product.config.shell }} aria-hidden="true" /> {product.config.shape.toUpperCase()} / {product.config.font}</p></div>
       <button className="product-add" type="button" aria-label={`Добавить ${product.title} в корзину`} onClick={add} disabled={soldOut}>+</button>
     </div>
-    <Link className="product-detail-link" href={`/configure?shape=${encodeURIComponent(product.config.shape)}`}>Изменить форму <span aria-hidden="true">↗</span></Link>
+    <Link className="product-detail-link" href={`/configure?shape=${encodeURIComponent(product.config.shape)}`} aria-label={`Изменить форму: ${product.title} (${product.config.shape.toUpperCase()})`}>Изменить форму <span aria-hidden="true">↗</span></Link>
   </article>;
 }
