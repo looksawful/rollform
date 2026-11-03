@@ -1,22 +1,23 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DiceViewer from './DiceViewer';
 import { useCart } from './CartState';
-import { diceShapes, fontNames, initialConfig, shellColors } from '@/lib/catalog';
-import type { DiceConfig, DiceShape, FontStyle } from '@/lib/catalog';
+import { configFromParams, diceShapes, fontNames, shellColors } from '@/lib/catalog';
+import type { DiceConfig, FontStyle } from '@/lib/catalog';
 
 const fonts: FontStyle[] = ['grotesk', 'mono', 'serif'];
 
 export default function Configurator() {
   const router = useRouter();
   const params = useSearchParams();
-  const requested = params.get('shape');
-  const initialShape: DiceShape = diceShapes.find(shape => shape === requested) ?? initialConfig.shape;
-  const [config, setConfig] = useState<DiceConfig>({ ...initialConfig, shape: initialShape });
+  const config = configFromParams(params);
   const { add } = useCart();
-  const change = <K extends keyof DiceConfig>(key: K, value: DiceConfig[K]) => setConfig(prev => ({ ...prev, [key]: value }));
+  const change = <K extends keyof DiceConfig>(key: K, value: DiceConfig[K]) => {
+    const next = new URLSearchParams(window.location.search);
+    next.set(key, value);
+    window.history.replaceState(null, '', `?${next}`);
+  };
   const addCustom = () => { if (add(config, { kind: 'preorder_custom' })) router.push('/cart'); };
 
   return <section className="wrapper section page-section">

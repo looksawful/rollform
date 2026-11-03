@@ -1,10 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { diceShapes, initialConfig, presets } from '../src/lib/catalog.ts';
+import { configFromParams, diceShapes, initialConfig, presets } from '../src/lib/catalog.ts';
 import { addCartItem, changeQuantity, makeOrderText, readCart } from '../src/lib/orders.ts';
 
 test('prototype product configuration contains only the three selectable parameters', () => {
   assert.deepEqual(Object.keys(initialConfig), ['shape', 'shell', 'font']);
+});
+
+test('config URL restores valid choices and ignores malformed values', () => {
+  const selected = configFromParams(new URLSearchParams('shape=d10&shell=%23A62D35&font=mono'));
+  assert.deepEqual(selected, { shape: 'd10', shell: '#A62D35', font: 'mono' });
+  assert.deepEqual(configFromParams(new URLSearchParams('shape=invalid&shell=red&font=bad')), initialConfig);
+  assert.deepEqual(configFromParams(new URLSearchParams()), initialConfig);
 });
 
 test('seven geometries, demonstration presets are not presented as stock', () => {
@@ -44,7 +51,7 @@ test('cart hydration rejects malformed and legacy entries instead of crashing', 
 
 test('quantity updates and draft order do not imply payment or delivery', () => {
   const saved = addCartItem([], { origin: { kind: 'preorder_custom' }, config: initialConfig });
-  assert.equal(changeQuantity(saved, saved[0].id, -1).length, 0);
+  assert.equal(changeQuantity(saved, saved[0].id, -1)[0].quantity, 1);
   assert.equal(changeQuantity(saved, saved[0].id, +1)[0].quantity, 2);
   const text = makeOrderText(saved);
   assert.match(text, /Свой вариант/);
