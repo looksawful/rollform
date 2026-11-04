@@ -9,16 +9,18 @@
     place-items: center;
     min-block-size: clamp(23rem, 40vw, 44rem);
     overflow: hidden;
+    background: var(--color-preview);
   }
   .dice-canvas { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; }
-  .dice-canvas:focus-visible { outline: 2px solid var(--ink); outline-offset: -3px; }
+  .dice-canvas:focus-visible { outline: 2px solid var(--color-preview-ink); outline-offset: -3px; }
   .canvas-fallback {
     position: absolute;
     inset: 25%;
     display: grid;
     place-items: center;
-    border: var(--line);
+    border: var(--border-default);
     font-size: 3rem;
+    color: var(--color-dice-label);
     font-weight: 900;
   }
   .hero-copy { --stack-space: var(--space-3); align-items: flex-start; }
@@ -31,5 +33,5 @@
     overflow-wrap: anywhere;
   }
   .hero-copy p { max-inline-size: 31rem; font-size: clamp(1rem, 1.2vw, 1.2rem); line-height: 1.5; }
-  .section { padding-block: var(--space-5); border-block-start: var(--line); }
+  .section { padding-block: var(--space-5); border-block-start: var(--border-default); }
 }

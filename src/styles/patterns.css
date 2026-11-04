@@ -89,5 +89,5 @@
     padding-inline: var(--center-gutter, 0px);
   }
 
-  .box { padding: var(--box-padding, var(--space-2)); border: var(--box-border, var(--line)); }
+  .box { padding: var(--box-padding, var(--space-2)); border: var(--box-border, var(--border-default)); }
 }

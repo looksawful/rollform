@@ -1,7 +1,7 @@
 @layer components {
   .site { min-block-size: 100svh; display: flex; flex-direction: column; }
   .site main { flex: 1; }
-  .topbar { position: relative; z-index: 20; background: var(--paper); }
+  .topbar { position: relative; z-index: 20; background: var(--color-surface); }
   .header-actions { --cluster-gap: 0.6rem; flex-wrap: nowrap; }
   .cart-shortcut {
     display: inline-flex;
@@ -24,14 +24,14 @@
   }
   .mobile-menu summary::-webkit-details-marker { display: none; }
   .hamburger-lines { display: grid; gap: 0.3rem; inline-size: 1.25rem; }
-  .hamburger-lines span { display: block; block-size: 2px; background: var(--ink); }
+  .hamburger-lines span { display: block; block-size: 2px; background: var(--color-text); }
   .mobile-nav {
     position: absolute;
     inset-block-start: calc(100% + 0.2rem);
     inset-inline-end: 0;
     inline-size: min(18rem, calc(100vw - 2rem));
-    background: var(--paper);
-    border: var(--line);
+    background: var(--color-surface);
+    border: var(--border-default);
     padding: 0.75rem;
     z-index: 30;
   }
@@ -45,16 +45,16 @@
   .page-title small { font-size: 0.35em; letter-spacing: -0.025em; vertical-align: top; }
 
   .configure-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.75fr); gap: clamp(2rem, 5vw, 5rem); }
-  .configure-preview { min-block-size: clamp(23rem, 50vw, 43rem); border: var(--line); position: relative; }
+  .configure-preview { min-block-size: clamp(23rem, 50vw, 43rem); border: var(--border-default); background: var(--color-preview); position: relative; }
   .configure-controls { --stack-space: 2rem; align-items: stretch; }
   .configure-controls .field h2 { font-size: 1rem; }
   .configure-controls .pill-list button { display: flex; align-items: center; gap: 0.5rem; }
-  .swatch { inline-size: 0.95rem; block-size: 0.95rem; border: 1px solid var(--ink); border-radius: 50%; }
-  .pill-list button.is-active .swatch { border-color: var(--paper); }
+  .swatch { inline-size: 0.95rem; block-size: 0.95rem; border: 1px solid var(--color-border); border-radius: 50%; }
+  .pill-list button.is-active .swatch { border-color: var(--color-on-action); }
 
   .cart-lines { --stack-space: 0; }
-  .cart-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); border-block-start: var(--line); padding-block: var(--space-3); align-items: center; }
-  .cart-entry:last-child { border-block-end: var(--line); }
+  .cart-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); border-block-start: var(--border-default); padding-block: var(--space-3); align-items: center; }
+  .cart-entry:last-child { border-block-end: var(--border-default); }
   .cart-entry-copy { --stack-space: 0.1rem; }
   .cart-entry-copy h2 { font-size: 1.3rem; }
   .cart-entry-copy p { font-size: 0.82rem; }
@@ -88,7 +88,7 @@
     min-inline-size: max(100%, 44rem);
   }
   .bento-grid > * {
-    border: var(--line);
+    border: var(--border-default);
     padding: var(--bento-card-padding, clamp(0.85rem, 1.7vw, 1.5rem));
     display: grid;
     gap: var(--bento-card-gap, 0.5rem);
@@ -112,24 +112,28 @@
   .product-grid { --grid-min: 18rem; }
   .product-scroller { --reel-min: 17rem; --reel-width: 31%; padding-block-end: 0.8rem; }
   .product { --stack-space: 0.75rem; min-inline-size: 0; }
-  .product-visual { display: grid; place-items: center; border: var(--line); }
+  .product-visual { display: grid; place-items: center; border: var(--border-default); }
+  .dice-glyph--inverted {
+    color: var(--color-background);
+    --dice-fill: var(--color-text);
+  }
   .product-visual .dice-glyph { inline-size: 65%; max-inline-size: 15rem; }
   .product-copy h3 { font-size: 1.3rem; }
   .product-actions { --cluster-gap: 0.6rem; }
   .product-actions :is(a, button) {
     min-block-size: 2.75rem;
-    border: var(--line);
-    background: var(--paper);
+    border: var(--border-default);
+    background: var(--color-surface);
     padding: 0.75rem 1rem;
-    color: var(--ink);
+    color: var(--color-text);
     font-size: 0.82rem;
   }
-  .product-actions :is(a, button):hover { background: var(--ink); color: var(--paper); }
+  .product-actions :is(a, button):hover { background: var(--color-text); color: var(--color-background); }
 
-  .footer { border-block-start: var(--line); padding-block: var(--space-4); }
+  .footer { border-block-start: var(--border-default); padding-block: var(--space-4); }
   .footer-inner { --switcher-threshold: 34rem; }
   .footer h2 { font-size: 1rem; }
-  .footer p { color: var(--ink); }
+  .footer p { color: var(--color-text); }
 
   @media (width <= 56rem) {
     .desktop-nav { display: none; }

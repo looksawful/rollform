@@ -162,10 +162,47 @@ test('about section uses the requested placeholder paragraph', () => {
   assert.match(home, /Внимание, этот текст является рыбой/);
 });
 
-test('theme uses a black and white palette only', () => {
+test('monochrome design tokens separate primitive colors from semantic roles', () => {
   const tokens = read('src/styles/tokens.css');
-  assert.match(tokens, /--ink:\s*#000000;/);
-  assert.match(tokens, /--paper:\s*#ffffff;/);
-  const others = [...tokens.matchAll(/#[a-f0-9]{3,8}\b/gi)].map(x => x[0].toLowerCase());
-  assert.deepEqual(new Set(others), new Set(['#000000', '#ffffff']));
+  assert.match(tokens, /--color-black:\s*#000000;/);
+  assert.match(tokens, /--color-white:\s*#ffffff;/);
+  for (const role of ['background', 'surface', 'text', 'border', 'action', 'on-action', 'focus', 'preview']) {
+    assert.match(tokens, new RegExp('--color-' + role + ':'));
+  }
+  assert.match(tokens, /--color-background:\s*light-dark\(/);
+  assert.match(tokens, /--color-text:\s*light-dark\(/);
+  const hexes = [...tokens.matchAll(/#[a-f0-9]{3,8}\b/gi)].map(x => x[0].toLowerCase());
+  assert.deepEqual(new Set(hexes), new Set(['#000000', '#ffffff']));
+});
+
+test('light dark themes support system preference and explicit scoped override without UI controls', () => {
+  const tokens = read('src/styles/tokens.css');
+  const base = read('src/styles/base.css');
+  const shell = read('src/components/SiteShell.tsx');
+  assert.match(tokens, /color-scheme:\s*light dark;/);
+  assert.match(tokens, /:root\[data-theme="light"\]\s*\{\s*color-scheme:\s*light;/);
+  assert.match(tokens, /:root\[data-theme="dark"\]\s*\{\s*color-scheme:\s*dark;/);
+  assert.doesNotMatch(base, /color-scheme:\s*light;/);
+  assert.doesNotMatch(shell, /theme-toggle|Тёмная тема|Светлая тема/i);
+});
+
+test('site CSS uses semantic theme roles, not raw colors or legacy ink-paper tokens', () => {
+  const combined = cssFiles.map(read).join('\n');
+  const rest = cssFiles.filter(x => !x.endsWith('/tokens.css')).map(read).join('\n');
+  assert.doesNotMatch(combined, /--ink\b|--paper\b|var\(--line\)/);
+  assert.doesNotMatch(rest, /#[a-f0-9]{3,8}\b/i);
+  assert.match(read('src/styles/components.css'), /--button-background:\s*var\(--color-action\)/);
+  assert.match(read('src/styles/components.css'), /--button-text:\s*var\(--color-on-action\)/);
+  assert.match(read('src/styles/sections.css'), /background:\s*var\(--color-preview\)/);
+  assert.match(read('src/styles/base.css'), /outline:\s*2px solid var\(--color-focus\)/);
+  assert.match(read('src/styles/pages.css'), /\.topbar\s*\{[^}]*background:\s*var\(--color-surface\)/);
+});
+
+test('catalog sketches follow the active CSS theme without altering product colors', () => {
+  const glyph = read('src/components/DiceGlyph.tsx');
+  const preview = read('src/components/DiceViewer.tsx');
+  assert.doesNotMatch(glyph, /#[a-f0-9]{3,8}\b/i);
+  assert.match(glyph, /currentColor/);
+  assert.match(glyph, /var\(--color-background\)/);
+  assert.match(preview, /next\.shell/);
 });

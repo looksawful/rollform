@@ -302,6 +302,6 @@ export default function DiceViewer({
     aria-label={'3D модель ' + config.shape.toUpperCase() +
       (interactive ? '. Стрелки поворачивают, Home сбрасывает поворот' : '')}
     onKeyDown={onKeyDown}>
-    {fallback && <div className="canvas-fallback" style={{ backgroundColor: config.shell, color: '#ffffff' }}>{config.shape.toUpperCase()}</div>}
+    {fallback && <div className="canvas-fallback" style={{ backgroundColor: config.shell }}>{config.shape.toUpperCase()}</div>}
   </div>;
 }

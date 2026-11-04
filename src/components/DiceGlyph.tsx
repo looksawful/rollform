@@ -2,8 +2,6 @@ import type { DiceShape } from '@/lib/catalog';
 
 /** Lightweight black-and-white catalog sketches; only the hero owns WebGL. */
 export default function DiceGlyph({ shape, inverted = false }: { shape: DiceShape; inverted?: boolean }) {
-  const paper = inverted ? '#000000' : '#ffffff';
-  const ink = inverted ? '#ffffff' : '#000000';
   const label = shape === 'd%' ? '00' : shape.slice(1);
   const sides: Record<DiceShape, string> = {
     d4: '100,15 15,166 185,166',
@@ -23,9 +21,9 @@ export default function DiceGlyph({ shape, inverted = false }: { shape: DiceShap
     d20: ['100,8 27,45 100,83','100,8 173,45 100,83','27,45 10,124 100,83','173,45 190,124 100,83','10,124 61,184 100,83','190,124 139,184 100,83','61,184 100,83 100,191','139,184 100,83 100,191'],
     'd%': ['100,10 100,93 39,49','100,10 161,49 100,93','12,102 100,93 56,166','188,102 144,166 100,93','56,166 100,190 100,93','144,166 100,190 100,93'],
   };
-  return <svg viewBox="0 0 200 200" className="dice-glyph" aria-hidden="true" fill="none" stroke={ink} strokeWidth="1.7" strokeLinejoin="round">
-    <polygon points={sides[shape]} fill={paper} />
+  return <svg viewBox="0 0 200 200" className={inverted ? 'dice-glyph dice-glyph--inverted' : 'dice-glyph'} aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round">
+    <polygon points={sides[shape]} fill="var(--dice-fill, var(--color-background))" />
     {facets[shape].map((points, i) => <polygon key={i} points={points} fill="none" />)}
-    <text x="100" y="124" fill={ink} stroke="none" fontSize={shape === 'd%' ? '32' : '42'} fontWeight="700" textAnchor="middle" fontFamily="Inter, Arial, sans-serif">{label}</text>
+    <text x="100" y="124" fill="currentColor" stroke="none" fontSize={shape === 'd%' ? '32' : '42'} fontWeight="700" textAnchor="middle" fontFamily="Inter, Arial, sans-serif">{label}</text>
   </svg>;
 }

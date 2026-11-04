@@ -1,6 +1,6 @@
 /* Component appearances and states. Layout algorithms live in patterns.css. */
 @layer components {
-  .topbar { border-block-end: var(--line); }
+  .topbar { border-block-end: var(--border-default); }
 
   .topbar-inner {
     --cluster-justify: space-between;
@@ -32,15 +32,24 @@
     justify-content: space-between;
     gap: 4rem;
     min-block-size: 3.25rem;
-    border: var(--line);
+    border: var(--border-default);
     padding: 0.75rem 1rem;
     font-size: 0.83rem;
     font-weight: 700;
     transition: color 0.16s, background-color 0.16s;
   }
 
-  .button-black { color: var(--paper); background: var(--ink); }
-  .button-black:hover { color: var(--ink); background: var(--paper); }
+  /* Component-level knobs follow the global semantic tokens. */
+  .button-black {
+    --button-background: var(--color-action);
+    --button-text: var(--color-on-action);
+    color: var(--button-text);
+    background: var(--button-background);
+  }
+  .button-black:hover {
+    --button-background: var(--color-background);
+    --button-text: var(--color-text);
+  }
   .button-fill { inline-size: 100%; }
 
   .field { --stack-space: 0.55rem; }
@@ -53,15 +62,15 @@
 
   .pill-list button {
     min-inline-size: 4.5rem;
-    border: var(--line);
+    border: var(--border-default);
     padding: 0.7rem 0.9rem;
-    background: var(--paper);
+    background: var(--color-surface);
     font-size: 0.8rem;
   }
 
   .pill-list button:is(.is-active, :hover) {
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--color-text);
+    color: var(--color-background);
   }
 
   .quantity { --cluster-gap: 0.6rem; flex-wrap: nowrap; }
@@ -69,8 +78,8 @@
   .quantity button {
     inline-size: 2.75rem;
     block-size: 2.75rem;
-    border: var(--line);
-    background: var(--paper);
+    border: var(--border-default);
+    background: var(--color-surface);
   }
   .quantity button:disabled { opacity: 0.35; cursor: not-allowed; }
 }

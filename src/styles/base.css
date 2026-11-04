@@ -8,13 +8,12 @@
 
   html {
     scroll-behavior: auto;
-    color-scheme: light;
   }
 
   body {
     margin: 0;
-    background: var(--paper);
-    color: var(--ink);
+    background: var(--color-background);
+    color: var(--color-text);
     font-family: var(--ff-body);
     font-size: var(--fs-body);
     line-height: 1.4;
@@ -26,13 +25,13 @@
   :where(h1, h2, h3, p) { margin: 0; }
 
   :focus-visible {
-    outline: 2px solid currentColor;
+    outline: 2px solid var(--color-focus);
     outline-offset: 4px;
   }
 
   ::selection {
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--color-text);
+    color: var(--color-background);
   }
 
   :where(#about, #contacts, #catalog) { scroll-margin-block-start: 5rem; }
