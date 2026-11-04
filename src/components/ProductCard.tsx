@@ -1,18 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { themeHref } from '@/lib/themeRoutes';
 import DiceGlyph from './DiceGlyph';
 import { useCart } from './CartState';
 import type { Preset } from '@/lib/catalog';
 
 export default function ProductCard({ product }: { product: Preset }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { add } = useCart();
   const addToCart = () => {
-    if (add(product.config, { kind: 'preorder_preset', presetId: product.id })) router.push('/cart');
+    if (add(product.config, { kind: 'preorder_preset', presetId: product.id })) router.push(themeHref(pathname, '/cart'));
   };
-  const url = '/configure?preset=' + encodeURIComponent(product.id);
+  const url = themeHref(pathname, '/configure?preset=' + encodeURIComponent(product.id));
   return <article className="product stack">
     <Link className="product-visual pile frame" href={url}
       aria-label={'Настроить ' + product.config.shape.toUpperCase()}>

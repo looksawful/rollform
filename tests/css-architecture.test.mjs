@@ -169,20 +169,21 @@ test('monochrome design tokens separate primitive colors from semantic roles', (
   for (const role of ['background', 'surface', 'text', 'border', 'action', 'on-action', 'focus', 'preview']) {
     assert.match(tokens, new RegExp('--color-' + role + ':'));
   }
-  assert.match(tokens, /--color-background:\s*light-dark\(/);
-  assert.match(tokens, /--color-text:\s*light-dark\(/);
+  assert.match(tokens, /\.site\s*\{[^}]*--color-background:\s*var\(--color-white\)/);
+  assert.match(tokens, /\.site\s*\{[^}]*--color-text:\s*var\(--color-black\)/);
   const hexes = [...tokens.matchAll(/#[a-f0-9]{3,8}\b/gi)].map(x => x[0].toLowerCase());
   assert.deepEqual(new Set(hexes), new Set(['#000000', '#ffffff']));
 });
 
-test('light dark themes support system preference and explicit scoped override without UI controls', () => {
+test('fixed light and dark route scopes control related variables without OS preference', () => {
   const tokens = read('src/styles/tokens.css');
-  const base = read('src/styles/base.css');
   const shell = read('src/components/SiteShell.tsx');
-  assert.match(tokens, /color-scheme:\s*light dark;/);
-  assert.match(tokens, /:root\[data-theme="light"\]\s*\{\s*color-scheme:\s*light;/);
-  assert.match(tokens, /:root\[data-theme="dark"\]\s*\{\s*color-scheme:\s*dark;/);
-  assert.doesNotMatch(base, /color-scheme:\s*light;/);
+  assert.match(tokens, /:root\s*\{[^}]*color-scheme:\s*light;/);
+  assert.match(tokens, /\.site\s*\{[^}]*color-scheme:\s*light;/);
+  assert.match(tokens, /\.site\[data-theme="dark"\]\s*\{\s*color-scheme:\s*dark;/);
+  assert.match(tokens, /\.site\[data-theme="dark"\]\s*\{[^}]*--color-background:\s*var\(--color-black\)/);
+  assert.match(tokens, /\.site\[data-theme="dark"\]\s*\{[^}]*--color-text:\s*var\(--color-white\)/);
+  assert.match(shell, /data-theme=\{dark \? 'dark' : 'light'\}/);
   assert.doesNotMatch(shell, /theme-toggle|Тёмная тема|Светлая тема/i);
 });
 

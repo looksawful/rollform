@@ -2,26 +2,16 @@
    until a consumer provides them, with local fallbacks in patterns.css. */
 @layer theme {
   :root {
-    /* System theme by default, explicit data-theme can lock either mode. */
-    color-scheme: light dark;
+    /* Light is the default; /dark always has its own dark scope. */
+    color-scheme: light;
     /* Primitives: the palette stays black and white in both themes. */
     --color-black: #000000;
     --color-white: #ffffff;
 
-    /* Semantic roles: components never depend on a specific shade. */
-    --color-background: light-dark(var(--color-white), var(--color-black));
-    --color-text: light-dark(var(--color-black), var(--color-white));
-    --color-surface: var(--color-background);
-    --color-border: var(--color-text);
-    --color-action: var(--color-text);
-    --color-on-action: var(--color-background);
-    --color-focus: var(--color-text);
-
-    /* 3D product previews keep a white stage for black physical dice. */
+    /* Physical dice previews use the same neutral stage in both themes. */
     --color-preview: var(--color-white);
     --color-preview-ink: var(--color-black);
     --color-dice-label: var(--color-white);
-    --border-default: 1px solid var(--color-border);
 
     --ff-body: Inter, Arial, Helvetica, sans-serif;
     --fs-body: 1rem;
@@ -37,7 +27,23 @@
     --space-4: clamp(2rem, 4vw, 4.5rem);
     --space-5: clamp(4.5rem, 9vw, 10rem);
   }
-  :root[data-theme="light"] { color-scheme: light; }
-  :root[data-theme="dark"] { color-scheme: dark; }
+  /* Resolve related values on the themed element, not on :root.
+     Inherited custom properties are computed before a nested theme overrides them. */
+  .site {
+    color-scheme: light;
+    --color-background: var(--color-white);
+    --color-text: var(--color-black);
+    --color-surface: var(--color-background);
+    --color-border: var(--color-text);
+    --color-action: var(--color-text);
+    --color-on-action: var(--color-background);
+    --color-focus: var(--color-text);
+    --border-default: 1px solid var(--color-border);
+  }
+  .site[data-theme="dark"] {
+    color-scheme: dark;
+    --color-background: var(--color-black);
+    --color-text: var(--color-white);
+  }
 
 }

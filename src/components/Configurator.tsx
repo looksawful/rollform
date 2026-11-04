@@ -1,6 +1,7 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { themeHref } from '@/lib/themeRoutes';
 import DiceViewer from './DiceViewer';
 import { useCart } from './CartState';
 import { configFromParams, diceShapes, fontNames, fontStyles, shellColors } from '@/lib/catalog';
@@ -8,6 +9,7 @@ import type { DiceConfig } from '@/lib/catalog';
 
 export default function Configurator() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useSearchParams();
   const config = configFromParams(params);
   const { add } = useCart();
@@ -16,7 +18,7 @@ export default function Configurator() {
     next.set(key, value);
     window.history.replaceState(null, '', `?${next}`);
   };
-  const addCustom = () => { if (add(config, { kind: 'preorder_custom' })) router.push('/cart'); };
+  const addCustom = () => { if (add(config, { kind: 'preorder_custom' })) router.push(themeHref(pathname, '/cart')); };
 
   return <section className="wrapper section page-section">
     <div className="page-heading"><h1 className="page-title">Заголовок</h1></div>

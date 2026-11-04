@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { CartProvider, useCart } from './CartState';
+import { isDarkPath, themeHref } from '@/lib/themeRoutes';
 
 const menuLinks = [
   { href: '/catalog', label: 'Каталог' },
@@ -14,14 +15,17 @@ const menuLinks = [
 
 function SiteChrome({ children }: { children: ReactNode }) {
   const { count } = useCart();
-  const path = usePathname().replace(/\/$/, '');
+  const pathname = usePathname();
+  const dark = isDarkPath(pathname);
+  const path = pathname.replace(/\/$/, '');
+  const link = (href: string) => themeHref(pathname, href);
   const navigation = menuLinks.map(({ href, label }) =>
-    <Link key={href} href={href} aria-current={path === href ? 'page' : undefined}>{label}</Link>
+    <Link key={href} href={link(href)} aria-current={path === link(href) ? 'page' : undefined}>{label}</Link>
   );
-  return <div className="site">
+  return <div className="site" data-theme={dark ? 'dark' : 'light'}>
     <header className="topbar">
       <div className="wrapper topbar-inner cluster">
-        <Link href="/" className="logo" aria-label="Логотип, на главную">Логотип</Link>
+        <Link href={link("/")} className="logo" aria-label="Логотип, на главную">Логотип</Link>
         <nav className="nav cluster desktop-nav" aria-label="Основное меню">{navigation}</nav>
         <div className="header-actions cluster">
           <details className="mobile-menu" onKeyDown={e => {
@@ -34,8 +38,8 @@ function SiteChrome({ children }: { children: ReactNode }) {
               e.currentTarget.closest('details')?.removeAttribute('open');
             }}>{navigation}</nav>
           </details>
-          <Link href="/cart" className="cart-shortcut" aria-label={'Корзина (' + count + ')'}
-            aria-current={path === '/cart' ? 'page' : undefined}>
+          <Link href={link("/cart")} className="cart-shortcut" aria-label={'Корзина (' + count + ')'}
+            aria-current={path === link('/cart') ? 'page' : undefined}>
             <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none"
               stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 8h16l-1 12H5L4 8Z"/>
@@ -55,7 +59,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
           <p>Текст</p>
         </div>
         <div className="stack">
-          <h2><Link href="/contacts">Контакты</Link></h2>
+          <h2><Link href={link("/contacts")}>Контакты</Link></h2>
           <p>Текст</p>
         </div>
       </div>

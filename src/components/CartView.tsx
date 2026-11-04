@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
 import { fontNames, shellColors } from '@/lib/catalog';
 import type { CartItem } from '@/lib/orders';
@@ -11,10 +13,11 @@ const describe = (item: CartItem) =>
 
 export default function CartView() {
   const { items, change, remove } = useCart();
+  const pathname = usePathname();
   return <section className="wrapper section page-section stack">
     <h1 className="page-title">Корзина</h1>
     {items.length === 0
-      ? <div className="empty-state box cover stack"><p>Текст</p><Link href="/configure" className="button button-black">Кнопка</Link></div>
+      ? <div className="empty-state box cover stack"><p>Текст</p><Link href={themeHref(pathname, "/configure")} className="button button-black">Кнопка</Link></div>
       : <div className="cart-lines stack">{items.map(item => <article className="cart-entry" key={item.id}>
           <div className="stack cart-entry-copy">
             <h2>{item.config.shape.toUpperCase()}</h2>

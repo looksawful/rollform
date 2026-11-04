@@ -1,5 +1,5 @@
 @layer components {
-  .site { min-block-size: 100svh; display: flex; flex-direction: column; }
+  .site { min-block-size: 100svh; display: flex; flex-direction: column; background: var(--color-background); color: var(--color-text); }
   .site main { flex: 1; }
   .topbar { position: relative; z-index: 20; background: var(--color-surface); }
   .header-actions { --cluster-gap: 0.6rem; flex-wrap: nowrap; }
