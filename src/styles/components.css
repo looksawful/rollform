@@ -54,11 +54,7 @@
 
   .field { --stack-space: 0.55rem; }
 
-  .pill-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
+  .pill-list { --cluster-gap: 0.4rem; }
 
   .pill-list button {
     min-inline-size: 4.5rem;

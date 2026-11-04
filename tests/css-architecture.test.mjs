@@ -57,7 +57,7 @@ test('layout composition reuses primitives with a deliberate mobile split except
   assert.match(home, /className="product-scroller reel"/);
   assert.match(home, /id="about"/);
   assert.match(home, /className="wrapper section prose"/);
-  assert.match(card, /className="product-visual pile frame"/);
+  assert.match(card, /className="product-visual frame"/);
   assert.match(catalog, /className="product-grid grid"/);
   assert.match(cart, /className="empty-state box cover stack"/);
   assert.match(contacts, /center prose/);
@@ -69,16 +69,16 @@ test('bento follows a five-cell two-row named-area layout', () => {
   const home = read('src/components/Storefront.tsx');
   const css = read('src/styles/pages.css');
   assert.match(home, /className="bento-grid"/);
-  assert.match(home, /className="bento-viewport"/);
+  assert.match(home, /className="bento-viewport scroller"/);
   assert.match(home, /tabIndex=\{0\}/);
   assert.match(home, /Array\.from\(\{ length: 5 \}/);
-  assert.equal((home.match(/className="bento-card prose"/g) || []).length, 1);
+  assert.equal((home.match(/className="bento-card box"/g) || []).length, 1);
   assert.match(css, /grid-template-areas:/);
   assert.match(css, /"one one one one two two two three three three three three"/);
   assert.match(css, /"four four four four four four four five five five five five"/);
   assert.match(css, /grid-template-rows:\s*repeat\(2,/);
   assert.match(css, /min-inline-size:\s*max\(100%,/);
-  assert.match(css, /\.bento-viewport\s*\{[^}]*overflow-x:\s*auto/);
+  assert.match(read('src/styles/patterns.css'), /\.scroller\s*\{[^}]*overflow-x:\s*auto/);
   assert.doesNotMatch(home, /<img|<Image|<AsyncImage/);
   assert.ok(home.indexOf('className="hero-copy') < home.indexOf('className="bento-grid"'));
   assert.ok(home.indexOf('className="bento-grid"') < home.indexOf('id="catalog"'));
@@ -88,7 +88,7 @@ test('prototype keeps responsive layout and reduced motion', () => {
   const frontend = read('src/components/Storefront.tsx');
   const builder = read('src/components/Configurator.tsx');
   assert.match(frontend, /className="wrapper hero split"/);
-  assert.match(builder, /className="configure-layout"/);
+  assert.match(builder, /className="configure-layout sidebar"/);
   const combined = cssFiles.map(read).join('\n');
   assert.match(combined, /@media\s*\(width\s*<=\s*56rem\)/);
   assert.match(combined, /prefers-reduced-motion:\s*reduce/);

@@ -11,7 +11,6 @@
     text-decoration: none;
     white-space: nowrap;
   }
-  .cart-shortcut svg { flex: none; }
   .cart-count { font-size: 0.78rem; font-weight: 700; }
   .mobile-menu { display: none; position: relative; }
   .mobile-menu summary {
@@ -44,7 +43,7 @@
   .page-title { font-size: var(--fs-heading); font-weight: 900; line-height: 1; letter-spacing: -0.055em; text-wrap: balance; }
   .page-title small { font-size: 0.35em; letter-spacing: -0.025em; vertical-align: top; }
 
-  .configure-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.75fr); gap: clamp(2rem, 5vw, 5rem); }
+  .configure-layout { --sidebar-gap: clamp(2rem, 5vw, 5rem); --sidebar-content-min: 34rem; --sidebar-width: clamp(18rem, 31vw, 26rem); }
   .configure-preview { min-block-size: clamp(23rem, 50vw, 43rem); border: var(--border-default); background: var(--color-preview); position: relative; }
   .configure-controls { --stack-space: 2rem; align-items: stretch; }
   .configure-controls .field h2 { font-size: 1rem; }
@@ -73,7 +72,6 @@
     margin-block-end: 0.75rem;
   }
   .bento-viewport {
-    overflow-x: auto;
     overscroll-behavior-x: contain;
     padding-block: 0.75rem 0.25rem;
   }
@@ -88,8 +86,7 @@
     min-inline-size: max(100%, 44rem);
   }
   .bento-grid > * {
-    border: var(--border-default);
-    padding: var(--bento-card-padding, clamp(0.85rem, 1.7vw, 1.5rem));
+    --box-padding: clamp(0.85rem, 1.7vw, 1.5rem);
     display: grid;
     gap: var(--bento-card-gap, 0.5rem);
     align-content: space-between;
@@ -111,12 +108,8 @@
 
   .product-grid { --grid-min: 18rem; }
   .product-scroller { --reel-min: 17rem; --reel-width: 31%; padding-block-end: 0.8rem; }
-  .product { --stack-space: 0.75rem; min-inline-size: 0; }
+  .product { --stack-space: 0.75rem; min-inline-size: 0; container-type: inline-size; }
   .product-visual { display: grid; place-items: center; border: var(--border-default); }
-  .dice-glyph--inverted {
-    color: var(--color-background);
-    --dice-fill: var(--color-text);
-  }
   .product-visual .dice-glyph { inline-size: 65%; max-inline-size: 15rem; }
   .product-copy h3 { font-size: 1.3rem; }
   .product-actions { --cluster-gap: 0.6rem; }
@@ -135,6 +128,53 @@
   .footer h2 { font-size: 1rem; }
   .footer p { color: var(--color-text); }
 
+  @container (width < 18rem) {
+    .product-actions { flex-direction: column; align-items: stretch; }
+    .product-actions :is(a, button) { text-align: center; justify-content: center; }
+  }
+
+  .legal-links { --stack-space: 0.5rem; align-items: flex-start; }
+  .legal-links button {
+    border: 0;
+    border-block-end: 1px solid currentColor;
+    padding: 0.3rem 0;
+    color: inherit;
+    background: transparent;
+    text-align: start;
+    font-size: 0.85rem;
+  }
+  .legal-dialog {
+    inline-size: min(32rem, calc(100vw - 2rem));
+    margin: 0;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    border: var(--border-default);
+    background: var(--color-background);
+    color: var(--color-text);
+    overflow: auto;
+    max-block-size: calc(100dvh - 2rem);
+    --stack-space: 1.5rem;
+  }
+  .legal-dialog:not([open]) { display: none; }
+  .legal-dialog[open] { display: flex; }
+  .legal-dialog::backdrop { background: rgb(0 0 0 / 0.6); }
+  .legal-dialog h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.1; }
+  .dialog-actions { --cluster-gap: 0.75rem; }
+  .dialog-actions button, .legal-dialog form button {
+    border: var(--border-default);
+    padding: 0.8rem 1.2rem;
+    min-block-size: 2.75rem;
+    color: var(--color-text);
+    background: var(--color-background);
+  }
+  .dialog-actions .button-black, .legal-dialog form .button-black {
+    color: var(--color-on-action);
+    background: var(--color-action);
+  }
+  .legal-dialog :is(button:hover, button:focus-visible) {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
   @media (width <= 56rem) {
     .desktop-nav { display: none; }
     .mobile-menu { display: block; }
@@ -142,7 +182,6 @@
   }
 
   @media (width <= 55rem) {
-    .configure-layout { grid-template-columns: minmax(0, 1fr); }
     .configure-preview { min-block-size: clamp(21rem, 65vw, 34rem); }
   }
   @media (width <= 36rem) {

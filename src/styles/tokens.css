@@ -21,6 +21,7 @@
     --gutter: clamp(1.25rem, 3.5vw, 4.5rem);
     --content-max: 94rem;
     --header-height: 5.25rem;
+    --measure: 60ch;
 
     --space-2: 1rem;
     --space-3: 1.5rem;

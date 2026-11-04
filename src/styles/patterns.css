@@ -11,6 +11,7 @@
   }
 
   .prose > * + * { margin-block-start: var(--prose-gap, 1em); }
+  .prose > :is(p, ul, ol) { max-inline-size: var(--measure, 60ch); }
 
   .pile { display: grid; grid-template-areas: "pile"; }
   .pile > * { grid-area: pile; }
@@ -47,6 +48,12 @@
   }
   .reel > * { scroll-snap-align: start; }
   .scroller { overflow-x: auto; }
+  .icon {
+    display: inline-block;
+    inline-size: var(--icon-size, 1.5rem);
+    block-size: var(--icon-size, 1.5rem);
+    flex: none;
+  }
 
   .frame { aspect-ratio: var(--frame-ratio, 1); overflow: hidden; }
   .frame > :is(img, video) { inline-size: 100%; block-size: 100%; object-fit: cover; }
@@ -56,12 +63,13 @@
     flex-wrap: wrap;
     gap: var(--sidebar-gap, var(--space-3));
   }
-  .sidebar > :first-child { flex-basis: var(--sidebar-width, 18rem); flex-grow: 1; }
-  .sidebar > :last-child {
+  /* Main content expands; the narrower sidebar moves below it when space runs out. */
+  .sidebar > :first-child {
     flex-basis: 0;
     flex-grow: 999;
-    min-inline-size: min(100%, var(--sidebar-content-min, 55%));
+    min-inline-size: min(100%, var(--sidebar-content-min, 34rem));
   }
+  .sidebar > :last-child { flex-basis: var(--sidebar-width, 18rem); flex-grow: 1; }
 
   .switcher { display: flex; flex-wrap: wrap; gap: var(--switcher-gap, var(--space-4)); }
   .switcher > * {

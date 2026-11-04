@@ -20,10 +20,10 @@ export default function Storefront() {
     </section>
     <section className="wrapper section bento-section" aria-labelledby="benefits-title">
       <h2 id="benefits-title" className="section-title">Заголовок</h2>
-      <div className="bento-viewport" role="region" aria-label="Преимущества" tabIndex={0}>
+      <div className="bento-viewport scroller" role="region" aria-label="Преимущества" tabIndex={0}>
         <div className="bento-grid">
           {Array.from({ length: 5 }, (_, i) =>
-            <article className="bento-card prose" key={i}>
+            <article className="bento-card box" key={i}>
               <h3>Заголовок</h3>
               <p>Текст</p>
             </article>

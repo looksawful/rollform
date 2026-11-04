@@ -16,7 +16,7 @@ export default function ProductCard({ product }: { product: Preset }) {
   };
   const url = themeHref(pathname, '/configure?preset=' + encodeURIComponent(product.id));
   return <article className="product stack">
-    <Link className="product-visual pile frame" href={url}
+    <Link className="product-visual frame" href={url}
       aria-label={'Настроить ' + product.config.shape.toUpperCase()}>
       <DiceGlyph shape={product.config.shape} />
     </Link>

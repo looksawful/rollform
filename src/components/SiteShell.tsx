@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { CartProvider, useCart } from './CartState';
+import LegalDialogs from './LegalDialogs';
 import { isDarkPath, themeHref } from '@/lib/themeRoutes';
 
 const menuLinks = [
@@ -40,7 +41,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
           </details>
           <Link href={link("/cart")} className="cart-shortcut" aria-label={'Корзина (' + count + ')'}
             aria-current={path === link('/cart') ? 'page' : undefined}>
-            <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none"
+            <svg aria-hidden="true" className="icon" viewBox="0 0 24 24" width="24" height="24" fill="none"
               stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 8h16l-1 12H5L4 8Z"/>
               <path d="M9 9V6a3 3 0 0 1 6 0v3"/>
@@ -57,6 +58,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
         <div className="stack">
           <h2>Юридическая информация</h2>
           <p>Текст</p>
+          <LegalDialogs />
         </div>
         <div className="stack">
           <h2><Link href={link("/contacts")}>Контакты</Link></h2>
