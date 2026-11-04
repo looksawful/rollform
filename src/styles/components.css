@@ -17,28 +17,14 @@
     letter-spacing: -0.07em;
   }
 
-  .logo span {
-    font-size: 0.43em;
-    transform: translateY(0.07em);
-  }
-
   .nav {
     --cluster-gap: clamp(1rem, 2vw, 2.75rem);
     font-size: 0.86rem;
     font-weight: 500;
   }
 
-  :is(.nav a, .footer a) { text-underline-offset: 0.3em; }
-  :is(.nav a, .footer a):hover { text-decoration: underline; }
-
-  .cart-trigger {
-    border: 0;
-    padding: 0.65rem 0;
-    background: none;
-    font-size: 0.86rem;
-    font-weight: 700;
-  }
-  .cart-trigger span { font-weight: 400; }
+  .nav a { text-underline-offset: 0.3em; }
+  .nav a:hover { text-decoration: underline; }
 
   .button {
     display: inline-flex;
@@ -55,11 +41,7 @@
 
   .button-black { color: var(--paper); background: var(--ink); }
   .button-black:hover { color: var(--ink); background: var(--paper); }
-  .button-outline { color: var(--ink); background: var(--paper); }
-  .button-outline:hover { color: var(--paper); background: var(--ink); }
   .button-fill { inline-size: 100%; }
-
-  .panel-note { font-size: 0.85rem; }
 
   .field { --stack-space: 0.55rem; }
 
@@ -80,16 +62,6 @@
   .pill-list button:is(.is-active, :hover) {
     background: var(--ink);
     color: var(--paper);
-  }
-
-  .cart-swatch {
-    display: grid;
-    place-items: center;
-    inline-size: 3.5rem;
-    block-size: 3.5rem;
-    flex: none;
-    border: var(--line);
-    font-size: 0.8rem;
   }
 
   .quantity { --cluster-gap: 0.6rem; flex-wrap: nowrap; }

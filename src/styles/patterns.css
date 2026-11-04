@@ -1,32 +1,6 @@
-/* Kevin Powell-inspired intrinsic composition primitives.
-   Keep these independent of all ROLLFORM component appearances. */
 @layer layouts {
-  .wrapper {
-    inline-size: min(100% - var(--gutter) * 2, var(--content-max));
-    margin-inline: auto;
-  }
-
-  /* Uniform vertical rhythm. Flex avoids the stretched-grid mystery spacing. */
-  .stack {
-    display: flex;
-    flex-direction: column;
-    gap: var(--stack-space, var(--space-2));
-  }
-
-  /* Typographic rhythm: em responds to each following element's font size. */
-  .prose > * + * {
-    margin-block-start: var(--prose-flow, 1em);
-  }
-
-  /* Multiple children in one grid area; no absolute positioning required. */
-  .pile {
-    display: grid;
-    grid-template-areas: "pile";
-    place-items: center;
-  }
-
-  .pile > * { grid-area: pile; }
-
+  .wrapper { inline-size: min(100% - var(--gutter) * 2, var(--content-max)); margin-inline: auto; }
+  .stack { display: flex; flex-direction: column; gap: var(--stack-space, var(--space-2)); }
   .cluster {
     display: flex;
     flex-wrap: wrap;
@@ -34,25 +8,10 @@
     justify-content: var(--cluster-justify, flex-start);
     gap: var(--cluster-gap, var(--space-2));
   }
-
-  /* Splits when the available width cannot fit two useful columns. */
   .split {
     display: grid;
-    grid-template-columns: repeat(
-      auto-fit,
-      minmax(min(var(--split-min, 24rem), 100%), 1fr)
-    );
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--split-min, 24rem), 100%), 1fr));
     align-items: var(--split-align, center);
     gap: var(--split-gap, var(--space-4));
-  }
-
-  /* Grid chooses the number of columns; no viewport breakpoints. */
-  .auto-grid {
-    display: grid;
-    grid-template-columns: repeat(
-      auto-fit,
-      minmax(min(var(--auto-grid-min, 17rem), 100%), 1fr)
-    );
-    gap: var(--auto-grid-gap, var(--space-3));
   }
 }

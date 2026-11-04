@@ -5,45 +5,20 @@ import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { CartProvider, useCart } from './CartState';
 
-const links = [
-  { href: '/catalog', label: 'Каталог' },
-  { href: '/configure', label: 'Конструктор' },
-  { href: '/#about', label: 'О проекте' },
-];
-
 function SiteChrome({ children }: { children: ReactNode }) {
   const { count } = useCart();
-  const activeRoute = usePathname().split('/').filter(Boolean).pop();
-  return <div className="site" id="top">
+  const path = usePathname();
+  return <div className="site">
     <header className="topbar">
       <div className="wrapper topbar-inner cluster">
-        <Link href="/" className="logo" aria-label="ROLLFORM — главная">ROLLFORM<span aria-hidden="true">◆</span></Link>
-        <nav className="nav nav-desktop cluster" aria-label="Основное меню">
-          {links.map(link => <Link key={link.href} aria-current={link.href === `/${activeRoute}` ? 'page' : undefined} href={link.href}>{link.label}</Link>)}
+        <Link href="/" className="logo" aria-label="ROLLFORM — главная">ROLLFORM</Link>
+        <nav className="nav cluster" aria-label="Основное меню">
+          <Link href="/configure" aria-current={path.endsWith('/configure') ? 'page' : undefined}>Конструктор</Link>
+          <Link href="/cart" aria-current={path.endsWith('/cart') ? 'page' : undefined}>Корзина ({count})</Link>
         </nav>
-        <div className="header-actions">
-          <Link href="/cart" className="cart-trigger" aria-current={activeRoute === 'cart' ? 'page' : undefined}>Корзина <span>({count})</span></Link>
-          <details className="mobile-navigation" onKeyDown={event => {
-            if (event.key === 'Escape' && event.currentTarget.open) {
-              event.currentTarget.open = false;
-              event.currentTarget.querySelector('summary')?.focus();
-            }
-          }}>
-            <summary>Меню <span aria-hidden="true">☰</span></summary>
-            <nav aria-label="Мобильное меню" className="mobile-nav-list">
-              {links.map(link => <Link href={link.href} key={link.href} aria-current={link.href === `/${activeRoute}` ? 'page' : undefined} onClick={event => {
-                const details = event.currentTarget.closest('details');
-                if (details) details.open = false;
-              }}>{link.label}</Link>)}
-            </nav>
-          </details>
-        </div>
       </div>
     </header>
     <main>{children}</main>
-    <footer className="footer" id="contacts">
-      <div className="wrapper cluster footer-inner"><Link className="logo" href="/">ROLLFORM</Link><span>Прототип для просмотра. Без заказов и оплаты.</span><a href="#top">Наверх ↑</a></div>
-    </footer>
   </div>;
 }
 

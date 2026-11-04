@@ -7,7 +7,7 @@
   }
 
   html {
-    scroll-behavior: auto; /* ScrollTrigger owns the pinned transition. */
+    scroll-behavior: auto;
     color-scheme: light;
   }
 
@@ -35,5 +35,4 @@
     color: var(--paper);
   }
 
-  :where(#catalog, #about, #contacts) { scroll-margin-block-start: 5rem; }
 }

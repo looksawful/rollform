@@ -7,15 +7,12 @@
     --line: 1px solid var(--ink);
 
     --ff-body: Inter, Arial, Helvetica, sans-serif;
-    --ff-label: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     --fs-body: 1rem;
     --fs-display: clamp(3.65rem, 6.4vw, 7.75rem);
     --fs-heading: clamp(2.75rem, 5vw, 5rem);
-    --fs-label: 0.75rem;
 
     --gutter: clamp(1.25rem, 3.5vw, 4.5rem);
     --content-max: 94rem;
-    --measure: 65ch;
     --header-height: 5.25rem;
 
     --space-2: 1rem;

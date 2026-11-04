@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
@@ -17,29 +17,34 @@ test('entry point declares predictable cascade order and imports exactly one cop
   }
 });
 
-test('layout primitives are reusable and decoupled from components', () => {
+test('layout primitives stay simple', () => {
   const patterns = read('src/styles/patterns.css');
-  for (const cls of ['wrapper','stack','cluster','split','auto-grid','prose','pile']) {
-    assert.match(patterns, new RegExp(`\\.${cls}(?:\\s*>)?[^{}]*\\{`), cls);
+  for (const cls of ['wrapper', 'stack', 'cluster', 'split']) {
+    assert.ok(patterns.includes('.' + cls + ' {'), cls);
   }
   assert.match(patterns, /--stack-space/);
   assert.match(patterns, /--split-min/);
-  assert.match(patterns, /--auto-grid-min/);
-  assert.match(patterns, /margin-block-start:\s*var\(--prose-flow,\s*1em\)/);
 });
 
-test('components use intrinsic layout and retain accessible user-preference changes', () => {
+test('prototype keeps responsive layout and reduced motion', () => {
   const frontend = read('src/components/Storefront.tsx');
-  const catalog = read('src/app/catalog/page.tsx');
-  const card = read('src/components/ProductCard.tsx');
-  assert.match(catalog, /className="auto-grid product-grid"/);
-  assert.match(card, /className="product-visual pile"/);
-  assert.match(frontend, /className="about-copy prose"/);
+  const builder = read('src/components/Configurator.tsx');
+  assert.match(frontend, /className="wrapper hero split"/);
+  assert.match(builder, /className="configure-layout"/);
   const combined = cssFiles.map(read).join('\n');
   assert.match(combined, /@media\s*\(width\s*<=\s*56rem\)/);
-  assert.match(combined, /@container\s*\(width\s*<\s*18rem\)/);
   assert.match(combined, /prefers-reduced-motion:\s*reduce/);
   assert.doesNotMatch(combined, /!important/);
+});
+
+test('wireframe keeps a single prototype path and placeholder copy', () => {
+  const home = read('src/components/Storefront.tsx');
+  const chrome = read('src/components/SiteShell.tsx');
+  assert.match(home, />Заголовок<\/h1>/);
+  assert.match(home, />Текст<\/p>/);
+  assert.doesNotMatch(home, /product-strip|Следующая форма|object-pause|builder-invite/);
+  assert.doesNotMatch(chrome, /Каталог|О проекте|mobile-navigation/);
+  assert.equal(existsSync(path.join(root, 'src/app/catalog/page.tsx')), false);
 });
 
 test('theme uses a black and white palette only', () => {
