@@ -35,4 +35,5 @@
     color: var(--paper);
   }
 
+  :where(#about, #contacts, #catalog) { scroll-margin-block-start: 5rem; }
 }

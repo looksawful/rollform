@@ -17,7 +17,6 @@
   .swatch { inline-size: 0.95rem; block-size: 0.95rem; border: 1px solid var(--ink); border-radius: 50%; }
   .pill-list button.is-active .swatch { border-color: var(--paper); }
 
-  .cart-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.6fr); gap: clamp(2rem, 5vw, 5rem); }
   .cart-lines { --stack-space: 0; }
   .cart-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); border-block-start: var(--line); padding-block: var(--space-3); align-items: center; }
   .cart-entry:last-child { border-block-end: var(--line); }
@@ -28,18 +27,42 @@
   .cart-entry-actions .quantity { white-space: nowrap; }
   .text-action { min-block-size: 2.75rem; padding: 0; background: none; border: none; border-block-end: 1px solid; font-size: 0.78rem; }
   .empty-state { border: var(--line); padding: clamp(2rem, 5vw, 4rem); align-items: flex-start; }
-  .order-draft { --stack-space: 0.9rem; border: var(--line); padding: 1.5rem; align-self: start; }
-  .order-draft h2 { font-size: 1.6rem; }
-  .order-draft p { font-size: 0.85rem; }
-  .order-draft textarea { inline-size: 100%; resize: vertical; border: var(--line); padding: 0.8rem; background: var(--paper); color: var(--ink); font: 0.875rem/1.5 var(--ff-body); }
+
+  .section-title { font-size: var(--fs-heading); line-height: 1; letter-spacing: -0.055em; }
+  .section-button { align-self: start; }
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+    gap: var(--space-3);
+  }
+  .product { --stack-space: 0.75rem; min-inline-size: 0; }
+  .product-visual { aspect-ratio: 1; display: grid; place-items: center; border: var(--line); }
+  .product-visual .dice-glyph { inline-size: 65%; max-inline-size: 15rem; }
+  .product-copy h3 { font-size: 1.3rem; }
+  .product-actions { --cluster-gap: 0.6rem; }
+  .product-actions :is(a, button) {
+    min-block-size: 2.75rem;
+    border: var(--line);
+    background: var(--paper);
+    padding: 0.75rem 1rem;
+    color: var(--ink);
+    font-size: 0.82rem;
+  }
+  .product-actions :is(a, button):hover { background: var(--ink); color: var(--paper); }
+
+  .footer { border-block-start: var(--line); padding-block: var(--space-4); }
+  .footer-inner { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+  .footer h2 { font-size: 1rem; }
+  .footer p { color: var(--ink); }
+  @media (width <= 36rem) { .footer-inner { grid-template-columns: 1fr; } }
 
   @media (width <= 55rem) {
-    .configure-layout, .cart-layout { grid-template-columns: minmax(0, 1fr); }
+    .configure-layout { grid-template-columns: minmax(0, 1fr); }
     .configure-preview { min-block-size: clamp(21rem, 65vw, 34rem); }
   }
   @media (width <= 36rem) {
-    .topbar-inner { flex-wrap: nowrap; --cluster-gap: 0.5rem; }
-    .nav { --cluster-gap: 0.75rem; font-size: 0.77rem; }
+    .topbar-inner { display: grid; justify-items: start; padding-block: 0.75rem; --cluster-gap: 0.5rem; }
+    .nav { --cluster-gap: 0.8rem; font-size: 0.77rem; }
     .logo { font-size: 1.1rem; }
     .cart-entry { grid-template-columns: 1fr; }
     .cart-entry-actions { align-items: start; }

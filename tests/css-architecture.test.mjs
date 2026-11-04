@@ -37,14 +37,35 @@ test('prototype keeps responsive layout and reduced motion', () => {
   assert.doesNotMatch(combined, /!important/);
 });
 
-test('wireframe keeps a single prototype path and placeholder copy', () => {
+test('storefront restores catalog, product cards, about, and contacts', () => {
   const home = read('src/components/Storefront.tsx');
   const chrome = read('src/components/SiteShell.tsx');
+  const catalog = read('src/app/catalog/page.tsx');
+  const contact = read('src/app/contacts/page.tsx');
+  const card = read('src/components/ProductCard.tsx');
+  assert.match(home, /id="about"/);
+  assert.match(home, /id="contacts"/);
+  assert.match(home, /ProductCard/);
+  assert.match(catalog, /ProductCard/);
+  assert.match(contact, /Текст/);
+  assert.match(chrome, /Юридическая информация/);
+  assert.match(chrome, /Контакты/);
+  assert.match(card, /В корзину/);
+});
+
+test('content stays generic, with no draft, copy action, or demo notice', () => {
+  const home = read('src/components/Storefront.tsx');
+  const cart = read('src/components/CartView.tsx');
+  const builder = read('src/components/Configurator.tsx');
+  const content = home + cart + builder + read('src/components/SiteShell.tsx') +
+    read('src/components/ProductCard.tsx') + read('src/app/catalog/page.tsx') +
+    read('src/app/contacts/page.tsx');
   assert.match(home, />Заголовок<\/h1>/);
   assert.match(home, />Текст<\/p>/);
-  assert.doesNotMatch(home, /product-strip|Следующая форма|object-pause|builder-invite/);
-  assert.doesNotMatch(chrome, /Каталог|О проекте|mobile-navigation/);
-  assert.equal(existsSync(path.join(root, 'src/app/catalog/page.tsx')), false);
+  assert.match(home, />Кнопка<\/Link>/);
+  assert.match(builder, />В корзину<\/button>/);
+  assert.doesNotMatch(cart, /makeOrderText|clipboard|textarea|order-draft/);
+  assert.doesNotMatch(content, /демо|прототип|черновик|не отправляется|предзаказ/i);
 });
 
 test('theme uses a black and white palette only', () => {

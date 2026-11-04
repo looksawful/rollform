@@ -7,18 +7,33 @@ import { CartProvider, useCart } from './CartState';
 
 function SiteChrome({ children }: { children: ReactNode }) {
   const { count } = useCart();
-  const path = usePathname();
+  const path = usePathname().replace(/\/$/, '');
   return <div className="site">
     <header className="topbar">
       <div className="wrapper topbar-inner cluster">
         <Link href="/" className="logo" aria-label="ROLLFORM — главная">ROLLFORM</Link>
         <nav className="nav cluster" aria-label="Основное меню">
-          <Link href="/configure" aria-current={path.endsWith('/configure') ? 'page' : undefined}>Конструктор</Link>
-          <Link href="/cart" aria-current={path.endsWith('/cart') ? 'page' : undefined}>Корзина ({count})</Link>
+          <Link href="/catalog" aria-current={path === '/catalog' ? 'page' : undefined}>Каталог</Link>
+          <Link href="/configure" aria-current={path === '/configure' ? 'page' : undefined}>Конструктор</Link>
+          <Link href="/#about">О проекте</Link>
+          <Link href="/contacts" aria-current={path === '/contacts' ? 'page' : undefined}>Контакты</Link>
+          <Link href="/cart" aria-current={path === '/cart' ? 'page' : undefined}>Корзина ({count})</Link>
         </nav>
       </div>
     </header>
     <main>{children}</main>
+    <footer className="footer">
+      <div className="wrapper footer-inner">
+        <div className="stack">
+          <h2>Юридическая информация</h2>
+          <p>Текст</p>
+        </div>
+        <div className="stack">
+          <h2><Link href="/contacts">Контакты</Link></h2>
+          <p>Текст</p>
+        </div>
+      </div>
+    </footer>
   </div>;
 }
 

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { configFromParams, diceShapes, fontNames, fontStyles, initialConfig, presets } from '../src/lib/catalog.ts';
-import { addCartItem, changeQuantity, makeOrderText, readCart } from '../src/lib/orders.ts';
+import { addCartItem, changeQuantity, readCart } from '../src/lib/orders.ts';
 
 test('prototype product configuration contains only the three selectable parameters', () => {
   assert.deepEqual(Object.keys(initialConfig), ['shape', 'shell', 'font']);
@@ -68,11 +68,10 @@ test('cart hydration rejects malformed and legacy entries instead of crashing', 
   assert.deepEqual(readCart(JSON.stringify(saved)), saved);
 });
 
-test('quantity updates and draft order do not imply payment or delivery', () => {
+test('quantity changes keep selections and have bounds', () => {
   const saved = addCartItem([], { origin: { kind: 'preorder_custom' }, config: initialConfig });
   assert.equal(changeQuantity(saved, saved[0].id, -1)[0].quantity, 1);
   assert.equal(changeQuantity(saved, saved[0].id, +1)[0].quantity, 2);
-  const text = makeOrderText(saved);
-  assert.match(text, /Свой вариант/);
-  assert.doesNotMatch(text, /Оплачено|Заказ получен|₽/);
+  assert.equal(changeQuantity(saved, saved[0].id, +200)[0].quantity, 99);
+  assert.equal(changeQuantity(saved, saved[0].id, -200)[0].quantity, 1);
 });

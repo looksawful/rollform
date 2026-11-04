@@ -59,17 +59,3 @@ export function readCart(raw: string | null): CartItem[] {
       Number.isInteger(v.quantity) && v.quantity > 0 && v.quantity <= 99);
   } catch { return []; }
 }
-
-export function makeOrderText(items: CartItem[]) {
-  const name = (origin: CartOrigin) => origin.kind === 'in_stock' ? 'Готовый товар'
-    : origin.kind === 'preorder_preset' ? 'Предзаказ варианта' : 'Свой вариант';
-  return [
-    'ROLLFORM / ЧЕРНОВИК ЗАЯВКИ',
-    'Прототип: заявка не отправлена.',
-    '',
-    ...items.map((item, i) => `${i + 1}. ${name(item.origin)}${'presetId' in item.origin ? ` (${item.origin.presetId})` : ''}\n${item.config.shape.toUpperCase()} · ${shellColors.find(c => c.value === item.config.shell)?.name} · ${item.config.font}\nКоличество: ${item.quantity}`),
-    '',
-    `Всего: ${items.reduce((total, item) => total + item.quantity, 0)}`,
-    'Цена и сроки не указаны.',
-  ].join('\n');
-}

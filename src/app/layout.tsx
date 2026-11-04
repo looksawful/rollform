@@ -3,8 +3,8 @@ import SiteShell from '@/components/SiteShell';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'ROLLFORM · прототип',
-  description: 'Прототип интерфейса магазина игральных кубиков для разработки и просмотра.',
+  title: 'ROLLFORM',
+  description: 'ROLLFORM',
   robots: { index: false, follow: false },
 };
 
