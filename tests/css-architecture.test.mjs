@@ -71,10 +71,37 @@ test('content stays generic, with no draft, copy action, or demo notice', () => 
 test('brand placeholder is not a fabricated brand name', () => {
   const shell = read('src/components/SiteShell.tsx');
   const layout = read('src/app/layout.tsx');
-  assert.match(shell, />логотип<\/Link>/);
-  assert.match(shell, /aria-label="логотип, на главную"/);
+  assert.match(shell, />Логотип<\/Link>/);
+  assert.match(shell, /aria-label="Логотип, на главную"/);
   assert.doesNotMatch(shell + layout, /ROLLFORM/);
-  assert.match(layout, /title: 'логотип'/);
+  assert.match(layout, /title: 'Логотип'/);
+});
+
+test('mobile header has hamburger navigation and always-visible cart shortcut', () => {
+  const shell = read('src/components/SiteShell.tsx');
+  const css = read('src/styles/pages.css');
+  assert.match(shell, /<details className="mobile-menu"/);
+  assert.match(shell, /<summary aria-label="Меню"/);
+  assert.match(shell, /className="cart-shortcut"/);
+  assert.match(shell, /<svg[^>]*aria-hidden="true"/);
+  assert.match(css, /\.mobile-menu\s*\{/);
+  assert.match(css, /\.cart-shortcut\s*\{/);
+});
+
+test('homepage offers keyboard-accessible horizontal catalog and mobile split', () => {
+  const home = read('src/components/Storefront.tsx');
+  const css = read('src/styles/pages.css') + read('src/styles/responsive.css');
+  assert.match(home, /className="product-scroller"/);
+  assert.match(home, /tabIndex=\{0\}/);
+  assert.match(css, /grid-auto-flow:\s*column/);
+  assert.match(css, /overflow-x:\s*auto/);
+  assert.match(css, /scroll-snap-type:\s*x\s+proximity/);
+  assert.match(css, /\.hero\.split\s*\{/);
+});
+
+test('about section uses the requested placeholder paragraph', () => {
+  const home = read('src/components/Storefront.tsx');
+  assert.match(home, /Внимание, этот текст является рыбой/);
 });
 
 test('theme uses a black and white palette only', () => {

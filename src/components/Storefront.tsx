@@ -17,12 +17,12 @@ export default function Storefront() {
     </section>
     <section className="wrapper section stack" id="catalog">
       <h2 className="section-title">Заголовок</h2>
-      <div className="product-grid">{presets.slice(0, 3).map(p => <ProductCard key={p.id} product={p} />)}</div>
+      <div className="product-scroller" role="region" aria-label="Товары" tabIndex={0}>{presets.map(p => <ProductCard key={p.id} product={p} />)}</div>
       <Link className="button button-black section-button" href="/catalog">Кнопка</Link>
     </section>
     <section className="wrapper section stack" id="about">
       <h2 className="section-title">О проекте</h2>
-      <p>Текст</p>
+      <p>Внимание, этот текст является рыбой.</p>
     </section>
     <section className="wrapper section stack" id="contacts">
       <h2 className="section-title">Контакты</h2>
