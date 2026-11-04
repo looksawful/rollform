@@ -49,7 +49,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
     </header>
     <main>{children}</main>
     <footer className="footer">
-      <div className="wrapper footer-inner">
+      <div className="wrapper footer-inner switcher">
         <div className="stack">
           <h2>Юридическая информация</h2>
           <p>Текст</p>

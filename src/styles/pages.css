@@ -61,28 +61,58 @@
   .cart-entry-actions { --stack-space: 0.5rem; align-items: end; }
   .cart-entry-actions .quantity { white-space: nowrap; }
   .text-action { min-block-size: 2.75rem; padding: 0; background: none; border: none; border-block-end: 1px solid; font-size: 0.78rem; }
-  .empty-state { border: var(--line); padding: clamp(2rem, 5vw, 4rem); align-items: flex-start; }
+  .empty-state { --box-padding: clamp(2rem, 5vw, 4rem); --cover-min-height: 12rem; align-items: flex-start; }
 
   .section-title { font-size: var(--fs-heading); line-height: 1; letter-spacing: -0.055em; }
   .section-button { align-self: start; }
-  .product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
-    gap: var(--space-3);
+  /* Kevin Powell's named-area Bento approach, adapted to five monochrome cells.
+     The narrow-screen scrollport preserves two rows and readable card widths. */
+  .bento-section { padding-block: clamp(1.5rem, 3vw, 3rem); }
+  .bento-section .section-title {
+    font-size: clamp(1.5rem, 3vw, 2.6rem);
+    margin-block-end: 0.75rem;
   }
-  .product-scroller {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(min(17rem, 82%), 31%);
-    gap: var(--space-3);
+  .bento-viewport {
     overflow-x: auto;
     overscroll-behavior-x: contain;
-    scroll-snap-type: x proximity;
-    padding-block-end: 0.8rem;
+    padding-block: 0.75rem 0.25rem;
   }
-  .product-scroller > .product { scroll-snap-align: start; }
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-areas:
+      "one one one one two two two three three three three three"
+      "four four four four four four four five five five five five";
+    grid-template-rows: repeat(2, minmax(8.5rem, auto));
+    gap: clamp(0.5rem, 1.2vw, 1rem);
+    min-inline-size: max(100%, 44rem);
+  }
+  .bento-grid > * {
+    border: var(--line);
+    padding: var(--bento-card-padding, clamp(0.85rem, 1.7vw, 1.5rem));
+    display: grid;
+    gap: var(--bento-card-gap, 0.5rem);
+    align-content: space-between;
+    min-inline-size: 0;
+    background: transparent;
+  }
+  .bento-card h3 {
+    font-size: clamp(1.05rem, 1.7vw, 1.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .bento-card p { font-size: 0.875rem; }
+  .bento-grid > :nth-child(1) { grid-area: one; }
+  .bento-grid > :nth-child(2) { grid-area: two; }
+  .bento-grid > :nth-child(3) { grid-area: three; }
+  .bento-grid > :nth-child(4) { grid-area: four; }
+  .bento-grid > :nth-child(5) { grid-area: five; }
+
+  .product-grid { --grid-min: 18rem; }
+  .product-scroller { --reel-min: 17rem; --reel-width: 31%; padding-block-end: 0.8rem; }
   .product { --stack-space: 0.75rem; min-inline-size: 0; }
-  .product-visual { aspect-ratio: 1; display: grid; place-items: center; border: var(--line); }
+  .product-visual { display: grid; place-items: center; border: var(--line); }
   .product-visual .dice-glyph { inline-size: 65%; max-inline-size: 15rem; }
   .product-copy h3 { font-size: 1.3rem; }
   .product-actions { --cluster-gap: 0.6rem; }
@@ -97,10 +127,9 @@
   .product-actions :is(a, button):hover { background: var(--ink); color: var(--paper); }
 
   .footer { border-block-start: var(--line); padding-block: var(--space-4); }
-  .footer-inner { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+  .footer-inner { --switcher-threshold: 34rem; }
   .footer h2 { font-size: 1rem; }
   .footer p { color: var(--ink); }
-  @media (width <= 36rem) { .footer-inner { grid-template-columns: 1fr; } }
 
   @media (width <= 56rem) {
     .desktop-nav { display: none; }

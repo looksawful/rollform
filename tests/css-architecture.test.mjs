@@ -26,6 +26,64 @@ test('layout primitives stay simple', () => {
   assert.match(patterns, /--split-min/);
 });
 
+test('all documented layout primitives have real CSS algorithms', () => {
+  const css = read('src/styles/patterns.css');
+  const names = ['wrapper', 'stack', 'prose', 'pile', 'cluster', 'split',
+    'grid', 'reel', 'scroller', 'frame', 'sidebar', 'switcher', 'cover',
+    'imposter', 'center', 'box'];
+  for (const name of names) {
+    assert.ok(css.includes('.' + name + ' '), name);
+  }
+  assert.match(css, /\.prose\s*>\s*\*\s*\+\s*\*/);
+  assert.match(css, /margin-block-start:\s*var\(--prose-gap,\s*1em\)/);
+  assert.match(css, /grid-template-areas:\s*["']pile["']/);
+  assert.match(css, /\.pile\s*>\s*\*\s*\{\s*grid-area:\s*pile;/);
+  assert.match(css, /flex-wrap:\s*wrap/);
+  assert.match(css, /scroll-snap-type:\s*x\s+proximity/);
+  assert.match(css, /--sidebar-width/);
+  assert.match(css, /--switcher-threshold/);
+  assert.match(css, /--cover-min-height/);
+  assert.match(css, /transform:\s*translate\(-50%,\s*-50%\)/);
+});
+
+test('layout composition reuses primitives with a deliberate mobile split exception', () => {
+  const home = read('src/components/Storefront.tsx');
+  const card = read('src/components/ProductCard.tsx');
+  const catalog = read('src/app/catalog/page.tsx');
+  const cart = read('src/components/CartView.tsx');
+  const contacts = read('src/app/contacts/page.tsx');
+  const shell = read('src/components/SiteShell.tsx');
+  const pages = read('src/styles/pages.css');
+  assert.match(home, /className="product-scroller reel"/);
+  assert.match(home, /id="about"/);
+  assert.match(home, /className="wrapper section prose"/);
+  assert.match(card, /className="product-visual pile frame"/);
+  assert.match(catalog, /className="product-grid grid"/);
+  assert.match(cart, /className="empty-state box cover stack"/);
+  assert.match(contacts, /center prose/);
+  assert.match(shell, /className="wrapper footer-inner switcher"/);
+  assert.match(pages, /\.hero\.split\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.05fr\)\s+minmax\(0,\s*0\.95fr\)/);
+});
+
+test('bento follows a five-cell two-row named-area layout', () => {
+  const home = read('src/components/Storefront.tsx');
+  const css = read('src/styles/pages.css');
+  assert.match(home, /className="bento-grid"/);
+  assert.match(home, /className="bento-viewport"/);
+  assert.match(home, /tabIndex=\{0\}/);
+  assert.match(home, /Array\.from\(\{ length: 5 \}/);
+  assert.equal((home.match(/className="bento-card prose"/g) || []).length, 1);
+  assert.match(css, /grid-template-areas:/);
+  assert.match(css, /"one one one one two two two three three three three three"/);
+  assert.match(css, /"four four four four four four four five five five five five"/);
+  assert.match(css, /grid-template-rows:\s*repeat\(2,/);
+  assert.match(css, /min-inline-size:\s*max\(100%,/);
+  assert.match(css, /\.bento-viewport\s*\{[^}]*overflow-x:\s*auto/);
+  assert.doesNotMatch(home, /<img|<Image|<AsyncImage/);
+  assert.ok(home.indexOf('className="hero-copy') < home.indexOf('className="bento-grid"'));
+  assert.ok(home.indexOf('className="bento-grid"') < home.indexOf('id="catalog"'));
+});
+
 test('prototype keeps responsive layout and reduced motion', () => {
   const frontend = read('src/components/Storefront.tsx');
   const builder = read('src/components/Configurator.tsx');
@@ -90,8 +148,8 @@ test('mobile header has hamburger navigation and always-visible cart shortcut', 
 
 test('homepage offers keyboard-accessible horizontal catalog and mobile split', () => {
   const home = read('src/components/Storefront.tsx');
-  const css = read('src/styles/pages.css') + read('src/styles/responsive.css');
-  assert.match(home, /className="product-scroller"/);
+  const css = read('src/styles/pages.css') + read('src/styles/responsive.css') + read('src/styles/patterns.css');
+  assert.match(home, /className="product-scroller reel"/);
   assert.match(home, /tabIndex=\{0\}/);
   assert.match(css, /grid-auto-flow:\s*column/);
   assert.match(css, /overflow-x:\s*auto/);
