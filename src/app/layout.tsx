@@ -3,8 +3,8 @@ import SiteShell from '@/components/SiteShell';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'ROLLFORM',
-  description: 'ROLLFORM',
+  title: 'логотип',
+  description: 'Текст',
   robots: { index: false, follow: false },
 };
 

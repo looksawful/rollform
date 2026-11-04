@@ -11,7 +11,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
   return <div className="site">
     <header className="topbar">
       <div className="wrapper topbar-inner cluster">
-        <Link href="/" className="logo" aria-label="ROLLFORM — главная">ROLLFORM</Link>
+        <Link href="/" className="logo" aria-label="логотип, на главную">логотип</Link>
         <nav className="nav cluster" aria-label="Основное меню">
           <Link href="/catalog" aria-current={path === '/catalog' ? 'page' : undefined}>Каталог</Link>
           <Link href="/configure" aria-current={path === '/configure' ? 'page' : undefined}>Конструктор</Link>

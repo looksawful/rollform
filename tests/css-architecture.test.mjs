@@ -68,6 +68,15 @@ test('content stays generic, with no draft, copy action, or demo notice', () => 
   assert.doesNotMatch(content, /демо|прототип|черновик|не отправляется|предзаказ/i);
 });
 
+test('brand placeholder is not a fabricated brand name', () => {
+  const shell = read('src/components/SiteShell.tsx');
+  const layout = read('src/app/layout.tsx');
+  assert.match(shell, />логотип<\/Link>/);
+  assert.match(shell, /aria-label="логотип, на главную"/);
+  assert.doesNotMatch(shell + layout, /ROLLFORM/);
+  assert.match(layout, /title: 'логотип'/);
+});
+
 test('theme uses a black and white palette only', () => {
   const tokens = read('src/styles/tokens.css');
   assert.match(tokens, /--ink:\s*#000000;/);
