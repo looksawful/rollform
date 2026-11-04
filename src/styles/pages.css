@@ -11,7 +11,7 @@
     text-decoration: none;
     white-space: nowrap;
   }
-  .cart-count { font-size: 0.78rem; font-weight: 700; }
+  .cart-count { font-size: var(--fs-small); line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
   .mobile-menu { display: none; position: relative; }
   .mobile-menu summary {
     display: grid;
@@ -40,13 +40,12 @@
 
   .page-section { padding-block: clamp(3rem, 8vw, 7rem); }
   .page-heading { padding-block-end: clamp(2rem, 5vw, 4rem); }
-  .page-title { font-size: var(--fs-heading); font-weight: 900; line-height: 1; letter-spacing: -0.055em; text-wrap: balance; }
-  .page-title small { font-size: 0.35em; letter-spacing: -0.025em; vertical-align: top; }
+  .page-title { font-size: var(--fs-heading); font-weight: 800; line-height: var(--lh-heading); letter-spacing: var(--tracking-heading); text-wrap: balance; }
 
   .configure-layout { --sidebar-gap: clamp(2rem, 5vw, 5rem); --sidebar-content-min: 34rem; --sidebar-width: clamp(18rem, 31vw, 26rem); }
   .configure-preview { min-block-size: clamp(23rem, 50vw, 43rem); border: var(--border-default); background: var(--color-preview); position: relative; }
   .configure-controls { --stack-space: 2rem; align-items: stretch; }
-  .configure-controls .field h2 { font-size: 1rem; }
+  .configure-controls .field h2 { font-size: var(--fs-body); line-height: var(--lh-title); font-weight: 700; }
   .configure-controls .pill-list button { display: flex; align-items: center; gap: 0.5rem; }
   .swatch { inline-size: 0.95rem; block-size: 0.95rem; border: 1px solid var(--color-border); border-radius: 50%; }
   .pill-list button.is-active .swatch { border-color: var(--color-on-action); }
@@ -54,22 +53,22 @@
   .cart-lines { --stack-space: 0; }
   .cart-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); border-block-start: var(--border-default); padding-block: var(--space-3); align-items: center; }
   .cart-entry:last-child { border-block-end: var(--border-default); }
-  .cart-entry-copy { --stack-space: 0.1rem; }
-  .cart-entry-copy h2 { font-size: 1.3rem; }
-  .cart-entry-copy p { font-size: 0.82rem; }
+  .cart-entry-copy { --stack-space: var(--space-1); }
+  .cart-entry-copy h2 { font-size: var(--fs-title); line-height: var(--lh-title); }
+  .cart-entry-copy p { font-size: var(--fs-small); line-height: var(--lh-small); }
   .cart-entry-actions { --stack-space: 0.5rem; align-items: end; }
   .cart-entry-actions .quantity { white-space: nowrap; }
-  .text-action { min-block-size: 2.75rem; padding: 0; background: none; border: none; border-block-end: 1px solid; font-size: 0.78rem; }
+  .text-action { min-block-size: 2.75rem; padding: 0; background: none; border: none; border-block-end: 1px solid; font-size: var(--fs-small); line-height: var(--lh-small); }
   .empty-state { --box-padding: clamp(2rem, 5vw, 4rem); --cover-min-height: 12rem; align-items: flex-start; }
 
-  .section-title { font-size: var(--fs-heading); line-height: 1; letter-spacing: -0.055em; }
+  .section-title { font-size: var(--fs-heading); line-height: var(--lh-heading); letter-spacing: var(--tracking-heading); font-weight: 800; text-wrap: balance; }
   .section-button { align-self: start; }
   /* Kevin Powell's named-area Bento approach, adapted to five monochrome cells.
      The narrow-screen scrollport preserves two rows and readable card widths. */
   .bento-section { padding-block: clamp(1.5rem, 3vw, 3rem); }
   .bento-section .section-title {
-    font-size: clamp(1.5rem, 3vw, 2.6rem);
-    margin-block-end: 0.75rem;
+    font-size: clamp(1.5rem, 1.125rem + 1vw, 2.625rem);
+    margin-block-end: var(--space-2);
   }
   .bento-viewport {
     overscroll-behavior-x: contain;
@@ -94,12 +93,12 @@
     background: transparent;
   }
   .bento-card h3 {
-    font-size: clamp(1.05rem, 1.7vw, 1.5rem);
+    font-size: var(--fs-title);
     font-weight: 700;
-    line-height: 1.1;
+    line-height: var(--lh-title);
     text-wrap: balance;
   }
-  .bento-card p { font-size: 0.875rem; }
+  .bento-card p { font-size: var(--fs-small); line-height: var(--lh-small); }
   .bento-grid > :nth-child(1) { grid-area: one; }
   .bento-grid > :nth-child(2) { grid-area: two; }
   .bento-grid > :nth-child(3) { grid-area: three; }
@@ -111,7 +110,7 @@
   .product { --stack-space: 0.75rem; min-inline-size: 0; container-type: inline-size; }
   .product-visual { display: grid; place-items: center; border: var(--border-default); }
   .product-visual .dice-glyph { inline-size: 65%; max-inline-size: 15rem; }
-  .product-copy h3 { font-size: 1.3rem; }
+  .product-copy h3 { font-size: var(--fs-title); line-height: var(--lh-title); font-weight: 700; }
   .product-actions { --cluster-gap: 0.6rem; }
   .product-actions :is(a, button) {
     min-block-size: 2.75rem;
@@ -119,14 +118,15 @@
     background: var(--color-surface);
     padding: 0.75rem 1rem;
     color: var(--color-text);
-    font-size: 0.82rem;
+    font-size: var(--fs-small);
+    line-height: var(--lh-small);
   }
   .product-actions :is(a, button):hover { background: var(--color-text); color: var(--color-background); }
 
   .footer { border-block-start: var(--border-default); padding-block: var(--space-4); }
   .footer-inner { --switcher-threshold: 34rem; }
-  .footer h2 { font-size: 1rem; }
-  .footer p { color: var(--color-text); }
+  .footer h2 { font-size: var(--fs-body); line-height: var(--lh-title); font-weight: 700; }
+  .footer p { color: var(--color-text); line-height: var(--lh-body); }
 
   @container (width < 18rem) {
     .product-actions { flex-direction: column; align-items: stretch; }
@@ -141,7 +141,8 @@
     color: inherit;
     background: transparent;
     text-align: start;
-    font-size: 0.85rem;
+    font-size: var(--fs-small);
+    line-height: var(--lh-small);
   }
   .legal-dialog {
     inline-size: min(32rem, calc(100vw - 2rem));
@@ -157,7 +158,7 @@
   .legal-dialog:not([open]) { display: none; }
   .legal-dialog[open] { display: flex; }
   .legal-dialog::backdrop { background: rgb(0 0 0 / 0.6); }
-  .legal-dialog h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.1; }
+  .legal-dialog h2 { font-size: clamp(1.5rem, 1.15rem + 1.5vw, 2.25rem); line-height: var(--lh-heading); letter-spacing: var(--tracking-heading); }
   .dialog-actions { --cluster-gap: 0.75rem; }
   .dialog-actions button, .legal-dialog form button {
     border: var(--border-default);
@@ -185,14 +186,14 @@
     .configure-preview { min-block-size: clamp(21rem, 65vw, 34rem); }
   }
   @media (width <= 36rem) {
+    /* Inherited Cluster wraps header actions when enlarged Cyrillic needs room. */
     .topbar-inner {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 0.5rem;
+      --cluster-gap: 0.5rem;
       min-block-size: 4.25rem;
       padding-block: 0.5rem;
     }
     .logo { font-size: 1.1rem; }
+    .header-actions { margin-inline-start: auto; }
     .hero.split {
       min-block-size: 0;
       grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
@@ -202,8 +203,7 @@
     }
     .hero-object { min-block-size: clamp(13rem, 67vw, 18rem); }
     .hero-copy { --stack-space: 0.7rem; min-inline-size: 0; }
-    .hero h1 { font-size: clamp(1.7rem, 7vw, 2.8rem); letter-spacing: -0.055em; }
-    .hero-copy p { font-size: 0.875rem; }
+    .hero h1 { font-size: clamp(1.45rem, 7.5vw, 2.5rem); }
     .hero-copy .button { min-block-size: 2.75rem; padding: 0.5rem 0.75rem; gap: 0.5rem; }
     .cart-entry { grid-template-columns: 1fr; }
     .cart-entry-actions { align-items: start; }

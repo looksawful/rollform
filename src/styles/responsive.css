@@ -2,13 +2,12 @@
   @media (width <= 56rem) {
     .hero { padding-block: 1rem 4rem; }
     .hero-object { min-block-size: clamp(21rem, 48vw, 26rem); }
-    .hero h1 { font-size: clamp(3.2rem, 9vw, 5.8rem); }
+    .hero h1 { font-size: clamp(2.65rem, 2rem + 2.2vw, 4.25rem); }
   }
   @media (width <= 36rem) {
     .topbar-inner { min-block-size: 4.25rem; }
     .hero-object { min-block-size: 22rem; }
     .hero-copy { --stack-space: 1.2rem; }
-    .hero h1 { font-size: clamp(3.2rem, 12vw, 4.7rem); }
   }
   @media (prefers-reduced-motion: reduce) { .button { transition: none; } }
 }

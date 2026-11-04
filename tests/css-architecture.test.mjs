@@ -35,7 +35,7 @@ test('all documented layout primitives have real CSS algorithms', () => {
     assert.ok(css.includes('.' + name + ' '), name);
   }
   assert.match(css, /\.prose\s*>\s*\*\s*\+\s*\*/);
-  assert.match(css, /margin-block-start:\s*var\(--prose-gap,\s*1em\)/);
+  assert.match(css, /margin-block-start:\s*var\(--prose-gap,\s*1\.25rem\)/);
   assert.match(css, /grid-template-areas:\s*["']pile["']/);
   assert.match(css, /\.pile\s*>\s*\*\s*\{\s*grid-area:\s*pile;/);
   assert.match(css, /flex-wrap:\s*wrap/);

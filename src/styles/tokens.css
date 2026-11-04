@@ -13,20 +13,31 @@
     --color-preview-ink: var(--color-black);
     --color-dice-label: var(--color-white);
 
+    /* Inter contains Cyrillic glyphs. Normal case is the UI default. */
     --ff-body: Inter, Arial, Helvetica, sans-serif;
     --fs-body: 1rem;
-    --fs-display: clamp(3.65rem, 6.4vw, 7.75rem);
-    --fs-heading: clamp(2.75rem, 5vw, 5rem);
+    --fs-small: 0.875rem;
+    --fs-title: clamp(1.125rem, 1.05rem + 0.3vw, 1.375rem);
+    --fs-heading: clamp(2rem, 1.45rem + 2vw, 3.625rem);
+    --fs-display: clamp(2.75rem, 1.75rem + 4vw, 5.75rem);
+    --lh-body: 1.55;
+    --lh-small: 1.45;
+    --lh-title: 1.25;
+    --lh-heading: 1.1;
+    --lh-display: 1.02;
+    --tracking-heading: -0.02em;
+    --tracking-display: -0.03em;
 
     --gutter: clamp(1.25rem, 3.5vw, 4.5rem);
     --content-max: 94rem;
     --header-height: 5.25rem;
-    --measure: 60ch;
+    --measure: 62ch;
 
+    --space-1: 0.5rem;
     --space-2: 1rem;
     --space-3: 1.5rem;
-    --space-4: clamp(2rem, 4vw, 4.5rem);
-    --space-5: clamp(4.5rem, 9vw, 10rem);
+    --space-4: clamp(1.5rem, 3vw, 3.5rem);
+    --space-5: clamp(3rem, 5.5vw, 6rem);
   }
   /* Resolve related values on the themed element, not on :root.
      Inherited custom properties are computed before a nested theme overrides them. */

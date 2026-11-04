@@ -13,14 +13,16 @@
     align-items: center;
     gap: 0.35em;
     font-size: 1.25rem;
-    font-weight: 900;
-    letter-spacing: -0.07em;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: var(--lh-title);
   }
 
   .nav {
     --cluster-gap: clamp(1rem, 2vw, 2.75rem);
-    font-size: 0.86rem;
-    font-weight: 500;
+    font-size: var(--fs-small);
+    line-height: var(--lh-small);
+    font-weight: 600;
   }
 
   .nav a { text-underline-offset: 0.3em; }
@@ -34,7 +36,8 @@
     min-block-size: 3.25rem;
     border: var(--border-default);
     padding: 0.75rem 1rem;
-    font-size: 0.83rem;
+    font-size: var(--fs-small);
+    line-height: var(--lh-small);
     font-weight: 700;
     transition: color 0.16s, background-color 0.16s;
   }
@@ -52,7 +55,7 @@
   }
   .button-fill { inline-size: 100%; }
 
-  .field { --stack-space: 0.55rem; }
+  .field { --stack-space: var(--space-1); }
 
   .pill-list { --cluster-gap: 0.4rem; }
 
@@ -61,7 +64,8 @@
     border: var(--border-default);
     padding: 0.7rem 0.9rem;
     background: var(--color-surface);
-    font-size: 0.8rem;
+    font-size: var(--fs-small);
+    line-height: var(--lh-small);
   }
 
   .pill-list button:is(.is-active, :hover) {

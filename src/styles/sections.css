@@ -26,12 +26,12 @@
   .hero-copy { --stack-space: var(--space-3); align-items: flex-start; }
   .hero h1 {
     font-size: var(--fs-display);
-    font-weight: 900;
-    line-height: 0.96;
-    letter-spacing: -0.06em;
+    font-weight: 800;
+    line-height: var(--lh-display);
+    letter-spacing: var(--tracking-display);
     text-wrap: balance;
     overflow-wrap: anywhere;
   }
-  .hero-copy p { max-inline-size: 31rem; font-size: clamp(1rem, 1.2vw, 1.2rem); line-height: 1.5; }
+  .hero-copy p { max-inline-size: 31rem; font-size: var(--fs-body); line-height: var(--lh-body); }
   .section { padding-block: var(--space-5); border-block-start: var(--border-default); }
 }

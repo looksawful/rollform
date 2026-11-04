@@ -16,13 +16,19 @@
     color: var(--color-black);
     font-family: var(--ff-body);
     font-size: var(--fs-body);
-    line-height: 1.4;
+    line-height: var(--lh-body);
+    letter-spacing: normal;
+    word-spacing: normal;
+    font-kerning: normal;
+    font-optical-sizing: auto;
   }
 
   :where(button, input, textarea) { font: inherit; }
   :where(button) { cursor: pointer; }
   :where(a) { color: inherit; text-decoration: none; }
   :where(h1, h2, h3, p) { margin: 0; }
+  :where(h1, h2, h3) { overflow-wrap: anywhere; text-wrap: balance; }
+  :where(p, ul, ol) { overflow-wrap: break-word; hyphens: auto; }
 
   :focus-visible {
     outline: 2px solid var(--color-focus);

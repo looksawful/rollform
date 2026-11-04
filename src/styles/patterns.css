@@ -10,8 +10,10 @@
     gap: var(--stack-space, var(--space-2));
   }
 
-  .prose > * + * { margin-block-start: var(--prose-gap, 1em); }
-  .prose > :is(p, ul, ol) { max-inline-size: var(--measure, 60ch); }
+  /* Ordinary editorial flow; Stack handles component UI gaps instead. */
+  .prose > * + * { margin-block-start: var(--prose-gap, 1.25rem); }
+  .prose > :is(h1, h2, h3) + * { margin-block-start: var(--prose-heading-gap, 0.75rem); }
+  .prose > :is(p, ul, ol) { max-inline-size: var(--measure, 62ch); }
 
   .pile { display: grid; grid-template-areas: "pile"; }
   .pile > * { grid-area: pile; }
