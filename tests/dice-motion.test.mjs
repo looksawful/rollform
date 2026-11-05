@@ -16,3 +16,13 @@ test('uses GSAP timeline, Three.js quaternion and motion CSS tokens', () => {
 test('no bespoke frame loop, physics engine or pointer controls', () => {
   assert.doesNotMatch(viewer, /requestAnimationFrame|setTimeout|pointerdown|pointermove|onKeyDown/);
 });
+
+test('roll is deliberately slow and includes a visible pause on mobile', () => {
+  const rollMs = Number(css.match(/--dice-roll-duration:\s*(\d+)ms/)?.[1]);
+  const holdMs = Number(css.match(/--dice-hold-duration:\s*(\d+)ms/)?.[1]);
+  assert.ok(rollMs >= 4500, 'roll should last at least 4.5 seconds');
+  assert.ok(holdMs >= 2000, 'pause should last at least 2 seconds');
+  assert.match(viewer, /Math\.PI \* 2 \* phase\.roll/);
+  assert.doesNotMatch(viewer, /Math\.floor\(Math\.random\(\) \* 2\)/);
+  assert.match(viewer, /ease: 'sine\.inOut', onStart: \(\) => \{ host\.dataset\.motion = 'rolling'/);
+});

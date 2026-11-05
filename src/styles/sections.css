@@ -18,9 +18,9 @@
     inline-size: 100%;
     block-size: 100%;
     --dice-anticipate-duration: 180ms;
-    --dice-roll-duration: 2100ms;
+    --dice-roll-duration: 4500ms;
     --dice-settle-duration: 380ms;
-    --dice-hold-duration: 1100ms;
+    --dice-hold-duration: 2200ms;
   }
   .canvas-fallback {
     position: absolute;

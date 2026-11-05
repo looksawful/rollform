@@ -159,19 +159,17 @@ export default function DiceViewer({ config }: { config: DiceConfig }) {
           const phase = { windup: 0, roll: 0, wobble: 0 };
           const start = new THREE.Quaternion(), target = new THREE.Quaternion();
           const axis = new THREE.Vector3(0.7, 1, 0.3).normalize();
-          let turns = 1;
           const choose = () => {
             start.copy(dice.quaternion);
             lastFace = (lastFace + 1 + Math.floor(Math.random() * Math.max(1, normals.length - 1))) % normals.length;
             target.setFromUnitVectors(normals[lastFace], front);
             target.premultiply(spin.setFromAxisAngle(front, (Math.random() - 0.5) * 0.6));
             axis.set(0.3 + Math.random(), 0.4 + Math.random(), 0.2 + Math.random()).normalize();
-            turns = 1 + Math.floor(Math.random() * 2);
           };
           choose();
           timeline = gsap.timeline({
             repeat: -1,
-            repeatDelay: duration('--dice-hold-duration', 1.1),
+            repeatDelay: duration('--dice-hold-duration', 2.2),
             onRepeat: choose,
           });
           timeline.fromTo(phase, { windup: 0 }, { windup: 1,
@@ -183,11 +181,11 @@ export default function DiceViewer({ config }: { config: DiceConfig }) {
             },
           });
           timeline.fromTo(phase, { roll: 0 }, { roll: 1,
-            duration: duration('--dice-roll-duration', 2.1),
-            ease: 'power2.inOut', onStart: () => { host.dataset.motion = 'rolling'; },
+            duration: duration('--dice-roll-duration', 4.5),
+            ease: 'sine.inOut', onStart: () => { host.dataset.motion = 'rolling'; },
             onUpdate: () => {
               dice.quaternion.copy(start).slerp(target, phase.roll);
-              dice.quaternion.premultiply(spin.setFromAxisAngle(axis, Math.PI * 2 * turns * phase.roll));
+              dice.quaternion.premultiply(spin.setFromAxisAngle(axis, Math.PI * 2 * phase.roll));
               dice.position.y = 0.06 * Math.sin(Math.PI * phase.roll);
               render();
             },
