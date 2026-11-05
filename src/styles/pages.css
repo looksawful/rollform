@@ -106,7 +106,27 @@
   .bento-grid > :nth-child(5) { grid-area: five; }
 
   .product-grid { --grid-min: 18rem; }
-  .product-scroller { --reel-min: 17rem; --reel-width: 31%; padding-block-end: 0.8rem; }
+  /* Kevin Powell: native scroll snap and a view timeline centered on each card. */
+  .product-scroller {
+    --reel-card-size: clamp(17rem, 30vw, 24rem);
+    grid-auto-columns: var(--reel-card-size);
+    padding-inline: max(0px, calc((100% - var(--reel-card-size)) / 2));
+    padding-block: 0.25rem 0.8rem;
+    scroll-snap-type: x mandatory;
+  }
+  .product-scroller > .product { scroll-snap-align: center; }
+  @keyframes reel-center-focus {
+    0%, 100% { opacity: 0.75; scale: 0.92; }
+    35%, 65% { opacity: 1; scale: 1; }
+  }
+  @supports ((animation-timeline: view(inline)) and (animation-range: entry)) {
+    @media (prefers-reduced-motion: no-preference) {
+      .product-scroller > .product {
+        animation: reel-center-focus auto linear both;
+        animation-timeline: view(inline);
+      }
+    }
+  }
   .product { --stack-space: 0.75rem; min-inline-size: 0; container-type: inline-size; }
   .product-media { position: relative; }
   .product-visual { display: grid; place-items: center; border: var(--border-default); border-radius: var(--radius-md); }
