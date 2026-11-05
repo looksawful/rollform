@@ -31,6 +31,7 @@
     inline-size: min(18rem, calc(100vw - 2rem));
     background: var(--color-surface);
     border: var(--border-default);
+    border-radius: var(--radius-sm);
     padding: 0.75rem;
     z-index: 30;
   }
@@ -43,7 +44,7 @@
   .page-title { font-size: var(--fs-heading); font-weight: 800; line-height: var(--lh-heading); letter-spacing: var(--tracking-heading); text-wrap: balance; }
 
   .configure-layout { --sidebar-gap: clamp(2rem, 5vw, 5rem); --sidebar-content-min: 34rem; --sidebar-width: clamp(18rem, 31vw, 26rem); }
-  .configure-preview { min-block-size: clamp(23rem, 50vw, 43rem); border: var(--border-default); background: var(--color-preview); position: relative; }
+  .configure-preview { min-block-size: clamp(23rem, 50vw, 43rem); border: var(--border-default); border-radius: var(--radius-md); background: var(--color-preview); position: relative; }
   .configure-controls { --stack-space: 2rem; align-items: stretch; }
   .configure-controls .field h2 { font-size: var(--fs-body); line-height: var(--lh-title); font-weight: 700; }
   .configure-controls .pill-list button { display: flex; align-items: center; gap: 0.5rem; }
@@ -108,13 +109,14 @@
   .product-grid { --grid-min: 18rem; }
   .product-scroller { --reel-min: 17rem; --reel-width: 31%; padding-block-end: 0.8rem; }
   .product { --stack-space: 0.75rem; min-inline-size: 0; container-type: inline-size; }
-  .product-visual { display: grid; place-items: center; border: var(--border-default); }
+  .product-visual { display: grid; place-items: center; border: var(--border-default); border-radius: var(--radius-md); }
   .product-visual .dice-glyph { inline-size: 65%; max-inline-size: 15rem; }
   .product-copy h3 { font-size: var(--fs-title); line-height: var(--lh-title); font-weight: 700; }
   .product-actions { --cluster-gap: 0.6rem; }
   .product-actions :is(a, button) {
     min-block-size: 2.75rem;
     border: var(--border-default);
+    border-radius: var(--radius-full);
     background: var(--color-surface);
     padding: 0.75rem 1rem;
     color: var(--color-text);
@@ -149,6 +151,7 @@
     margin: 0;
     padding: clamp(1.25rem, 4vw, 2.5rem);
     border: var(--border-default);
+    border-radius: var(--radius-lg);
     background: var(--color-background);
     color: var(--color-text);
     overflow: auto;
@@ -162,6 +165,7 @@
   .dialog-actions { --cluster-gap: 0.75rem; }
   .dialog-actions button, .legal-dialog form button {
     border: var(--border-default);
+    border-radius: var(--radius-full);
     padding: 0.8rem 1.2rem;
     min-block-size: 2.75rem;
     color: var(--color-text);

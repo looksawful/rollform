@@ -33,6 +33,12 @@
     --header-height: 5.25rem;
     --measure: 62ch;
 
+    /* Material 3-inspired corners, deliberately limited to four useful steps. */
+    --radius-sm: 0.75rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.75rem;
+    --radius-full: 999px;
+
     --space-1: 0.5rem;
     --space-2: 1rem;
     --space-3: 1.5rem;
