@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { themeHref } from '@/lib/themeRoutes';
-import DiceGlyph from './DiceGlyph';
 import { useCart } from './CartState';
 import type { Preset } from '@/lib/catalog';
 
@@ -18,7 +17,11 @@ export default function ProductCard({ product }: { product: Preset }) {
   return <article className="product stack">
     <Link className="product-visual frame" href={url}
       aria-label={'Настроить ' + product.config.shape.toUpperCase()}>
-      <DiceGlyph shape={product.config.shape} />
+      <img
+        src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products/${product.id}.webp`}
+        alt={'Фото кубика ' + product.config.shape.toUpperCase()}
+        width={360} height={360} loading="lazy" decoding="async"
+      />
     </Link>
     <div className="product-copy stack"><h3>Заголовок</h3><p>Текст</p></div>
     <div className="product-actions cluster">
