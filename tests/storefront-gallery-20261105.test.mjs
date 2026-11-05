@@ -70,3 +70,21 @@ test('all nine catalog images are real 900px WebP renders, not 360px mismatched 
   assert.match(source('src/components/ProductGallery.tsx'), /width: 900,/);
   assert.match(source('src/components/ProductCard.tsx'), /width=\{900\} height=\{900\}/);
 });
+
+test('homepage reel pins at card center while vertical scroll scrubs horizontal position', () => {
+  const gallery = source('src/components/ProductGallery.tsx');
+  const css = source('src/styles/pages.css');
+  assert.match(gallery, /import\('gsap\/ScrollTrigger'\)/);
+  assert.match(gallery, /gsap\.registerPlugin\(ScrollTrigger\)/);
+  assert.match(gallery, /mode !== 'reel'/);
+  assert.match(gallery, /scroller\?\.closest\('#catalog'\)/);
+  assert.match(gallery, /scrollLeft:\s*\(\) => distance\(\)/);
+  assert.match(gallery, /start:\s*'center center'/);
+  assert.match(gallery, /pin:\s*section/);
+  assert.match(gallery, /end:\s*\(\) => ['"]\+=['"] \+ distance\(\)/);
+  assert.match(gallery, /scrub:\s*true/);
+  assert.match(gallery, /prefers-reduced-motion: reduce/);
+  assert.match(gallery, /animation\?\.scrollTrigger\?\.kill\(\)/);
+  assert.match(css, /\.catalog-pinned \.product-scroller\s*\{\s*scroll-snap-type:\s*none/);
+  assert.match(gallery, /<Lightbox/);
+});

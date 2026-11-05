@@ -114,6 +114,7 @@
     padding-block: 0.25rem 0.8rem;
     scroll-snap-type: x mandatory;
   }
+  .catalog-pinned .product-scroller { scroll-snap-type: none; }
   .product-scroller > .product { scroll-snap-align: center; }
   @keyframes reel-center-focus {
     0%, 100% { opacity: 0.75; scale: 0.92; }
