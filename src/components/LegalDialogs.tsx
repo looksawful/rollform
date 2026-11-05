@@ -27,7 +27,7 @@ export default function LegalDialogs() {
       <button type="button" onClick={() => agreementDialog.current?.showModal()}>Пользовательское соглашение</button>
     </div>
 
-    <dialog ref={cookieDialog} className="legal-dialog imposter stack" aria-labelledby="cookie-dialog-title">
+    <dialog ref={cookieDialog} className="legal-dialog stack" aria-labelledby="cookie-dialog-title">
       <h2 id="cookie-dialog-title">Файлы Cookie</h2>
       <p>Текст</p>
       <div className="dialog-actions cluster">
@@ -36,7 +36,7 @@ export default function LegalDialogs() {
       </div>
     </dialog>
 
-    <dialog ref={agreementDialog} className="legal-dialog imposter stack" aria-labelledby="agreement-dialog-title">
+    <dialog ref={agreementDialog} className="legal-dialog stack" aria-labelledby="agreement-dialog-title">
       <h2 id="agreement-dialog-title">Пользовательское соглашение</h2>
       <p>Текст</p>
       <form method="dialog">

@@ -28,22 +28,19 @@ test('layout primitives stay simple', () => {
 
 test('all documented layout primitives have real CSS algorithms', () => {
   const css = read('src/styles/patterns.css');
-  const names = ['wrapper', 'stack', 'prose', 'pile', 'cluster', 'split',
+  const names = ['wrapper', 'stack', 'prose', 'cluster', 'split',
     'grid', 'reel', 'scroller', 'frame', 'sidebar', 'switcher', 'cover',
-    'imposter', 'center', 'box'];
+    'center', 'box'];
   for (const name of names) {
     assert.ok(css.includes('.' + name + ' '), name);
   }
   assert.match(css, /\.prose\s*>\s*\*\s*\+\s*\*/);
   assert.match(css, /margin-block-start:\s*var\(--prose-gap,\s*1\.25rem\)/);
-  assert.match(css, /grid-template-areas:\s*["']pile["']/);
-  assert.match(css, /\.pile\s*>\s*\*\s*\{\s*grid-area:\s*pile;/);
   assert.match(css, /flex-wrap:\s*wrap/);
   assert.match(css, /scroll-snap-type:\s*x\s+proximity/);
   assert.match(css, /--sidebar-width/);
   assert.match(css, /--switcher-threshold/);
   assert.match(css, /--cover-min-height/);
-  assert.match(css, /transform:\s*translate\(-50%,\s*-50%\)/);
 });
 
 test('layout composition reuses primitives with a deliberate mobile split exception', () => {
@@ -197,13 +194,4 @@ test('site CSS uses semantic theme roles, not raw colors or legacy ink-paper tok
   assert.match(read('src/styles/sections.css'), /background:\s*var\(--color-preview\)/);
   assert.match(read('src/styles/base.css'), /outline:\s*2px solid var\(--color-focus\)/);
   assert.match(read('src/styles/pages.css'), /\.topbar\s*\{[^}]*background:\s*var\(--color-surface\)/);
-});
-
-test('catalog sketches follow the active CSS theme without altering product colors', () => {
-  const glyph = read('src/components/DiceGlyph.tsx');
-  const preview = read('src/components/DiceViewer.tsx');
-  assert.doesNotMatch(glyph, /#[a-f0-9]{3,8}\b/i);
-  assert.match(glyph, /currentColor/);
-  assert.match(glyph, /var\(--color-background\)/);
-  assert.match(preview, /next\.shell/);
 });

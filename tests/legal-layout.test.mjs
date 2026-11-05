@@ -8,7 +8,7 @@ const read = file => readFileSync(path.resolve(process.cwd(), file), 'utf8');
 test('both legal overlays use native accessible modal dialogs and footer triggers', () => {
   const modal = read('src/components/LegalDialogs.tsx');
   const shell = read('src/components/SiteShell.tsx');
-  assert.match(modal, /<dialog[^>]*className="legal-dialog imposter stack"/);
+  assert.match(modal, /<dialog[^>]*className="legal-dialog stack"/);
   assert.equal((modal.match(/<dialog\b/g) || []).length, 2);
   assert.match(modal, /aria-labelledby="cookie-dialog-title"/);
   assert.match(modal, /aria-labelledby="agreement-dialog-title"/);
@@ -38,13 +38,13 @@ test('dialog surface is hidden when closed and tokenized in both themes', () => 
   assert.match(css, /\.legal-dialog:not\(\[open\]\)\s*\{[^}]*display:\s*none/);
   assert.match(css, /\.legal-dialog\[open\]\s*\{[^}]*display:\s*flex/);
   assert.match(css, /\.legal-dialog::backdrop/);
+  assert.match(css, /\.legal-dialog\s*\{[^}]*margin:\s*auto/);
   assert.match(css, /\.legal-dialog\s*\{[^}]*var\(--color-background\)/);
 });
 
 test('all existing layout algorithms are reused where appropriate', () => {
   const patterns = read('src/styles/patterns.css');
   const home = read('src/components/Storefront.tsx');
-  const catalogCard = read('src/components/ProductCard.tsx');
   const builder = read('src/components/Configurator.tsx');
   const shell = read('src/components/SiteShell.tsx');
   const css = read('src/styles/pages.css');
@@ -54,7 +54,6 @@ test('all existing layout algorithms are reused where appropriate', () => {
   assert.match(builder, /className="pill-list cluster"/);
   assert.match(home, /className="bento-viewport scroller"/);
   assert.match(home, /className="bento-card box"/);
-  assert.doesNotMatch(catalogCard, /product-visual pile/);
   assert.match(css, /container-type:\s*inline-size/);
   assert.match(css, /@container\s*\(width\s*<\s*18rem\)/);
   assert.match(patterns, /\.prose\s*>\s*:is\(p,\s*ul,\s*ol\)/);

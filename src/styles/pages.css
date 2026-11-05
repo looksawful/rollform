@@ -108,7 +108,6 @@
   .product-scroller { --reel-min: 17rem; --reel-width: 31%; padding-block-end: 0.8rem; }
   .product { --stack-space: 0.75rem; min-inline-size: 0; container-type: inline-size; }
   .product-visual { display: grid; place-items: center; border: var(--border-default); border-radius: var(--radius-md); }
-  .product-visual .dice-glyph { inline-size: 65%; max-inline-size: 15rem; }
   .product-copy h3 { font-size: var(--fs-title); line-height: var(--lh-title); font-weight: 700; }
   .product-actions { --cluster-gap: 0.6rem; }
   .product-actions :is(a, button) {
@@ -146,7 +145,7 @@
   }
   .legal-dialog {
     inline-size: min(32rem, calc(100vw - 2rem));
-    margin: 0;
+    margin: auto;
     padding: clamp(1.25rem, 4vw, 2.5rem);
     border: var(--border-default);
     border-radius: var(--radius-lg);
