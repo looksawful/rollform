@@ -48,7 +48,7 @@ test('builder, cart and production pages honor accepted copy decisions',()=>{
   assert.match(data,/grotesk: 'Шрифт 1'/);
   assert.ok(existsSync('src/app/production/page.tsx'));
   assert.ok(existsSync('src/app/dark/production/page.tsx'));
-  assert.match(read('src/components/ProductionInfo.tsx'),/Сроки изготовления/);
+  assert.match(read('src/components/ProductionInfo.tsx'),/Изготовление и доставка/);
 });
 test('contact channels and a truthful demo contact form appear on both screens',()=>{
  const ui=read('src/components/ContactContent.tsx');
@@ -76,7 +76,7 @@ test('legal prototype text is not represented as accepted terms or real cookies'
 test('in-stock delivery copy matches the agreed week timeframe, not an unspecified period', () => {
   const catalog = read('src/app/catalog/page.tsx');
   const production = read('src/components/ProductionInfo.tsx');
-  assert.match(catalog, /в течение недели/);
+  assert.doesNotMatch(catalog, /в течение недели/); // conditions live on the production page
   assert.match(production, /в течение недели/);
 });
 

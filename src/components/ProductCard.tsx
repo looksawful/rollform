@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { ZoomIn } from 'lucide-react';
 import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
 import { fontNames, shellColors } from '@/lib/catalog';
 import type { Preset } from '@/lib/catalog';
 
-export default function ProductCard({ product }: { product: Preset }) {
+export default function ProductCard({ product, onPreview }: { product: Preset; onPreview: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
   const { add } = useCart();
@@ -16,14 +17,20 @@ export default function ProductCard({ product }: { product: Preset }) {
   };
   const url = themeHref(pathname, '/configure?preset=' + encodeURIComponent(product.id));
   return <article className="product stack">
-    <Link className="product-visual frame" href={url}
-      aria-label={'Настроить ' + product.config.shape.toUpperCase()}>
-      <img
-        src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products/${product.id}.webp`}
-        alt=""
-        width={360} height={360} loading="lazy" decoding="async"
-      />
-    </Link>
+    <div className="product-media">
+      <Link className="product-visual frame" href={url}
+        aria-label={'Настроить ' + product.config.shape.toUpperCase()}>
+        <img
+          src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products/${product.id}.webp`}
+          alt=""
+          width={360} height={360} loading="lazy" decoding="async"
+        />
+      </Link>
+      <button className="product-zoom" type="button" onClick={onPreview}
+        aria-label={'Увеличить изображение: ' + product.title}>
+        <ZoomIn className="icon" aria-hidden="true" />
+      </button>
+    </div>
     <div className="product-copy stack">
       <h3>{product.title}</h3>
       <div className="product-badges cluster" aria-label="Параметры варианта">

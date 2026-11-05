@@ -36,5 +36,6 @@ export default function CartView() {
               onClick={() => remove(item.id)}>Удалить</button>
           </div>
         </article>)}</div>}
+    {items.length > 0 && <p className="cart-delivery"><Link href={themeHref(pathname, '/production')}>Изготовление и доставка</Link></p>}
   </section>;
 }

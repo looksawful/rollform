@@ -51,11 +51,11 @@ test('layout composition reuses primitives with a deliberate mobile split except
   const contacts = read('src/app/contacts/page.tsx');
   const shell = read('src/components/SiteShell.tsx');
   const pages = read('src/styles/pages.css');
-  assert.match(home, /className="product-scroller reel"/);
+  assert.match(read('src/components/ProductGallery.tsx'), /product-scroller reel/);
   assert.match(home, /id="about"/);
   assert.match(home, /className="wrapper section prose"/);
   assert.match(card, /className="product-visual frame"/);
-  assert.match(catalog, /className="product-grid grid"/);
+  assert.match(read('src/components/ProductGallery.tsx'), /product-grid grid/);
   assert.match(cart, /className="empty-state box cover stack"/);
   assert.match(contacts, /page-section stack/);
   assert.match(contacts, /<ContactContent/);
@@ -96,8 +96,8 @@ test('storefront restores catalog, product cards, about, and contacts', () => {
   const card = read('src/components/ProductCard.tsx');
   assert.match(home, /id="about"/);
   assert.match(home, /id="contacts"/);
-  assert.match(home, /ProductCard/);
-  assert.match(catalog, /ProductCard/);
+  assert.match(home, /ProductGallery/);
+  assert.match(catalog, /ProductGallery/);
   assert.match(contact, /ContactContent/);
   assert.match(chrome, /Юридическая информация/);
   assert.match(chrome, /Контакты/);
@@ -111,9 +111,9 @@ test('copy stays generic while contact form is clearly marked as non-sending', (
   const content = home + cart + builder + read('src/components/SiteShell.tsx') +
     read('src/components/ProductCard.tsx') + read('src/app/catalog/page.tsx') +
     read('src/app/contacts/page.tsx');
-  assert.match(home, />Заголовок<\/h1>/);
-  assert.match(home, />Текст<\/p>/);
-  assert.match(home, />Кнопка<\/Link>/);
+  assert.match(home, />Игральные кости под ваш стиль<\/h1>/);
+  assert.match(home, /Выберите форму, цвет и шрифт/);
+  assert.match(home, />Собрать кубик<\/Link>/);
   assert.match(builder, /<span>В корзину<\/span><ShoppingBag/);
   assert.doesNotMatch(cart, /makeOrderText|clipboard|textarea|order-draft/);
   assert.doesNotMatch(content, /демо|прототип|черновик|не отправляется|предзаказ/i);
@@ -142,8 +142,8 @@ test('mobile header has hamburger navigation and always-visible cart shortcut', 
 test('homepage offers keyboard-accessible horizontal catalog and mobile split', () => {
   const home = read('src/components/Storefront.tsx');
   const css = read('src/styles/pages.css') + read('src/styles/responsive.css') + read('src/styles/patterns.css');
-  assert.match(home, /className="product-scroller reel"/);
-  assert.match(home, /tabIndex=\{0\}/);
+  assert.match(read('src/components/ProductGallery.tsx'), /product-scroller reel/);
+  assert.match(read('src/components/ProductGallery.tsx'), /tabIndex: 0/);
   assert.match(css, /grid-auto-flow:\s*column/);
   assert.match(css, /overflow-x:\s*auto/);
   assert.match(css, /scroll-snap-type:\s*x\s+proximity/);

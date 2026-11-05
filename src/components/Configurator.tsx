@@ -32,7 +32,7 @@ export default function Configurator() {
         <div className="field stack"><h2>Шрифт</h2><div className="pill-list cluster">{fontStyles.map(font => <button key={font} type="button" aria-pressed={config.font === font} className={config.font === font ? 'is-active' : ''} onClick={() => change('font', font)}>{fontNames[font]}</button>)}</div></div>
         <div className="production-note stack">
           <p>Кубики по вашим параметрам изготавливаются на заказ. Срок уточняется.</p>
-          <Link href={themeHref(pathname, '/production')}>Подробнее о сроках</Link>
+          <Link href={themeHref(pathname, '/production')}>Изготовление и доставка</Link>
         </div>
         <button type="button" className="button button-black button-fill" onClick={addCustom}><span>В корзину</span><ShoppingBag className="icon" aria-hidden="true" /></button>
       </div>

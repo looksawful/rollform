@@ -49,6 +49,7 @@
   .swatch { inline-size: 0.95rem; block-size: 0.95rem; border: 1px solid var(--color-border); border-radius: 50%; }
   .pill-list button.is-active .swatch { border-color: var(--color-on-action); }
 
+  .cart-delivery a { text-decoration: underline; text-underline-offset: 0.3em; }
   .cart-lines { --stack-space: 0; }
   .cart-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); border-block-start: var(--border-default); padding-block: var(--space-3); align-items: center; }
   .cart-entry:last-child { border-block-end: var(--border-default); }
@@ -107,7 +108,22 @@
   .product-grid { --grid-min: 18rem; }
   .product-scroller { --reel-min: 17rem; --reel-width: 31%; padding-block-end: 0.8rem; }
   .product { --stack-space: 0.75rem; min-inline-size: 0; container-type: inline-size; }
+  .product-media { position: relative; }
   .product-visual { display: grid; place-items: center; border: var(--border-default); border-radius: var(--radius-md); }
+  .product-zoom {
+    position: absolute;
+    inset-inline-end: 0.75rem;
+    inset-block-end: 0.75rem;
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: var(--border-default);
+    border-radius: var(--radius-full);
+    color: var(--color-text);
+    background: var(--color-surface);
+  }
+  .product-zoom:hover { background: var(--color-text); color: var(--color-background); }
   .product-copy h3 { font-size: var(--fs-title); line-height: var(--lh-title); font-weight: 700; }
   .product-actions { --cluster-gap: 0.6rem; }
   .product-actions :is(a, button) {
@@ -172,6 +188,14 @@
   .production-note a, .footer-secondary-link { text-underline-offset: 0.3em; }
   .production-info { max-inline-size: calc(var(--measure) + 2 * var(--gutter)); }
   .production-info h2 { font-size: var(--fs-title); line-height: var(--lh-title); }
+  .production-options { --stack-space: var(--space-3); }
+  .production-options > section { --stack-space: var(--space-2); padding-block-start: var(--space-3); border-block-start: var(--border-default); }
+  .faq-list { max-inline-size: var(--measure); }
+  .faq-list details { border-block-end: var(--border-default); }
+  .faq-list details:first-child { border-block-start: var(--border-default); }
+  .faq-list summary { cursor: pointer; padding-block: 1.15rem; font-weight: 600; }
+  .faq-list details p { max-inline-size: 55ch; padding-block-end: 1.15rem; }
+  .section-intro { max-inline-size: var(--measure); }
 
   .footer { border-block-start: var(--border-default); padding-block: var(--space-4); }
   .footer-inner { --switcher-threshold: 34rem; }
