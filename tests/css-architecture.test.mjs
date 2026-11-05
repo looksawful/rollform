@@ -222,3 +222,18 @@ test('centered Hero composition preserves approved copy and passive 3D motion', 
   assert.match(css, /@media \(width <= 36rem\)/);
   assert.doesNotMatch(css, /#[a-f0-9]{3,8}\b/i);
 });
+
+test('Hero copy stays at the top, action at the bottom and mobile action fills width', () => {
+  const css = read('src/styles/sections.css');
+  const hero = css.match(/\.hero\.hero-centered\s*\{([^}]*)\}/)?.[1] || '';
+  const copy = css.match(/\.hero-centered \.hero-copy\s*\{([^}]*)\}/)?.[1] || '';
+  const title = css.match(/\.hero-centered h1\s*\{([^}]*)\}/)?.[1] || '';
+  const action = css.match(/\.hero-centered \.hero-copy \.button\s*\{([^}]*)\}/)?.[1] || '';
+  const dice = css.match(/\.hero-centered \.hero-object\s*\{([^}]*)\}/)?.[1] || '';
+  assert.match(hero, /place-items:\s*stretch/);
+  assert.match(copy, /justify-content:\s*flex-start/);
+  assert.match(title, /font-weight:\s*900/);
+  assert.match(action, /margin-block-start:\s*auto/);
+  assert.match(dice, /opacity:\s*1/);
+  assert.match(css, /@media\s*\(width\s*<=\s*36rem\)[\s\S]*\.hero-centered \.hero-copy \.button\s*\{[^}]*inline-size:\s*100%/);
+});

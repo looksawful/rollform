@@ -50,9 +50,9 @@
     isolation: isolate;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    place-items: center;
+    place-items: stretch;
     min-block-size: clamp(38rem, calc(100svh - var(--header-height)), 62rem);
-    padding-block: clamp(5rem, 10vh, 9rem);
+    padding-block: clamp(2rem, 4vw, 4rem);
     text-align: center;
   }
   .hero-centered .hero-object {
@@ -63,18 +63,20 @@
     border: 0;
     border-radius: 0;
     background: transparent;
-    opacity: 0.32;
+    opacity: 1;
     pointer-events: none;
   }
   .hero-centered .hero-copy {
     --stack-space: clamp(0.85rem, 2vw, 1.5rem);
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     inline-size: 100%;
     max-inline-size: 76rem;
+    margin-inline: auto;
   }
   .hero-centered h1 {
-    font-size: clamp(3.5rem, 11vw, 10.5rem);
+    font-size: clamp(4rem, 12vw, 12rem);
+    font-weight: 900;
     line-height: 0.92;
     letter-spacing: var(--tracking-display);
     text-align: center;
@@ -86,7 +88,7 @@
   .hero-centered .hero-copy .button {
     justify-content: center;
     min-inline-size: 12rem;
-    margin-block-start: clamp(0.5rem, 2vw, 1.5rem);
+    margin-block-start: auto;
   }
   .site[data-theme="dark"] .hero-centered .hero-object {
     filter: invert(1);
@@ -94,13 +96,14 @@
   @media (width <= 36rem) {
     .hero.hero-centered {
       min-block-size: clamp(34rem, calc(100svh - var(--header-height)), 52rem);
-      padding-block: 3rem 5rem;
+      padding-block: 1.5rem 2rem;
     }
-    .hero-centered h1 {
-      font-size: clamp(3.1rem, 14.5vw, 5.5rem);
+    .hero.hero-centered h1 {
+      font-size: clamp(3.1rem, 15.5vw, 5.8rem);
       letter-spacing: var(--tracking-display);
     }
     .hero-centered .hero-copy p { max-inline-size: 26ch; }
-    .hero-centered .hero-copy { --stack-space: 1rem; }
+    .hero-centered .hero-copy { --stack-space: 0.8rem; }
+    .hero-centered .hero-copy .button { inline-size: 100%; min-inline-size: 0; }
   }
 }

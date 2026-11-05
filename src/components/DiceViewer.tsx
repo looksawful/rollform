@@ -32,7 +32,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(39, 1, 0.1, 100);
-        camera.position.set(0, 0, 6.6);
+        camera.position.set(0, 0, continuous ? 8 : 6.6);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.outputColorSpace = THREE.SRGBColorSpace;
