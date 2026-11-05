@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { DiceConfig } from '@/lib/catalog';
 import type { Vector3, Mesh } from 'three';
 import { buildGeometry, faceLabel, facePlacements } from '@/lib/diceGeometry';
+import { cssTimeSeconds } from '@/lib/cssTime';
 
 export default function DiceViewer({ config }: { config: DiceConfig }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -146,10 +147,8 @@ export default function DiceViewer({ config }: { config: DiceConfig }) {
           }
         };
 
-        const duration = (name: string, fallback: number) => {
-          const value = parseFloat(getComputedStyle(host).getPropertyValue(name));
-          return Number.isFinite(value) && value > 0 ? value / 1000 : fallback;
-        };
+        const duration = (name: string, fallback: number) =>
+          cssTimeSeconds(getComputedStyle(host).getPropertyValue(name), fallback);
         const render = () => {
           if (!closed && !lost && visible && !document.hidden) renderer.render(scene, camera);
         };
