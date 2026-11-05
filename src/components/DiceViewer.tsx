@@ -1,31 +1,21 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { KeyboardEvent, MutableRefObject } from 'react';
+import type { KeyboardEvent } from 'react';
 import type { DiceConfig } from '@/lib/catalog';
 import { buildGeometry, faceLabel, facePlacements } from '@/lib/diceGeometry';
 
-type Props = {
-  config: DiceConfig;
-  onSelect?: () => void;
-  scrollAngleRef?: MutableRefObject<number>;
-  autoRotate?: boolean;
-  interactive?: boolean;
-};
-
-export default function DiceViewer({
-  config, onSelect, scrollAngleRef, autoRotate = false, interactive = false,
-}: Props) {
+export default function DiceViewer({ config }: { config: DiceConfig }) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const propsRef = useRef({ config, onSelect, autoRotate });
+  const configRef = useRef(config);
   const viewerRef = useRef<{
     update: (config: DiceConfig) => void;
     rotate: (x: number, y: number, reset?: boolean) => void;
   } | null>(null);
   const [fallback, setFallback] = useState(false);
-  propsRef.current = { config, onSelect, autoRotate };
+  configRef.current = config;
 
-  useEffect(() => { viewerRef.current?.update(config); }, [config, autoRotate]);
+  useEffect(() => { viewerRef.current?.update(config); }, [config]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -121,48 +111,17 @@ export default function DiceViewer({
           renderedFont = next.font;
         };
 
-        const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
         let frame = 0;
-        let lastRender = -Infinity;
         let visible = true;
         let lost = false;
-        let dirty = true;
-        let previousScrollAngle = scrollAngleRef?.current ?? 0;
-        let lastScroll = -Infinity;
-        let lastTouch = 0;
         let pointerId: number | null = null;
-        let moved = false;
-        let startX = 0, startY = 0, lastX = 0, lastY = 0;
+        let lastX = 0, lastY = 0;
 
-        const draw = (now: number) => {
+        const draw = () => {
           frame = 0;
-          if (closed || lost || document.hidden || !visible) return;
-          const angle = scrollAngleRef?.current ?? 0;
-          const delta = angle - previousScrollAngle;
-          previousScrollAngle = angle;
-          if (!motion.matches && Math.abs(delta) > 0.00001) {
-            dice.rotation.y += delta;
-            dice.rotation.x += delta * 0.38;
-            dirty = true;
-          }
-          if (propsRef.current.autoRotate && !motion.matches && pointerId === null &&
-            performance.now() - lastTouch > 1400) {
-            dice.rotation.y += 0.0026;
-            dice.rotation.x += 0.00025;
-            dirty = true;
-          }
-          if (dirty && (!propsRef.current.autoRotate || now - lastRender >= 1000 / 60)) {
-            renderer.render(scene, camera);
-            lastRender = now;
-            dirty = false;
-          }
-          if ((!motion.matches && propsRef.current.autoRotate) ||
-            (scrollAngleRef && !motion.matches && performance.now() - lastScroll < 1200)) {
-            frame = requestAnimationFrame(draw);
-          }
+          if (!closed && !lost && !document.hidden && visible) renderer.render(scene, camera);
         };
         const wake = () => {
-          dirty = true;
           if (!frame && !closed && !lost && !document.hidden && visible) frame = requestAnimationFrame(draw);
         };
         const stop = () => { cancelAnimationFrame(frame); frame = 0; };
@@ -172,12 +131,11 @@ export default function DiceViewer({
           surface.color.set(next.shell === '#000000' ? '#191919' : next.shell);
           wake();
         };
-        update(propsRef.current.config);
+        update(configRef.current);
 
         const rotate = (x: number, y: number, reset = false) => {
           if (reset) dice.rotation.set(-0.38, 0.4, 0.12);
           else { dice.rotation.y += x; dice.rotation.x += y; }
-          lastTouch = performance.now();
           wake();
         };
         viewerRef.current = { update, rotate };
@@ -185,34 +143,28 @@ export default function DiceViewer({
         const onPointerDown = (event: PointerEvent) => {
           if (pointerId !== null || event.button !== 0) return;
           pointerId = event.pointerId;
-          moved = false;
-          startX = lastX = event.clientX;
-          startY = lastY = event.clientY;
+          lastX = event.clientX;
+          lastY = event.clientY;
           canvas.setPointerCapture(event.pointerId);
           canvas.style.cursor = 'grabbing';
         };
         const onPointerMove = (event: PointerEvent) => {
           if (pointerId !== event.pointerId) return;
           const dx = event.clientX - lastX, dy = event.clientY - lastY;
-          if (Math.hypot(event.clientX - startX, event.clientY - startY) > 6) moved = true;
           rotate(dx * 0.011, dy * 0.011);
           lastX = event.clientX;
           lastY = event.clientY;
         };
-        const endPointer = (event: PointerEvent, cancelled: boolean) => {
+        const endPointer = (event: PointerEvent) => {
           if (pointerId !== event.pointerId) return;
           pointerId = null;
-          lastTouch = performance.now();
           if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
           canvas.style.cursor = 'grab';
-          if (!cancelled && !moved) propsRef.current.onSelect?.();
         };
-        const onPointerUp = (event: PointerEvent) => endPointer(event, false);
-        const onPointerCancel = (event: PointerEvent) => endPointer(event, true);
         canvas.addEventListener('pointerdown', onPointerDown);
         canvas.addEventListener('pointermove', onPointerMove);
-        canvas.addEventListener('pointerup', onPointerUp);
-        canvas.addEventListener('pointercancel', onPointerCancel);
+        canvas.addEventListener('pointerup', endPointer);
+        canvas.addEventListener('pointercancel', endPointer);
 
         const onLost = (event: Event) => {
           event.preventDefault();
@@ -248,10 +200,7 @@ export default function DiceViewer({
         });
         visibility.observe(host);
         const onVisibility = () => { if (document.hidden) stop(); else wake(); };
-        const onScroll = () => { lastScroll = performance.now(); wake(); };
         document.addEventListener('visibilitychange', onVisibility);
-        if (scrollAngleRef) window.addEventListener('scroll', onScroll, { passive: true });
-        motion.addEventListener('change', wake);
         resize();
 
         cleanup = () => {
@@ -259,12 +208,10 @@ export default function DiceViewer({
           observer.disconnect();
           visibility.disconnect();
           document.removeEventListener('visibilitychange', onVisibility);
-          if (scrollAngleRef) window.removeEventListener('scroll', onScroll);
-          motion.removeEventListener('change', wake);
           canvas.removeEventListener('pointerdown', onPointerDown);
           canvas.removeEventListener('pointermove', onPointerMove);
-          canvas.removeEventListener('pointerup', onPointerUp);
-          canvas.removeEventListener('pointercancel', onPointerCancel);
+          canvas.removeEventListener('pointerup', endPointer);
+          canvas.removeEventListener('pointercancel', endPointer);
           canvas.removeEventListener('webglcontextlost', onLost);
           canvas.removeEventListener('webglcontextrestored', onRestored);
           if (viewerRef.current?.update === update) viewerRef.current = null;
@@ -281,10 +228,9 @@ export default function DiceViewer({
       }
     })();
     return () => { closed = true; cleanup?.(); };
-  }, [scrollAngleRef]);
+  }, []);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!interactive) return;
     const turn = 0.2;
     switch (event.key) {
       case 'ArrowLeft': viewerRef.current?.rotate(-turn, 0); break;
@@ -297,10 +243,8 @@ export default function DiceViewer({
     event.preventDefault();
   };
 
-  return <div ref={hostRef} className="dice-canvas"
-    role={interactive ? 'group' : 'img'} tabIndex={interactive ? 0 : undefined}
-    aria-label={'3D модель ' + config.shape.toUpperCase() +
-      (interactive ? '. Стрелки поворачивают, Home сбрасывает поворот' : '')}
+  return <div ref={hostRef} className="dice-canvas" role="group" tabIndex={0}
+    aria-label={'3D модель ' + config.shape.toUpperCase() + '. Стрелки поворачивают, Home сбрасывает поворот'}
     onKeyDown={onKeyDown}>
     {fallback && <div className="canvas-fallback" style={{ backgroundColor: config.shell }}>{config.shape.toUpperCase()}</div>}
   </div>;
