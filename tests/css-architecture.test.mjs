@@ -80,7 +80,7 @@ test('Bento layout is preserved but disconnected until the copy is validated', (
 test('prototype keeps responsive layout and reduced motion', () => {
   const frontend = read('src/components/Storefront.tsx');
   const builder = read('src/components/Configurator.tsx');
-  assert.match(frontend, /className="wrapper hero split"/);
+  assert.match(frontend, /className="wrapper hero hero-centered"/);
   assert.match(builder, /className="configure-layout sidebar"/);
   const combined = cssFiles.map(read).join('\n');
   assert.match(combined, /@media\s*\(width\s*<=\s*56rem\)/);
@@ -141,13 +141,13 @@ test('mobile header has hamburger navigation and always-visible cart shortcut', 
 
 test('homepage offers keyboard-accessible horizontal catalog and mobile split', () => {
   const home = read('src/components/Storefront.tsx');
-  const css = read('src/styles/pages.css') + read('src/styles/responsive.css') + read('src/styles/patterns.css');
+  const css = read('src/styles/pages.css') + read('src/styles/responsive.css') + read('src/styles/patterns.css') + read('src/styles/sections.css');
   assert.match(read('src/components/ProductGallery.tsx'), /product-scroller reel/);
   assert.match(read('src/components/ProductGallery.tsx'), /tabIndex: 0/);
   assert.match(css, /grid-auto-flow:\s*column/);
   assert.match(css, /overflow-x:\s*auto/);
   assert.match(css, /scroll-snap-type:\s*x\s+proximity/);
-  assert.match(css, /\.hero\.split\s*\{/);
+  assert.match(css, /\.hero\.hero-centered\s*\{/);
 });
 
 test('about section uses the requested placeholder paragraph', () => {
@@ -206,4 +206,19 @@ test('horizontal product reel centers and gently scales cards as they scroll', (
   assert.match(pages, /animation-timeline:\s*view\(inline\)/);
   assert.match(pages, /prefers-reduced-motion:\s*no-preference/);
   assert.match(gallery, /product-grid grid/);
+});
+
+test('centered Hero composition preserves approved copy and passive 3D motion', () => {
+  const home = read('src/components/Storefront.tsx');
+  const css = read('src/styles/sections.css');
+  assert.match(home, /className="wrapper hero hero-centered"/);
+  assert.match(home, /<DiceViewer config=\{initialConfig\} continuous \/>/);
+  assert.match(home, />Заголовок<\/h1>/);
+  assert.match(home, />Текст<\/p>/);
+  assert.match(home, />Собрать кубик<\/Link>/);
+  assert.match(css, /\.hero-centered \.hero-object\s*\{[^}]*position:\s*absolute;/);
+  assert.match(css, /\.hero-centered \.hero-copy\s*\{[^}]*align-items:\s*center;/);
+  assert.match(css, /\.hero-centered h1\s*\{[^}]*text-align:\s*center;/);
+  assert.match(css, /@media \(width <= 36rem\)/);
+  assert.doesNotMatch(css, /#[a-f0-9]{3,8}\b/i);
 });

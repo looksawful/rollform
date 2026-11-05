@@ -11,7 +11,7 @@ import { initialConfig } from '@/lib/catalog';
 export default function Storefront() {
   const pathname = usePathname();
   return <>
-    <section className="wrapper hero split" aria-labelledby="hero-title">
+    <section className="wrapper hero hero-centered" aria-labelledby="hero-title">
       <div className="hero-object"><DiceViewer config={initialConfig} continuous /></div>
       <div className="hero-copy stack">
         <h1 id="hero-title">Заголовок</h1>

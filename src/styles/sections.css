@@ -43,4 +43,64 @@
   }
   .hero-copy p { max-inline-size: 31rem; font-size: var(--fs-body); line-height: var(--lh-body); }
   .section { padding-block: var(--space-5); border-block-start: var(--border-default); }
+
+  /* Centered monochrome Hero study: 3D dice acts as a passive backdrop. */
+  .hero.hero-centered {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    place-items: center;
+    min-block-size: clamp(38rem, calc(100svh - var(--header-height)), 62rem);
+    padding-block: clamp(5rem, 10vh, 9rem);
+    text-align: center;
+  }
+  .hero-centered .hero-object {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    min-block-size: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    opacity: 0.32;
+    pointer-events: none;
+  }
+  .hero-centered .hero-copy {
+    --stack-space: clamp(0.85rem, 2vw, 1.5rem);
+    justify-content: center;
+    align-items: center;
+    inline-size: 100%;
+    max-inline-size: 76rem;
+  }
+  .hero-centered h1 {
+    font-size: clamp(3.5rem, 11vw, 10.5rem);
+    line-height: 0.92;
+    letter-spacing: var(--tracking-display);
+    text-align: center;
+  }
+  .hero-centered .hero-copy p {
+    max-inline-size: 32rem;
+    text-align: center;
+  }
+  .hero-centered .hero-copy .button {
+    justify-content: center;
+    min-inline-size: 12rem;
+    margin-block-start: clamp(0.5rem, 2vw, 1.5rem);
+  }
+  .site[data-theme="dark"] .hero-centered .hero-object {
+    filter: invert(1);
+  }
+  @media (width <= 36rem) {
+    .hero.hero-centered {
+      min-block-size: clamp(34rem, calc(100svh - var(--header-height)), 52rem);
+      padding-block: 3rem 5rem;
+    }
+    .hero-centered h1 {
+      font-size: clamp(3.1rem, 14.5vw, 5.5rem);
+      letter-spacing: var(--tracking-display);
+    }
+    .hero-centered .hero-copy p { max-inline-size: 26ch; }
+    .hero-centered .hero-copy { --stack-space: 1rem; }
+  }
 }
