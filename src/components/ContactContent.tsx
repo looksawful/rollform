@@ -25,10 +25,10 @@ export default function ContactContent() {
           <li className="contact-method cluster" key={title}>
             <Icon className="icon" aria-hidden="true" />
             <span>{title}</span>
-            <span className="contact-placeholder">Контакт уточняется</span>
           </li>
         )}
       </ul>
+      <p className="contact-availability">Данные для связи уточняются.</p>
     </div>
     <form className="contact-form stack" onSubmit={onSubmit}>
       <h3>Написать нам</h3>

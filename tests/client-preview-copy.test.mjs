@@ -71,3 +71,19 @@ test('legal prototype text is not represented as accepted terms or real cookies'
  assert.match(legal,/>Закрыть<\/button>/);
  assert.doesNotMatch(legal,/document\.cookie|gtag\(/);
 });
+
+
+test('in-stock delivery copy matches the agreed week timeframe, not an unspecified period', () => {
+  const catalog = read('src/app/catalog/page.tsx');
+  const production = read('src/components/ProductionInfo.tsx');
+  assert.match(catalog, /в течение недели/);
+  assert.match(production, /в течение недели/);
+});
+
+test('contact links have channel-specific icons without four repeated placeholders', () => {
+  const contacts = read('src/components/ContactContent.tsx');
+  assert.match(contacts, /Camera|Instagram/);
+  assert.match(contacts, /\{ title: 'Instagram', Icon: Camera \}/);
+  assert.doesNotMatch(contacts, /Контакт уточняется/);
+  assert.match(contacts, /Данные для связи уточняются/);
+});
