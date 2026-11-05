@@ -37,3 +37,11 @@
 - Motion cycles automatically: anticipation → quaternion roll with a little vertical bounce → damped settling to a front-facing face → stillness → repeat, with a new random face. Timing in CSS `sections.css` via `--dice-*-duration`, state exposed as `data-motion`. Procedural approximation, **no physics engine, collision simulation, or actual ground plane**.
 - Accessibility and GPU: `prefers-reduced-motion` leaves a static model, offscreen / hidden tabs suspend frames, renderer and texture resources disposed on teardown. Retain fallback. QA: `npm test`, TypeScript, static export; Chromium 390/1440 on Hero and D6/D12/D20 in both themes, WebGL active, reduced-motion static, no runtime errors.
 - Unfinished, **not in this prototype scope**: certified dice numbering and balance, CNC/3D-print quality bevels, real PBR texture maps, material production references, physical Safari/mobile UAT.
+
+## 3D · актуальная реализация (05.11.2026, заменяет предыдущий черновой прототип)
+
+- Фаски: шесть компактных `public/models/*.glb` созданы в Blender 5.2 встроенными Bevel Modifier (width 0.065, 3 segments) и Weighted Normal; D% использует d10.glb. В браузере собственный генератор фасок отсутствует.
+- Материал: один `THREE.MeshStandardMaterial` (roughness 0.37, metalness 0.06), штатные RoomEnvironment + PMREM. Текст чисел остаётся на CanvasTexture по рассчитанным плоским граням; это визуализация, не гравировка для производства.
+- Motion: готовая библиотека GSAP Timeline, цикл anticipation / roll / settle / resting с рандомной гранью, Three.js Quaternion.slerp. Нет самописного RAF-цикла, физического движка, управления мышью. CSS `--dice-*-duration` и `data-motion`, учтён `prefers-reduced-motion`.
+- Сохраняется один DiceViewer для Hero D20 и конструктора, семь существующих форм и обе темы. 9 фотографий карточек и тексты не менялись.
+- QA: npm test 54/54, TypeScript, Next static export, Chrome 390/1440 Hero и D6/D12/D20, dark theme, reduced-motion, отсутствие горизонтального overflow и JS ошибок. Достоверная игровая нумерация, физический iPhone Safari/VoiceOver и производство модели остаются вне прототипа.

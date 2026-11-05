@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { diceShapes } from '../src/lib/catalog.ts';
-import { buildGeometry, buildRoundedGeometry, faceLabel, facePlacements } from '../src/lib/diceGeometry.ts';
+import { buildGeometry, faceLabel, facePlacements } from '../src/lib/diceGeometry.ts';
 
 const counts = { d4: 4, d6: 6, d8: 8, d10: 10, d12: 12, d20: 20, 'd%': 10 };
 
@@ -30,45 +31,19 @@ test('percentile D10 uses 00 to 90 in tens', () => {
     ['00', '10', '20', '30', '40', '50', '60', '70', '80', '90']);
 });
 
-test('rounded preview geometries have real additional topology and valid outward normals', () => {
-  for (const shape of diceShapes) {
-    const original = buildGeometry(shape);
-    const rounded = buildRoundedGeometry(shape, 0.065, 3);
-    const p = rounded.getAttribute('position');
-    const n = rounded.getAttribute('normal');
-    assert.ok(p.count > original.getAttribute('position').count * 2, shape);
-    assert.equal(p.count, n.count, shape);
-    assert.equal(p.count % 3, 0, shape);
-    for (let i = 0; i < p.count; i += 3) {
-      const a = new Array(3).fill(0).map((_, j) => p.getX(i + j));
-      const b = new Array(3).fill(0).map((_, j) => p.getY(i + j));
-      const c = new Array(3).fill(0).map((_, j) => p.getZ(i + j));
-      for (const v of [...a, ...b, ...c]) assert.ok(Number.isFinite(v), shape);
-      for (let j = 0; j < 3; j++) {
-        const len = Math.hypot(n.getX(i + j), n.getY(i + j), n.getZ(i + j));
-        assert.ok(Math.abs(len - 1) < 1e-4, shape);
-      }
-    }
-    rounded.dispose();
-    original.dispose();
-  }
-});
 
-test('rounded D6, D12 and D20 are closed watertight triangle meshes', () => {
-  for (const shape of ['d6','d12','d20']) {
-    const geom = buildRoundedGeometry(shape, 0.065, 3);
-    const p = geom.getAttribute('position');
-    const key = i => [p.getX(i),p.getY(i),p.getZ(i)].map(n=>n.toFixed(5)).join(',');
-    const edgeCounts = new Map();
-    for (let i = 0; i < p.count; i += 3) {
-      for (const [a,b] of [[0,1],[1,2],[2,0]]) {
-        const x=key(i+a),y=key(i+b);
-        const edge=[x,y].sort().join('/');
-        edgeCounts.set(edge,(edgeCounts.get(edge)||0)+1);
-      }
-    }
-    const bad=[...edgeCounts.values()].filter(n=>n!==2);
-    assert.deepEqual(bad, [], shape+' open or non-manifold edges');
-    geom.dispose();
+test('Blender bevel models exist and contain normals and more vertices than flat shapes', () => {
+  for (const shape of ['d4', 'd6', 'd8', 'd10', 'd12', 'd20']) {
+    const bytes = readFileSync('public/models/' + shape + '.glb');
+    assert.equal(bytes.toString('ascii', 0, 4), 'glTF', shape);
+    assert.equal(bytes.readUInt32LE(4), 2, shape);
+    const length = bytes.readUInt32LE(12);
+    const document = JSON.parse(bytes.toString('utf8', 20, 20 + length));
+    const attrs = document.meshes[0].primitives[0].attributes;
+    assert.ok(Number.isInteger(attrs.NORMAL), shape);
+    const beveledCount = document.accessors[attrs.POSITION].count;
+    const flat = buildGeometry(shape);
+    assert.ok(beveledCount > flat.getAttribute('position').count, shape);
+    flat.dispose();
   }
 });
