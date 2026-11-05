@@ -28,6 +28,21 @@
 [Issue № 5](https://github.com/looksawful/rollform-internal/issues/5).
 
 
+
+## GSAP и поведение элементов · исследование 05.11.2026
+
+**Карта реализации:** GSAP 3.15.1 используется только в `src/components/DiceViewer.tsx`; заголовки, страницы и карточки не имеют GSAP-анимаций. Hero (`Storefront.tsx`) передаёт `continuous`: постоянный поворот D20 вокруг Y за 12 с, `ease: none`, `repeat: -1`, без обработки клика. Конструктор использует отдельный сценарий `anticipating (0,18 с) → rolling (4,5 с) → settling (0,38 с) → resting (2,2 с)` с выбором случайной грани. Длительности фаз читаются из `src/styles/sections.css` через `cssTimeSeconds()`; CSS может возвращать `s` вместо `ms`. Загрузка новой формы пересобирает модель и её цифровые текстуры.
+
+**Состояния и ограничения:** WebGL-рендер прекращается вне viewport/в скрытой вкладке; `prefers-reduced-motion` ставит таймлайн на паузу; при размонтировании таймлайн уничтожается, наблюдатели и ресурсы Three.js освобождаются. Внутри 3D нет pointer/click-управления. Меню и FAQ используют `details/summary`, просмотр фотографий — `yet-another-react-lightbox`, cookie и соглашение — `dialog`, кнопки и выбранные параметры — CSS/React. В браузере подтверждены: 390px, обе темы, смена D20→D6, Escape для lightbox, reduced-motion; первая cookie-модалка показывается поверх **продолжающейся** Hero-анимации. Реальный iPhone/Safari и GPU-профиль не проверялись.
+
+**Выводы для будущих изменений (не реализованы):**
+1. Сохранять единственную GSAP-сцену для 3D; не вводить `ScrollTrigger`, глобальные reveal-анимации, анимации текстов или новый motion-framework без конкретной UX-задачи.
+2. **P1, доступность:** непрерывный декоративный Hero движется более 5 секунд рядом с текстом, но на странице отсутствует способ паузы/остановки. `prefers-reduced-motion` — полезная настройка, но не заменяет явное управление для каждого посетителя. Рассмотреть отдельную доступную кнопку «Остановить анимацию» **вне самого кубика**, сохранив пассивность 3D.
+3. **P2, UX конструктора:** случайные повторяющиеся броски отвлекают от оценки выбранной формы/цвета/цифр. Проверить сценарий «неподвижный просмотр + короткий переход при смене параметра» вместо бесконечного броска.
+4. **P3:** рассмотреть паузу рендера под cookie-модалкой, если будет подтверждён заметный расход ресурсов; добавлять CSS-переходы в UI лишь при ясной пользе и с уважением к reduced motion. Не добавлять новый GSAP React-хук ради одного вручную очищаемого таймлайна.
+
+Источники: [GSAP Timeline](https://gsap.com/docs/v3/GSAP/Timeline/), [GSAP matchMedia](https://gsap.com/docs/v3/GSAP/gsap.matchMedia%28%29/), [Three.js on-demand rendering](https://threejs.org/manual/pages/rendering-on-demand.html), [WCAG 2.2 SC 2.2.2 Pause, Stop, Hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide), [MDN prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion). Решения и QA — существующий [Issue #5](https://github.com/looksawful/rollform-internal/issues/5).
+
 ## Иконки
 
 Используется [Lucide](https://lucide.dev/) (lucide-react), лицензия ISC; часть пиктограмм унаследована от Feather Icons (MIT). © Lucide Icons and Contributors; © Cole Bemis. Лицензионные уведомления: [Lucide License](https://lucide.dev/license) и node_modules/lucide-react/LICENSE после npm ci.
