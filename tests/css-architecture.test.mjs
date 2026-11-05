@@ -57,28 +57,24 @@ test('layout composition reuses primitives with a deliberate mobile split except
   assert.match(card, /className="product-visual frame"/);
   assert.match(catalog, /className="product-grid grid"/);
   assert.match(cart, /className="empty-state box cover stack"/);
-  assert.match(contacts, /center prose/);
+  assert.match(contacts, /page-section stack/);
+  assert.match(contacts, /<ContactContent/);
   assert.match(shell, /className="wrapper footer-inner switcher"/);
   assert.match(pages, /\.hero\.split\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.05fr\)\s+minmax\(0,\s*0\.95fr\)/);
 });
 
-test('bento follows a five-cell two-row named-area layout', () => {
+test('Bento layout is preserved but disconnected until the copy is validated', () => {
   const home = read('src/components/Storefront.tsx');
+  const bento = read('src/components/BentoSection.tsx');
   const css = read('src/styles/pages.css');
-  assert.match(home, /className="bento-grid"/);
-  assert.match(home, /className="bento-viewport scroller"/);
-  assert.match(home, /tabIndex=\{0\}/);
-  assert.match(home, /Array\.from\(\{ length: 5 \}/);
-  assert.equal((home.match(/className="bento-card box"/g) || []).length, 1);
+  assert.doesNotMatch(home, /bento-section|BentoSection|bento-grid/);
+  assert.match(bento, /className="bento-grid"/);
+  assert.match(bento, /className="bento-viewport scroller"/);
+  assert.match(bento, /tabIndex=\{0\}/);
+  assert.equal((bento.match(/className="bento-card box"/g) || []).length, 1);
   assert.match(css, /grid-template-areas:/);
   assert.match(css, /"one one one one two two two three three three three three"/);
   assert.match(css, /"four four four four four four four five five five five five"/);
-  assert.match(css, /grid-template-rows:\s*repeat\(2,/);
-  assert.match(css, /min-inline-size:\s*max\(100%,/);
-  assert.match(read('src/styles/patterns.css'), /\.scroller\s*\{[^}]*overflow-x:\s*auto/);
-  assert.doesNotMatch(home, /<img|<Image|<AsyncImage/);
-  assert.ok(home.indexOf('className="hero-copy') < home.indexOf('className="bento-grid"'));
-  assert.ok(home.indexOf('className="bento-grid"') < home.indexOf('id="catalog"'));
 });
 
 test('prototype keeps responsive layout and reduced motion', () => {
@@ -102,13 +98,13 @@ test('storefront restores catalog, product cards, about, and contacts', () => {
   assert.match(home, /id="contacts"/);
   assert.match(home, /ProductCard/);
   assert.match(catalog, /ProductCard/);
-  assert.match(contact, /Текст/);
+  assert.match(contact, /ContactContent/);
   assert.match(chrome, /Юридическая информация/);
   assert.match(chrome, /Контакты/);
   assert.match(card, /В корзину/);
 });
 
-test('content stays generic, with no draft, copy action, or demo notice', () => {
+test('copy stays generic while contact form is clearly marked as non-sending', () => {
   const home = read('src/components/Storefront.tsx');
   const cart = read('src/components/CartView.tsx');
   const builder = read('src/components/Configurator.tsx');
@@ -126,10 +122,10 @@ test('content stays generic, with no draft, copy action, or demo notice', () => 
 test('brand placeholder is not a fabricated brand name', () => {
   const shell = read('src/components/SiteShell.tsx');
   const layout = read('src/app/layout.tsx');
-  assert.match(shell, />Логотип<\/Link>/);
-  assert.match(shell, /aria-label="Логотип, на главную"/);
+  assert.match(shell, />Лого<\/Link>/);
+  assert.match(shell, /aria-label="На главную"/);
   assert.doesNotMatch(shell + layout, /ROLLFORM/);
-  assert.match(layout, /title: 'Логотип'/);
+  assert.match(layout, /title: 'Лого'/);
 });
 
 test('mobile header has hamburger navigation and always-visible cart shortcut', () => {

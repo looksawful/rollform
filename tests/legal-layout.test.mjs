@@ -12,6 +12,10 @@ test('both legal overlays use native accessible modal dialogs and footer trigger
   assert.equal((modal.match(/<dialog\b/g) || []).length, 2);
   assert.match(modal, /aria-labelledby="cookie-dialog-title"/);
   assert.match(modal, /aria-labelledby="agreement-dialog-title"/);
+  assert.match(modal, /ref=\{agreementDialog\} tabIndex=\{-1\}/);
+  assert.match(modal, /dialog\.focus\(\)/);
+  assert.match(modal, /dialog\.scrollTop = 0/);
+
   assert.match(modal, /showModal\(\)/);
   assert.match(modal, /method="dialog"/);
   assert.match(shell, /<LegalDialogs\s*\/>/);
@@ -28,7 +32,7 @@ test('cookie preferences allow rejection, acceptance, reopening and persistence 
   assert.match(modal, /'accepted'/);
   assert.match(modal, /Отклонить/);
   assert.match(modal, /Принять/);
-  assert.match(modal, /Файлы Cookie/);
+  assert.match(modal, /Файлы cookie/);
   assert.match(modal, /Пользовательское соглашение/);
   assert.doesNotMatch(modal, /document\.cookie|analytics|gtag|facebook|pixel/);
 });
@@ -44,7 +48,7 @@ test('dialog surface is hidden when closed and tokenized in both themes', () => 
 
 test('all existing layout algorithms are reused where appropriate', () => {
   const patterns = read('src/styles/patterns.css');
-  const home = read('src/components/Storefront.tsx');
+  const home = read('src/components/BentoSection.tsx');
   const builder = read('src/components/Configurator.tsx');
   const shell = read('src/components/SiteShell.tsx');
   const css = read('src/styles/pages.css');

@@ -7,8 +7,8 @@ import { isDarkPath, themeHref } from '../src/lib/themeRoutes.ts';
 const root = process.cwd();
 const read = file => readFileSync(path.join(root, file), 'utf8');
 
-test('light and dark URLs use the same five screens', () => {
-  for (const route of ['page.tsx', 'catalog/page.tsx', 'configure/page.tsx', 'cart/page.tsx', 'contacts/page.tsx']) {
+test('light and dark URLs use the same six screens', () => {
+  for (const route of ['page.tsx', 'catalog/page.tsx', 'configure/page.tsx', 'cart/page.tsx', 'contacts/page.tsx', 'production/page.tsx']) {
     assert.ok(existsSync(path.join(root, 'src/app', route)), route);
     assert.ok(existsSync(path.join(root, 'src/app/dark', route)), 'dark/' + route);
   }
@@ -24,7 +24,7 @@ test('theme is selected by URL, not OS preference or similar-looking path', () =
 });
 
 test('all internal links remain inside their selected theme', () => {
-  for (const href of ['/', '/#about', '/catalog', '/configure', '/cart', '/contacts', '/configure?preset=demo-1']) {
+  for (const href of ['/', '/#about', '/catalog', '/configure', '/cart', '/contacts', '/configure?preset=demo-1','/production']) {
     assert.equal(themeHref('/catalog/', href), href);
     assert.equal(themeHref('/dark/catalog/', href), '/dark' + href);
   }

@@ -22,7 +22,7 @@ test('one free tree-shaken Lucide pack, with specific imports only', () => {
 test('mobile menu and basket use consistent accessible outline glyphs', () => {
   assert.match(shell, /<summary aria-label="Меню">\s*<Menu\s+className="icon"\s+aria-hidden="true"\s*\/>/);
   assert.match(shell, /<ShoppingBag\s+className="icon"\s+aria-hidden="true"\s*\/>/);
-  assert.match(shell, /aria-label=\{'Корзина \('/);
+  assert.match(shell, /aria-label=\{'Корзина, товаров: '/);
   assert.doesNotMatch(shell, /hamburger-lines|<svg/);
   assert.doesNotMatch(pages, /\.hamburger-lines/);
 });

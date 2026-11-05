@@ -293,7 +293,7 @@ export default function DiceViewer({ config }: { config: DiceConfig }) {
   }, []);
 
   return <div ref={hostRef} className="dice-canvas" role="img" data-motion="paused"
-    aria-label={'3D модель ' + config.shape.toUpperCase() + ', автоматически перекатывается и останавливается гранью к зрителю'}>
+    aria-label={'3D-модель ' + config.shape.toUpperCase()}>
     {fallback && <div className="canvas-fallback" style={{ backgroundColor: config.shell }}>{config.shape.toUpperCase()}</div>}
   </div>;
 }

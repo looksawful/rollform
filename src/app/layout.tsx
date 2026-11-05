@@ -3,8 +3,7 @@ import SiteShell from '@/components/SiteShell';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Логотип',
-  description: 'Текст',
+  title: 'Лого',
   robots: { index: false, follow: false },
 };
 

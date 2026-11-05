@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { themeHref } from '@/lib/themeRoutes';
 import DiceViewer from './DiceViewer';
 import ProductCard from './ProductCard';
+import ContactContent from './ContactContent';
 import { initialConfig, presets } from '@/lib/catalog';
 
 export default function Storefront() {
@@ -18,32 +19,17 @@ export default function Storefront() {
         <Link className="button button-black" href={themeHref(pathname, "/configure")}>Кнопка</Link>
       </div>
     </section>
-    <section className="wrapper section bento-section" aria-labelledby="benefits-title">
-      <h2 id="benefits-title" className="section-title">Заголовок</h2>
-      <div className="bento-viewport scroller" role="region" aria-label="Преимущества" tabIndex={0}>
-        <div className="bento-grid">
-          {Array.from({ length: 5 }, (_, i) =>
-            <article className="bento-card box" key={i}>
-              <h3>Заголовок</h3>
-              <p>Текст</p>
-            </article>
-          )}
-        </div>
-      </div>
-    </section>
     <section className="wrapper section stack" id="catalog">
-      <h2 className="section-title">Заголовок</h2>
-      <div className="product-scroller reel" role="region" aria-label="Товары" tabIndex={0}>{presets.map(p => <ProductCard key={p.id} product={p} />)}</div>
-      <Link className="button button-black section-button" href={themeHref(pathname, "/catalog")}>Кнопка</Link>
+      <h2 className="section-title">В наличии</h2>
+      <div className="product-scroller reel" role="region" aria-label="В наличии" tabIndex={0}>{presets.map(p => <ProductCard key={p.id} product={p} />)}</div>
     </section>
     <section className="wrapper section prose" id="about">
-      <h2 className="section-title">О проекте</h2>
+      <h2 className="section-title">О нас</h2>
       <p>Внимание, этот текст является рыбой.</p>
     </section>
     <section className="wrapper section stack" id="contacts">
       <h2 className="section-title">Контакты</h2>
-      <p>Текст</p>
-      <Link className="button button-black section-button" href={themeHref(pathname, "/contacts")}>Кнопка</Link>
+      <ContactContent />
     </section>
   </>;
 }

@@ -18,11 +18,11 @@ export default function CartView() {
   return <section className="wrapper section page-section stack">
     <h1 className="page-title">Корзина</h1>
     {items.length === 0
-      ? <div className="empty-state box cover stack"><p>Текст</p><Link href={themeHref(pathname, "/configure")} className="button button-black">Кнопка</Link></div>
+      ? <div className="empty-state box cover stack"><p>Корзина пока пуста.</p><Link href={themeHref(pathname, "/catalog")} className="button button-black">В каталог</Link></div>
       : <div className="cart-lines stack">{items.map(item => <article className="cart-entry" key={item.id}>
           <div className="stack cart-entry-copy">
             <h2>{item.config.shape.toUpperCase()}</h2>
-            <p>{shellColors.find(x => x.value === item.config.shell)?.name} / {fontNames[item.config.font]}</p>
+            <p>{shellColors.find(x => x.value === item.config.shell)?.name} · {fontNames[item.config.font]}</p>
           </div>
           <div className="cart-entry-actions stack">
             <div className="quantity cluster">
@@ -32,8 +32,8 @@ export default function CartView() {
               <button aria-label={'Увеличить количество: ' + describe(item)}
                 disabled={item.quantity >= 99} onClick={() => change(item.id, +1)}><Plus className="icon" aria-hidden="true" /></button>
             </div>
-            <button className="text-action" aria-label={'Удалить: ' + describe(item)}
-              onClick={() => remove(item.id)}>Кнопка</button>
+            <button className="text-action" aria-label={'Удалить из корзины: ' + describe(item)}
+              onClick={() => remove(item.id)}>Удалить</button>
           </div>
         </article>)}</div>}
   </section>;

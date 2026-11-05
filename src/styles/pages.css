@@ -122,6 +122,57 @@
   }
   .product-actions :is(a, button):hover { background: var(--color-text); color: var(--color-background); }
 
+  /* Generic contact and production surfaces; no fictitious contact links. */
+  .product-badges { --cluster-gap: 0.4rem; }
+  .product-badges span {
+    display: inline-flex;
+    align-items: center;
+    border: var(--border-default);
+    border-radius: var(--radius-full);
+    padding: 0.3rem 0.65rem;
+    font-size: var(--fs-small);
+    line-height: var(--lh-small);
+  }
+  .product-actions button { flex: 1; text-align: center; }
+
+  .contact-content { --switcher-threshold: 48rem; --switcher-gap: clamp(1.5rem, 3vw, 3rem); }
+  .contact-content > * { min-inline-size: 0; }
+  .contact-content h3 { font-size: var(--fs-title); line-height: var(--lh-title); }
+  .contact-methods { list-style: none; padding: 0; --stack-space: 0; }
+  .contact-method {
+    padding-block: 0.85rem;
+    border-block-end: var(--border-default);
+    --cluster-gap: 0.85rem;
+  }
+  .contact-method:first-child { border-block-start: var(--border-default); }
+  .contact-method .icon { --icon-size: 1.375rem; }
+  .contact-placeholder { margin-inline-start: auto; font-size: var(--fs-small); opacity: 0.7; }
+
+  .contact-form { --stack-space: 1rem; }
+  .contact-form label { --stack-space: 0.35rem; font-size: var(--fs-small); font-weight: 600; }
+  .contact-form :is(input, textarea) {
+    display: block;
+    inline-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 2.9rem;
+    border: var(--border-default);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: 400;
+    padding: 0.7rem 0.85rem;
+  }
+  .contact-form textarea { resize: vertical; }
+  .contact-form > button { align-self: flex-start; }
+  .contact-form > p, .contact-form [role="status"] { font-size: var(--fs-small); line-height: var(--lh-small); }
+
+  .production-note { --stack-space: 0.35rem; border-block-start: var(--border-default); padding-block-start: var(--space-2); }
+  .production-note p, .production-note a { font-size: var(--fs-small); line-height: var(--lh-small); }
+  .production-note a, .footer-secondary-link { text-underline-offset: 0.3em; }
+  .production-info { max-inline-size: calc(var(--measure) + 2 * var(--gutter)); }
+  .production-info h2 { font-size: var(--fs-title); line-height: var(--lh-title); }
+
   .footer { border-block-start: var(--border-default); padding-block: var(--space-4); }
   .footer-inner { --switcher-threshold: 34rem; }
   .footer h2 { font-size: var(--fs-body); line-height: var(--lh-title); font-weight: 700; }

@@ -9,9 +9,9 @@ import LegalDialogs from './LegalDialogs';
 import { isDarkPath, themeHref } from '@/lib/themeRoutes';
 
 const menuLinks = [
-  { href: '/catalog', label: 'Каталог' },
-  { href: '/configure', label: 'Конструктор' },
-  { href: '/#about', label: 'О проекте' },
+  { href: '/catalog', label: 'Кубики' },
+  { href: '/configure', label: 'Собери сам' },
+  { href: '/#about', label: 'О нас' },
   { href: '/contacts', label: 'Контакты' },
 ];
 
@@ -27,7 +27,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
   return <div className="site" data-theme={dark ? 'dark' : 'light'}>
     <header className="topbar">
       <div className="wrapper topbar-inner cluster">
-        <Link href={link("/")} className="logo" aria-label="Логотип, на главную">Логотип</Link>
+        <Link href={link("/")} className="logo" aria-label="На главную">Лого</Link>
         <nav className="nav cluster desktop-nav" aria-label="Основное меню">{navigation}</nav>
         <div className="header-actions cluster">
           <details className="mobile-menu" onKeyDown={e => {
@@ -40,10 +40,9 @@ function SiteChrome({ children }: { children: ReactNode }) {
               e.currentTarget.closest('details')?.removeAttribute('open');
             }}>{navigation}</nav>
           </details>
-          <Link href={link("/cart")} className="cart-shortcut" aria-label={'Корзина (' + count + ')'}
+          <Link href={link("/cart")} className="cart-shortcut" aria-label={'Корзина, товаров: ' + count}
             aria-current={path === link('/cart') ? 'page' : undefined}>
             <ShoppingBag className="icon" aria-hidden="true" />
-            <span className="cart-shortcut-label">Корзина</span>
             <span className="cart-count" aria-hidden="true">{count}</span>
           </Link>
         </div>
@@ -54,12 +53,11 @@ function SiteChrome({ children }: { children: ReactNode }) {
       <div className="wrapper footer-inner switcher">
         <div className="stack">
           <h2>Юридическая информация</h2>
-          <p>Текст</p>
           <LegalDialogs />
         </div>
         <div className="stack">
           <h2><Link href={link("/contacts")}>Контакты</Link></h2>
-          <p>Текст</p>
+          <Link href={link("/production")} className="footer-secondary-link">Сроки изготовления</Link>
         </div>
       </div>
     </footer>
