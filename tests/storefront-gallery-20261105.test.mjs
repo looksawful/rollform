@@ -23,7 +23,7 @@ test('production and receiving conditions share the existing route', () => {
   assert.match(production, /самовывоз|самостоятельно/);
   assert.match(production, /курьерск/);
   assert.match(production, /в течение недели/);
-  assert.match(production, /срок.*уточняется/i);
+  assert.doesNotMatch(production, /срок.*уточняется/i);
   assert.ok(existsSync('src/app/production/page.tsx'));
   assert.ok(existsSync('src/app/dark/production/page.tsx'));
 });
@@ -69,7 +69,7 @@ test('nine licensed photographic examples are available without losing accurate 
   }
   assert.match(source('src/components/ProductGallery.tsx'), /photoPath\(index\)/);
   assert.match(source('src/components/ProductCard.tsx'), /photoPath\(index\)/);
-  assert.match(source('src/components/SiteShell.tsx'), /photoCredits\.map/);
+  assert.doesNotMatch(source('src/components/SiteShell.tsx'), /photoCredits|Источники фотографий/);
 });
 
 test('homepage reel pins at card center while vertical scroll scrubs horizontal position', () => {
@@ -94,12 +94,12 @@ test('new photo-first product layout keeps purchase honest and supplies a shared
   const card = source('src/components/ProductCard.tsx');
   const detail = source('src/components/ProductDetail.tsx');
   const css = source('src/styles/pages.css');
-  assert.match(card, /Цена уточняется/);
+  assert.match(card, /formatPrice\(priceForPreset\(product.id\)\)/);
   assert.match(card, /<h3><Link/);
   assert.match(card, /Купить/);
   assert.doesNotMatch(card, /product-badges/);
   assert.match(detail, /3D-вариант/);
-  assert.match(detail, /Цена уточняется/);
+  assert.match(detail, /formatPrice\(priceForPreset\(product.id\)\)/);
   assert.match(detail, /add\(product.config/);
   assert.ok(existsSync('src/app/product/page.tsx'));
   assert.ok(existsSync('src/app/dark/product/page.tsx'));
@@ -119,15 +119,31 @@ test('header is hidden until scroll, logo is invisible, cart only exists after s
   assert.match(orders, /rollform:demo-cart:v3/);
 });
 
-test('licensed photographic sources are available and no fake prices or claims appear', () => {
-  const credits = source('src/lib/photoCredits.ts');
-  const about = source('src/components/Storefront.tsx');
+test('no-credit-needed photos and prices are consistent across all screens', () => {
+  const assets = source('src/lib/photoAssets.ts');
+  const pricing = source('src/lib/pricing.ts');
+  const home = source('src/components/Storefront.tsx');
   const production = source('src/components/ProductionInfo.tsx');
-  const detail = source('src/components/ProductDetail.tsx');
+  const cart = source('src/components/CartView.tsx');
   assert.ok(existsSync('public/photos/process-example.webp'));
-  assert.match(credits, /CC BY-SA/);
-  assert.match(credits, /Stephan Sprinz/);
-  assert.match(about, /Не производство ROLLFORM/);
-  assert.match(production, /Не производство ROLLFORM/);
-  assert.doesNotMatch(detail, /\d+\s?₽/);
+  assert.ok(existsSync('public/photos/process-workshop.webp'));
+  assert.match(assets, /Pexels/);
+  assert.match(assets, /attribution not required/);
+  assert.match(pricing, /const presetPrices = \[/);
+  assert.match(pricing, /Intl\.NumberFormat\('ru-RU'/);
+  assert.match(cart, /priceForCartItem\(item\) \* item\.quantity/);
+  assert.match(cart, /formatPrice\(total\)/);
+  assert.match(source('src/components/Configurator.tsx'), /formatPrice\(priceForConfig\(config\)\)/);
+  assert.doesNotMatch(home + production, /Фото-пример|Референс|Не производство|иллюстративные/);
+  assert.doesNotMatch(source('src/components/ProductDetail.tsx'), /Цена уточняется|фотография приведена/i);
+});
+
+test('homepage and cart are free from prototype disclaimers', () => {
+  const components = ['SiteShell', 'Storefront', 'ProductCard', 'ProductDetail', 'CartView', 'ContactContent', 'ProductionInfo'];
+  for(const component of components) {
+    const file = source(`src/components/${component}.tsx`);
+    assert.doesNotMatch(file, /демонстрацион|демо[- ]сайт|Фото-пример|референс|Не производство|Источники фотографий/i, component);
+  }
+  assert.ok(!existsSync('src/lib/photoCredits.ts'));
+  assert.ok(!existsSync('src/components/LegalDialogs.tsx'));
 });

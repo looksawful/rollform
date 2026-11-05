@@ -19,20 +19,19 @@ test('shape design uses just four reusable Material-inspired tokens', () => {
   assert.equal(names.length, 4);
 });
 
-test('primary, choice, quantity, catalog and dialog action buttons have capsule shapes', () => {
+test('primary, choice, quantity and catalog action buttons have capsule shapes', () => {
   assert.match(components, /\.button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
   assert.match(components, /\.pill-list button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
   assert.match(pages, /\.quantity button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
   assert.match(pages, /\.product-actions \.button\s*\{[^}]*inline-size:\s*100%/);
-  assert.match(pages, /\.dialog-actions button, \.legal-dialog form button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
 });
 
-test('cards and previews round moderately, while dialogs are distinctly more rounded', () => {
+test('cards, previews and menu share design-system corner sizes', () => {
   assert.match(patterns, /\.box\s*\{[^}]*border-radius:\s*var\(--radius-md\)/);
   assert.match(pages, /\.product-visual\s*\{[^}]*border-radius:\s*var\(--radius-md\)/);
   assert.match(pages, /\.configure-preview\s*\{[^}]*border-radius:\s*var\(--radius-md\)/);
   assert.match(sections, /\.hero-object\s*\{[^}]*border-radius:\s*var\(--radius-md\)/);
-  assert.match(pages, /\.legal-dialog\s*\{[^}]*border-radius:\s*var\(--radius-lg\)/);
+  assert.match(pages, /\.product\s*\{[^}]*border-radius:\s*var\(--radius-lg\)/);
   assert.match(pages, /\.mobile-nav\s*\{[^}]*border-radius:\s*var\(--radius-sm\)/);
 });
 

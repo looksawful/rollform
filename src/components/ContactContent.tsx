@@ -1,38 +1,41 @@
 'use client';
 
-import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Camera, Mail, Phone, Send } from 'lucide-react';
+import { Mail, Send } from 'lucide-react';
 
 const channels = [
-  { title: 'Почта', Icon: Mail },
-  { title: 'Телефон', Icon: Phone },
-  { title: 'Telegram', Icon: Send },
-  { title: 'Instagram', Icon: Camera },
+  { title: 'Электронная почта', detail: 'i@lookawful.ru', href: 'mailto:i@lookawful.ru', Icon: Mail },
+  { title: 'Telegram', detail: '@looksawful', href: 'https://t.me/looksawful', Icon: Send },
 ];
 
 export default function ContactContent() {
-  const [attempted, setAttempted] = useState(false);
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setAttempted(true);
+    const data = new FormData(event.currentTarget);
+    const name = String(data.get('name') || '').trim();
+    const reply = String(data.get('reply') || '').trim();
+    const message = String(data.get('message') || '').trim();
+    if (!name || !reply || !message) return;
+    const subject = encodeURIComponent('Вопрос о кубиках');
+    const body = encodeURIComponent(`Имя: ${name}\nПочта: ${reply}\n\n${message}`);
+    window.location.href = `mailto:i@lookawful.ru?subject=${subject}&body=${body}`;
   };
   return <div className="contact-content switcher">
     <div className="stack contact-options">
-      <h3>Способы связи</h3>
+      <h3>Связаться с нами</h3>
       <ul className="contact-methods stack">
-        {channels.map(({ title, Icon }) =>
-          <li className="contact-method cluster" key={title}>
-            <Icon className="icon" aria-hidden="true" />
-            <span>{title}</span>
+        {channels.map(({ title, detail, href, Icon }) =>
+          <li className="contact-method" key={title}>
+            <a className="cluster" href={href} {...(href.startsWith('https:') ? { target: '_blank', rel: 'noreferrer' } : {})}>
+              <Icon className="icon" aria-hidden="true" />
+              <span className="stack"><strong>{title}</strong><span>{detail}</span></span>
+            </a>
           </li>
         )}
       </ul>
-      <p className="contact-availability">Данные для связи уточняются.</p>
     </div>
     <form className="contact-form stack" onSubmit={onSubmit}>
       <h3>Написать нам</h3>
-      <p>Демонстрационная форма. Сообщения не отправляются, контакты для связи уточняются.</p>
       <label className="stack" htmlFor="contact-name">Имя
         <input id="contact-name" name="name" type="text" autoComplete="name" required maxLength={80} />
       </label>
@@ -42,8 +45,7 @@ export default function ContactContent() {
       <label className="stack" htmlFor="contact-message">Сообщение
         <textarea id="contact-message" name="message" rows={4} required maxLength={1500} />
       </label>
-      <button className="button button-black" type="submit">Проверить сообщение</button>
-      {attempted && <p role="status">Сообщение не отправлено: форма работает в демонстрационном режиме.</p>}
+      <button className="button button-black" type="submit">Написать</button>
     </form>
   </div>;
 }

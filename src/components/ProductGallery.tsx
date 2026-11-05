@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import { presets } from '@/lib/catalog';
-import { photoPath } from '@/lib/photoCredits';
+import { photoPath } from '@/lib/photoAssets';
 import ProductCard from './ProductCard';
 
 const slides = presets.map((product, index) => ({
   src: photoPath(index),
-  alt: `Референсная фотография игровых кубиков, ${product.title}. Не продукция ROLLFORM.`,
+  alt: `Игральные кубики, ${product.title}.`,
 }));
 
 export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {

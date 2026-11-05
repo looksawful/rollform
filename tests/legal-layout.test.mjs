@@ -1,49 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
 const read = file => readFileSync(path.resolve(process.cwd(), file), 'utf8');
 
-test('both legal overlays use native accessible modal dialogs and footer triggers', () => {
-  const modal = read('src/components/LegalDialogs.tsx');
+test('no fabricated cookie-consent/legal UI blocks the storefront', () => {
   const shell = read('src/components/SiteShell.tsx');
-  assert.match(modal, /<dialog[^>]*className="legal-dialog stack"/);
-  assert.equal((modal.match(/<dialog\b/g) || []).length, 2);
-  assert.match(modal, /aria-labelledby="cookie-dialog-title"/);
-  assert.match(modal, /aria-labelledby="agreement-dialog-title"/);
-  assert.match(modal, /ref=\{agreementDialog\} tabIndex=\{-1\}/);
-  assert.match(modal, /dialog\.focus\(\)/);
-  assert.match(modal, /dialog\.scrollTop = 0/);
-
-  assert.match(modal, /showModal\(\)/);
-  assert.match(modal, /method="dialog"/);
-  assert.match(shell, /<LegalDialogs\s*\/>/);
-  assert.equal((shell.match(/import LegalDialogs from/g) || []).length, 1);
-  assert.doesNotMatch(modal, /role="dialog"|aria-modal|document\.addEventListener\('keydown'/);
-});
-
-test('cookie preferences allow rejection, acceptance, reopening and persistence without trackers', () => {
-  const modal = read('src/components/LegalDialogs.tsx');
-  assert.match(modal, /rollform:cookie-choice/);
-  assert.match(modal, /localStorage\.getItem/);
-  assert.match(modal, /localStorage\.setItem/);
-  assert.match(modal, /'rejected'/);
-  assert.match(modal, /'accepted'/);
-  assert.match(modal, /Отклонить/);
-  assert.match(modal, /Принять/);
-  assert.match(modal, /Файлы cookie/);
-  assert.match(modal, /Пользовательское соглашение/);
-  assert.doesNotMatch(modal, /document\.cookie|analytics|gtag|facebook|pixel/);
-});
-
-test('dialog surface is hidden when closed and tokenized in both themes', () => {
   const css = read('src/styles/pages.css');
-  assert.match(css, /\.legal-dialog:not\(\[open\]\)\s*\{[^}]*display:\s*none/);
-  assert.match(css, /\.legal-dialog\[open\]\s*\{[^}]*display:\s*flex/);
-  assert.match(css, /\.legal-dialog::backdrop/);
-  assert.match(css, /\.legal-dialog\s*\{[^}]*margin:\s*auto/);
-  assert.match(css, /\.legal-dialog\s*\{[^}]*var\(--color-background\)/);
+  assert.ok(!existsSync('src/components/LegalDialogs.tsx'));
+  assert.doesNotMatch(shell, /LegalDialogs|photoCredits|photo-credits/);
+  assert.doesNotMatch(css, /\.legal-dialog|\.legal-links/);
+  assert.match(shell, /<footer className="footer">/);
+});
+
+test('the cart persists only after user selection, without tracking scripts', () => {
+  const state = read('src/components/CartState.tsx');
+  const shell = read('src/components/SiteShell.tsx');
+  assert.match(state, /localStorage\.getItem/);
+  assert.match(state, /localStorage\.setItem/);
+  assert.match(shell, /count > 0 && <Link/);
+  assert.doesNotMatch(state + shell, /gtag\(|fbq\(|analytics\./);
 });
 
 test('all existing layout algorithms are reused where appropriate', () => {

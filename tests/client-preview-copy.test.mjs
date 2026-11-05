@@ -10,7 +10,7 @@ test('approved Russian header labels and icon-only cart',()=>{
   assert.match(s,/>Лого<\/Link>/);
   assert.match(s,/<ShoppingBag className="icon" aria-hidden="true"\s*\/>/);
   assert.doesNotMatch(s,/cart-shortcut-label/);
-  assert.match(s,/<LegalDialogs\s*\/>/);
+  assert.doesNotMatch(s, /LegalDialogs|photoCredits|photo-credits/);
   assert.doesNotMatch(s,/<p>Текст<\/p>/);
 });
 test('Bento retained as a disconnected draft component',()=>{
@@ -51,28 +51,27 @@ test('builder, cart and production pages honor accepted copy decisions',()=>{
   assert.ok(existsSync('src/app/dark/production/page.tsx'));
   assert.match(read('src/components/ProductionInfo.tsx'),/Изготовление и доставка/);
 });
-test('contact channels and a truthful demo contact form appear on both screens',()=>{
- const ui=read('src/components/ContactContent.tsx');
- const home=read('src/components/Storefront.tsx');
- const page=read('src/app/contacts/page.tsx');
- for(const s of ['Телефон','Telegram','Instagram','Почта','Имя','Электронная почта','Сообщение','Проверить сообщение'])assert.ok(ui.includes(s),s);
- assert.match(ui,/<form/);assert.match(ui,/onSubmit=\{onSubmit\}/);
- assert.match(ui,/Сообщения не отправляются/);
- assert.match(ui,/role="status"/);
- assert.doesNotMatch(ui, /https:\/\/t\.me\/|mailto:|tel:\+\d/);
- assert.match(home,/<ContactContent\s*\/>/);
- assert.match(page,/<ContactContent\s*\/>/);
-});
-test('legal prototype text is not represented as accepted terms or real cookies',()=>{
- const legal=read('src/components/LegalDialogs.tsx');
- assert.match(legal,/>Принять все<\/button>/);
- assert.match(legal,/>Файлы cookie<\/h2>/);
- assert.match(legal,/Демонстрационный сайт|демонстрационный сайт/);
- assert.match(legal,/заказ не оформляется|не оформляет заказ|не оформляют заказ/);
- assert.match(legal,/>Закрыть<\/button>/);
- assert.doesNotMatch(legal,/document\.cookie|gtag\(/);
+test('contacts expose working email and Telegram links and a mail composer', () => {
+  const ui = read('src/components/ContactContent.tsx');
+  const home = read('src/components/Storefront.tsx');
+  const page = read('src/app/contacts/page.tsx');
+  for(const s of ['Telegram', 'Электронная почта', 'Имя', 'Сообщение', 'Написать']) {
+    assert.ok(ui.includes(s), s);
+  }
+  assert.match(ui, /mailto:i@lookawful\.ru/);
+  assert.match(ui, /https:\/\/t\.me\/looksawful/);
+  assert.match(ui, /window\.location\.href/);
+  assert.match(ui, /onSubmit=\{onSubmit\}/);
+  assert.doesNotMatch(ui, /Демонстрационная|не отправляются|уточняются/);
+  assert.match(home, /<ContactContent\s*\/>/);
+  assert.match(page, /<ContactContent\s*\/>/);
 });
 
+test('there is no bogus cookie consent or draft legal agreement', () => {
+  const shell = read('src/components/SiteShell.tsx');
+  assert.doesNotMatch(shell, /LegalDialogs|cookie-choice|photo-credits/);
+  assert.ok(!existsSync('src/components/LegalDialogs.tsx'));
+});
 
 test('in-stock delivery copy matches the agreed week timeframe, not an unspecified period', () => {
   const catalog = read('src/app/catalog/page.tsx');
@@ -81,10 +80,10 @@ test('in-stock delivery copy matches the agreed week timeframe, not an unspecifi
   assert.match(production, /в течение недели/);
 });
 
-test('contact links have channel-specific icons without four repeated placeholders', () => {
+test('contact icons are paired with actual reachable destinations', () => {
   const contacts = read('src/components/ContactContent.tsx');
-  assert.match(contacts, /Camera|Instagram/);
-  assert.match(contacts, /\{ title: 'Instagram', Icon: Camera \}/);
-  assert.doesNotMatch(contacts, /Контакт уточняется/);
-  assert.match(contacts, /Данные для связи уточняются/);
+  assert.match(contacts, /Mail, Send/);
+  assert.match(contacts, /href: 'mailto:i@lookawful\.ru'/);
+  assert.match(contacts, /href: 'https:\/\/t\.me\/looksawful'/);
+  assert.doesNotMatch(contacts, /Instagram|Телефон|данные для связи уточняются/i);
 });

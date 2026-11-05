@@ -6,7 +6,8 @@ import { usePathname } from 'next/navigation';
 import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
 import { fontNames, shellColors, presets } from '@/lib/catalog';
-import { photoPath } from '@/lib/photoCredits';
+import { photoPath } from '@/lib/photoAssets';
+import { formatPrice, priceForCartItem } from '@/lib/pricing';
 import type { CartItem } from '@/lib/orders';
 
 const describe = (item: CartItem) =>
@@ -16,6 +17,7 @@ const describe = (item: CartItem) =>
 export default function CartView() {
   const { items, change, remove } = useCart();
   const pathname = usePathname();
+  const total = items.reduce((sum, item) => sum + priceForCartItem(item) * item.quantity, 0);
   return <section className="wrapper section page-section cart-page stack">
     <p className="eyebrow">Ваш выбор</p>
     <h1 className="page-title">Корзина</h1>
@@ -33,13 +35,13 @@ export default function CartView() {
           return <article className="cart-entry" key={item.id}>
             <div className="cart-entry-media">
               {index >= 0
-                ? <img src={photoPath(index)} alt="Фото-пример других игровых кубиков" width={160} height={160} />
+                ? <img src={photoPath(index)} alt="Игральные кубики" width={160} height={160} />
                 : <ShoppingBag className="icon" aria-hidden="true" />}
             </div>
             <div className="stack cart-entry-copy">
               <h2>{index >= 0 ? presets[index].title : 'Свой вариант'} · {item.config.shape.toUpperCase()}</h2>
               <p>{shellColors.find(x => x.value === item.config.shell)?.name} · {fontNames[item.config.font]}</p>
-              <p className="cart-price">Цена уточняется</p>
+              <p className="cart-price">{formatPrice(priceForCartItem(item))} / шт.</p>
               <button className="text-action" aria-label={'Удалить из корзины: ' + describe(item)}
                 onClick={() => remove(item.id)}>Удалить</button>
             </div>
@@ -60,7 +62,7 @@ export default function CartView() {
         })}</div>
         <div className="cart-summary stack">
           <h2>Итого</h2>
-          <p>Стоимость и наличие уточняются. Оплата на демонстрационном сайте недоступна.</p>
+          <p className="cart-total">{formatPrice(total)}</p>
           <Link href={themeHref(pathname, '/production')}>Изготовление и доставка</Link>
           <Link href={themeHref(pathname, '/catalog')} className="button button-black">Продолжить выбор</Link>
         </div>

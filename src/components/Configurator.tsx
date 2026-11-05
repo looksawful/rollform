@@ -8,6 +8,7 @@ import DiceViewer from './DiceViewer';
 import { useCart } from './CartState';
 import { configFromParams, diceShapes, fontNames, fontStyles, shellColors } from '@/lib/catalog';
 import type { DiceConfig } from '@/lib/catalog';
+import { formatPrice, priceForConfig } from '@/lib/pricing';
 
 export default function Configurator() {
   const router = useRouter();
@@ -31,9 +32,10 @@ export default function Configurator() {
         <div className="field stack"><h2>Цвет</h2><div className="pill-list cluster">{shellColors.map(color => <button key={color.value} type="button" aria-pressed={config.shell === color.value} className={config.shell === color.value ? 'is-active' : ''} onClick={() => change('shell', color.value)}><span className="swatch" style={{ background: color.value }}/> {color.name}</button>)}</div></div>
         <div className="field stack"><h2>Шрифт</h2><div className="pill-list cluster">{fontStyles.map(font => <button key={font} type="button" aria-pressed={config.font === font} className={config.font === font ? 'is-active' : ''} onClick={() => change('font', font)}>{fontNames[font]}</button>)}</div></div>
         <div className="production-note stack">
-          <p>Кубики по вашим параметрам изготавливаются на заказ. Срок уточняется.</p>
+          <p>Кубики по вашим параметрам изготавливаются на заказ.</p>
           <Link href={themeHref(pathname, '/production')}>Изготовление и доставка</Link>
         </div>
+        <p className="configure-price">{formatPrice(priceForConfig(config))}</p>
         <button type="button" className="button button-black button-fill" onClick={addCustom}><span>В корзину</span><ShoppingBag className="icon" aria-hidden="true" /></button>
       </div>
     </div>

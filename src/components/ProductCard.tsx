@@ -6,7 +6,8 @@ import { ZoomIn } from 'lucide-react';
 import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
 import { fontNames, shellColors } from '@/lib/catalog';
-import { photoPath } from '@/lib/photoCredits';
+import { photoPath } from '@/lib/photoAssets';
+import { formatPrice, priceForPreset } from '@/lib/pricing';
 import type { Preset } from '@/lib/catalog';
 
 export default function ProductCard({ product, index, onPreview }: {
@@ -33,9 +34,8 @@ export default function ProductCard({ product, index, onPreview }: {
   return <article className="product stack">
     <div className="product-media">
       <Link className="product-visual frame" href={detailsUrl} aria-label={'Подробнее: ' + product.title}>
-        <img src={photoPath(index)} alt={'Фото-пример игровых кубиков для ' + product.title}
+        <img src={photoPath(index)} alt={'Игральные кубики: ' + product.title}
           width={1000} height={800} loading="lazy" decoding="async" />
-        <span className="product-photo-label">Фото-пример</span>
       </Link>
       <button className="product-zoom" type="button" onClick={onPreview}
         aria-label={'Увеличить изображение: ' + product.title}>
@@ -45,7 +45,7 @@ export default function ProductCard({ product, index, onPreview }: {
     <div className="product-copy stack">
       <h3><Link href={detailsUrl}>{product.title}</Link></h3>
       <p className="product-description">{description}</p>
-      <p className="product-price">Цена уточняется</p>
+      <p className="product-price">{formatPrice(priceForPreset(product.id))}</p>
     </div>
     <div className="product-actions">
       <button type="button" className="button button-black" onClick={buy}

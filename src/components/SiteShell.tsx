@@ -6,8 +6,6 @@ import { Menu, ShoppingBag } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { CartProvider, useCart } from './CartState';
-import LegalDialogs from './LegalDialogs';
-import { photoCredits } from '@/lib/photoCredits';
 import { isDarkPath, themeHref } from '@/lib/themeRoutes';
 
 const menuLinks = [
@@ -61,21 +59,17 @@ function SiteChrome({ children }: { children: ReactNode }) {
     <main>{children}</main>
     <footer className="footer">
       <div className="wrapper footer-inner switcher">
+        <nav className="stack" aria-label="Навигация в подвале">
+          <h2>Навигация</h2>
+          <Link href={link("/catalog")}>Каталог</Link>
+          <Link href={link("/configure")}>Конструктор</Link>
+          <Link href={link("/production")}>Изготовление и доставка</Link>
+        </nav>
         <div className="stack">
-          <h2>Юридическая информация</h2>
-          <LegalDialogs />
+          <h2>Контакты</h2>
+          <Link href={link("/contacts")}>Связаться</Link>
+          <a href="mailto:i@lookawful.ru">i@lookawful.ru</a>
         </div>
-        <div className="stack">
-          <h2><Link href={link("/contacts")}>Контакты</Link></h2>
-          <Link href={link("/production")} className="footer-secondary-link">Сроки изготовления</Link>
-        </div>
-        <details className="photo-credits">
-          <summary>Источники фотографий</summary>
-          <p>Иллюстративные фотографии других авторов. Уменьшены и переведены в WebP; товары и производство этого магазина не показаны.</p>
-          <ul>{photoCredits.map(([filename, author, license]) =>
-            <li key={filename}><a href={'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(filename.replaceAll(' ', '_'))}
-              target="_blank" rel="noreferrer">{author}, «{filename}», {license}</a></li>)}</ul>
-        </details>
       </div>
     </footer>
   </div>;

@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import { presets, fontNames, shellColors } from '@/lib/catalog';
-import { photoPath } from '@/lib/photoCredits';
+import { photoPath } from '@/lib/photoAssets';
+import { formatPrice, priceForPreset } from '@/lib/pricing';
 import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
 
@@ -32,18 +33,17 @@ export default function ProductDetail() {
       <div className="product-detail-gallery">
         <div className="product-detail-main">
           <img key={view} src={view === 'photo' ? photo : model}
-            alt={view === 'photo' ? 'Фотография других игровых кубиков, пример' : '3D-визуализация выбранного варианта'}
+            alt={view === 'photo' ? 'Игральные кубики' : '3D-визуализация выбранного варианта'}
             width={1000} height={900} />
         </div>
         <div className="product-detail-thumbs cluster" aria-label="Вид товара">
           <button type="button" aria-pressed={view === 'photo'} onClick={() => setView('photo')}>
-            <img src={photo} alt="" width={80} height={80} /> Фото-пример
+            <img src={photo} alt="" width={80} height={80} /> Фото
           </button>
           <button type="button" aria-pressed={view === 'model'} onClick={() => setView('model')}>
             <img src={model} alt="" width={80} height={80} /> 3D-вариант
           </button>
         </div>
-        <p className="photo-disclaimer">Фотография приведена как референс и не изображает продукцию ROLLFORM.</p>
       </div>
       <div className="product-detail-content stack">
         <p className="eyebrow">Кубики / Вариант на заказ</p>
@@ -54,7 +54,7 @@ export default function ProductDetail() {
           <div><dt>Цвет</dt><dd>{shellColors.find(x => x.value === product.config.shell)?.name}</dd></div>
           <div><dt>Шрифт</dt><dd>{fontNames[product.config.font]}</dd></div>
         </dl>
-        <p className="detail-price">Цена уточняется</p>
+        <p className="detail-price">{formatPrice(priceForPreset(product.id))}</p>
         <button type="button" className="button button-black button-fill" onClick={buy}>
           Купить <ShoppingBag className="icon" aria-hidden="true" />
         </button>

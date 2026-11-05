@@ -21,7 +21,6 @@ export default function Storefront() {
     </section>
     <section className="wrapper section stack" id="catalog">
       <h2 className="section-title">В наличии</h2>
-      <p className="section-intro">Примеры сочетаний формы, цвета и шрифта. Изображения иллюстративные.</p>
       <ProductGallery mode="reel" />
     </section>
     <section className="wrapper section about-section" id="about">
@@ -34,21 +33,18 @@ export default function Storefront() {
         </div>
         <figure className="editorial-photo">
           <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/dice-02.webp`}
-            alt="Фотография реальных игровых кубиков из смолы, пример другого автора"
+            alt="Игральные кубики"
             width={1000} height={680} loading="lazy" decoding="async" />
-          <figcaption>Фотография-пример, не изделие ROLLFORM</figcaption>
         </figure>
       </div>
       <div className="editorial-mini-grid">
         <figure className="editorial-photo">
-          <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/process-example.webp`}
-            alt="Пример работы с эпоксидной смолой" width={760} height={1000} loading="lazy" decoding="async" />
-          <figcaption>Референс процесса. Не производство ROLLFORM</figcaption>
+          <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/process-workshop.webp`}
+            alt="Работа с эпоксидной смолой" width={760} height={1000} loading="lazy" decoding="async" />
         </figure>
         <figure className="editorial-photo">
           <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/dice-07.webp`}
-            alt="Макросъёмка настольных игральных кубиков" width={1000} height={680} loading="lazy" decoding="async" />
-          <figcaption>Референс игровой продукции</figcaption>
+            alt="Игральные кубики крупным планом" width={1000} height={680} loading="lazy" decoding="async" />
         </figure>
       </div>
     </section>

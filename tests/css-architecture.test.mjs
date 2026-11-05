@@ -99,7 +99,7 @@ test('storefront restores catalog, product cards, about, and contacts', () => {
   assert.match(home, /ProductGallery/);
   assert.match(catalog, /ProductGallery/);
   assert.match(contact, /ContactContent/);
-  assert.match(chrome, /Юридическая информация/);
+  assert.match(chrome, /Навигация/);
   assert.match(chrome, /Контакты/);
   assert.match(card, /Купить/);
 });
@@ -124,8 +124,8 @@ test('brand placeholder is not a fabricated brand name', () => {
   const layout = read('src/app/layout.tsx');
   assert.match(shell, />Лого<\/Link>/);
   assert.match(shell, /aria-label="На главную"/);
-  assert.doesNotMatch(shell + layout, /ROLLFORM/);
-  assert.match(layout, /title: 'Лого'/);
+  assert.match(layout, /ROLLFORM/);
+  assert.match(layout, /title: 'ROLLFORM \| Кубики'/);
 });
 
 test('header reveals after scroll and only shows cart when items exist', () => {
