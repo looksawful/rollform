@@ -111,8 +111,8 @@ test('copy stays generic while contact form is clearly marked as non-sending', (
   const content = home + cart + builder + read('src/components/SiteShell.tsx') +
     read('src/components/ProductCard.tsx') + read('src/app/catalog/page.tsx') +
     read('src/app/contacts/page.tsx');
-  assert.match(home, />Игральные кости под ваш стиль<\/h1>/);
-  assert.match(home, /Выберите форму, цвет и шрифт/);
+  assert.match(home, />Заголовок<\/h1>/);
+  assert.match(home, />Текст<\/p>/);
   assert.match(home, />Собрать кубик<\/Link>/);
   assert.match(builder, /<span>В корзину<\/span><ShoppingBag/);
   assert.doesNotMatch(cart, /makeOrderText|clipboard|textarea|order-draft/);

@@ -14,8 +14,8 @@ export default function Storefront() {
     <section className="wrapper hero split" aria-labelledby="hero-title">
       <div className="hero-object"><DiceViewer config={initialConfig} continuous /></div>
       <div className="hero-copy stack">
-        <h1 id="hero-title">Игральные кости под ваш стиль</h1>
-        <p>Выберите форму, цвет и шрифт. Посмотрите сочетание в 3D и соберите свой вариант.</p>
+        <h1 id="hero-title">Заголовок</h1>
+        <p>Текст</p>
         <Link className="button button-black" href={themeHref(pathname, "/configure")}>Собрать кубик</Link>
       </div>
     </section>

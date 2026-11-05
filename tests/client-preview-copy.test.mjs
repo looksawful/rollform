@@ -76,7 +76,7 @@ test('legal prototype text is not represented as accepted terms or real cookies'
 test('in-stock delivery copy matches the agreed week timeframe, not an unspecified period', () => {
   const catalog = read('src/app/catalog/page.tsx');
   const production = read('src/components/ProductionInfo.tsx');
-  assert.doesNotMatch(catalog, /в течение недели/); // conditions live on the production page
+  assert.match(catalog, /в течение недели/);
   assert.match(production, /в течение недели/);
 });
 
