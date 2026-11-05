@@ -236,7 +236,10 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
 
         const onMotion = () => {
           if (motion.matches) { timeline?.pause(); host.dataset.motion = 'paused'; }
-          else if (visible && !document.hidden) timeline?.resume();
+          else if (visible && !document.hidden) {
+            timeline?.resume();
+            if (continuous) host.dataset.motion = 'rolling';
+          }
           render();
         };
         motion.addEventListener('change', onMotion);

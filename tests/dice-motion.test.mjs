@@ -35,4 +35,5 @@ test('hero has a passive seamless loop, without click controls', () => {
   assert.match(viewer, /gsap\.timeline\(\{ repeat: -1 \}\)\.to\(dice\.rotation/);
   assert.match(viewer, /duration: 12, ease: 'none'/);
   assert.match(viewer, /pointer-events:none/);
+  assert.match(viewer, /if \(continuous\) host\.dataset\.motion = 'rolling'/);
 });
