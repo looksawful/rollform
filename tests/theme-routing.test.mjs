@@ -37,7 +37,7 @@ test('theme applies on first render without a JS theme switcher', () => {
   assert.match(shell, /data-theme=\{dark \? 'dark' : 'light'\}/);
   assert.match(css, /color-scheme:\s*light;/);
   assert.match(css, /\.site\[data-theme="dark"\]\s*\{\s*color-scheme:\s*dark;/);
-  assert.match(css, /\.site\[data-theme="dark"\]\s*\{[^}]*--color-background:\s*var\(--color-black\)/);
+  assert.match(css, /\.site\[data-theme="dark"\]\s*\{[^}]*--color-background:\s*#151515/);
   assert.match(pages, /\.site\s*\{[^}]*background:\s*var\(--color-background\)/);
   assert.match(pages, /\.site\s*\{[^}]*color:\s*var\(--color-text\)/);
   assert.doesNotMatch(shell, /theme-toggle/);

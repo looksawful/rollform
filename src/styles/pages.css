@@ -16,7 +16,6 @@
     opacity: 1;
     pointer-events: auto;
   }
-  .logo-hidden { display: none; }
   .header-actions { --cluster-gap: 0.6rem; flex-wrap: nowrap; }
   .cart-shortcut {
     display: inline-flex;
@@ -139,7 +138,23 @@
     padding-block: 0.35rem 1.25rem;
     scroll-snap-type: x mandatory;
   }
-  .catalog-pinned .product-scroller { scroll-snap-type: none; }
+  .catalog-scrubbing .product-scroller { scroll-snap-type: none; }
+  .catalog-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); }
+  .catalog-link { display: inline-flex; align-items: center; gap: 0.65rem; min-block-size: 2.75rem; font-weight: 650; text-decoration: underline; text-underline-offset: 0.25em; }
+  .catalog-link:hover { text-decoration-thickness: 2px; }
+  .reel-controls { display: flex; justify-content: flex-end; gap: var(--space-1); }
+  .reel-controls button {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: var(--border-default);
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+  .reel-controls button:hover { background: var(--color-background); }
   .product-scroller > .product { scroll-snap-align: center; }
   @keyframes reel-center-focus {
     0%, 100% { opacity: 1; scale: 0.965; }
@@ -163,6 +178,7 @@
     border: var(--border-default);
     border-radius: var(--radius-lg);
     background: var(--color-surface);
+    box-shadow: var(--shadow-card);
     overflow: hidden;
   }
   .product-media { position: relative; }

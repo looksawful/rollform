@@ -72,21 +72,21 @@ test('nine licensed photographic examples are available without losing accurate 
   assert.doesNotMatch(source('src/components/SiteShell.tsx'), /photoCredits|Источники фотографий/);
 });
 
-test('homepage reel pins at card center while vertical scroll scrubs horizontal position', () => {
+test('homepage reel briefly previews cards then releases to native horizontal scrolling', () => {
   const gallery = source('src/components/ProductGallery.tsx');
   const css = source('src/styles/pages.css');
   assert.match(gallery, /import\('gsap\/ScrollTrigger'\)/);
   assert.match(gallery, /gsap\.registerPlugin\(ScrollTrigger\)/);
   assert.match(gallery, /mode !== 'reel'/);
   assert.match(gallery, /scroller\?\.closest\('#catalog'\)/);
-  assert.match(gallery, /scrollLeft:\s*\(\) => distance\(\)/);
+  assert.match(gallery, /scrollLeft:\s*\(\) => previewDistance\(\)/);
   assert.match(gallery, /start:\s*'center center'/);
   assert.match(gallery, /pin:\s*section/);
-  assert.match(gallery, /end:\s*\(\) => ['"]\+=['"] \+ distance\(\)/);
+  assert.match(gallery, /end:\s*\(\) => ['"]\+=['"] \+ Math\.max/);
   assert.match(gallery, /scrub:\s*true/);
   assert.match(gallery, /prefers-reduced-motion: reduce/);
   assert.match(gallery, /animation\?\.scrollTrigger\?\.kill\(\)/);
-  assert.match(css, /\.catalog-pinned \.product-scroller\s*\{\s*scroll-snap-type:\s*none/);
+  assert.match(css, /\.catalog-scrubbing \.product-scroller\s*\{\s*scroll-snap-type:\s*none/);
   assert.match(gallery, /<Lightbox/);
 });
 
@@ -106,14 +106,14 @@ test('new photo-first product layout keeps purchase honest and supplies a shared
   assert.match(css, /\.product\s*\{[^}]*border-radius:\s*var\(--radius-lg\)/);
 });
 
-test('header is hidden until scroll, logo is invisible, cart only exists after selection', () => {
+test('header is hidden until scroll but contains a visible logo when revealed, cart only after selection', () => {
   const shell = source('src/components/SiteShell.tsx');
   const css = source('src/styles/pages.css');
   const orders = source('src/lib/orders.ts');
   assert.match(shell, /window\.scrollY > 24/);
   assert.match(shell, /revealed \? "topbar topbar-visible" : "topbar"/);
   assert.match(shell, /count > 0 && <Link/);
-  assert.match(css, /\.logo-hidden\s*\{\s*display:\s*none/);
+  assert.match(source('src/styles/components.css'), /\.logo\s*\{[^}]*font-weight:\s*800/);
   assert.match(css, /transform:\s*translateY\(-110%\)/);
   assert.match(css, /\.topbar:focus-within/);
   assert.match(orders, /rollform:demo-cart:v3/);
@@ -146,4 +146,50 @@ test('homepage and cart are free from prototype disclaimers', () => {
   }
   assert.ok(!existsSync('src/lib/photoCredits.ts'));
   assert.ok(!existsSync('src/components/LegalDialogs.tsx'));
+});
+
+test('vertical scrolling only previews the first three cards; the rest remain natively scrollable', () => {
+  const gallery = source('src/components/ProductGallery.tsx');
+  const css = source('src/styles/pages.css');
+  assert.match(gallery, /const previewDistance = \(\) =>/);
+  assert.match(gallery, /cards\[2\]\.offsetLeft - cards\[0\]\.offsetLeft/);
+  assert.match(gallery, /scrollLeft: \(\) => previewDistance\(\)/);
+  assert.match(gallery, /Math\.min\(previewDistance\(\), window\.innerHeight \* 0\.7\)/);
+  assert.match(gallery, /onEnter: markScrubbing/);
+  assert.match(gallery, /onLeave: unmarkScrubbing/);
+  assert.match(gallery, /section\.classList\.remove\('catalog-scrubbing'\)/);
+  assert.doesNotMatch(gallery, /scrollLeft: \(\) => distance\(\)/);
+  assert.match(css, /\.catalog-scrubbing \.product-scroller\s*\{\s*scroll-snap-type: none/);
+  assert.match(css, /\.product-scroller\s*\{[^}]*scroll-snap-type: x mandatory/);
+});
+
+test('homepage has an explicit catalog link and restored logo', () => {
+  const home = source('src/components/Storefront.tsx');
+  const shell = source('src/components/SiteShell.tsx');
+  const css = source('src/styles/pages.css');
+  assert.match(home, /className="catalog-heading"/);
+  assert.match(home, />Весь каталог/);
+  assert.match(home, /themeHref\(pathname, '\/catalog'\)/);
+  assert.match(shell, /className="logo"/);
+  assert.doesNotMatch(shell, /logo-hidden/);
+  assert.doesNotMatch(css, /\.logo-hidden/);
+});
+
+test('neutral surface palette and translucent dividers are central CSS tokens', () => {
+  const tokens = source('src/styles/tokens.css');
+  const pages = source('src/styles/pages.css');
+  assert.match(tokens, /--color-background: #fafafa/);
+  assert.match(tokens, /--color-surface: #ffffff/);
+  assert.match(tokens, /--color-border: rgb\(0 0 0 \/ 0\.1[24]\)/);
+  assert.match(tokens, /--shadow-card:/);
+  assert.match(tokens, /\.site\[data-theme="dark"\][^}]*--color-border: rgb\(255 255 255 \/ 0\.1[46]\)/);
+  assert.match(pages, /\.product\s*\{[^}]*box-shadow: var\(--shadow-card\)/);
+});
+
+test('manual carousel buttons scroll horizontally without capturing the page', () => {
+  const gallery = source('src/components/ProductGallery.tsx');
+  assert.match(gallery, /scroller\.scrollBy\(\{ left: direction/);
+  assert.match(gallery, /aria-label="Предыдущие карточки"/);
+  assert.match(gallery, /aria-label="Следующие карточки"/);
+  assert.match(gallery, /mode === 'reel' && <div className="reel-controls"/);
 });

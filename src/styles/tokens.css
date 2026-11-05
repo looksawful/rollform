@@ -4,7 +4,7 @@
   :root {
     /* Light is the default; /dark always has its own dark scope. */
     color-scheme: light;
-    /* Primitives: the palette stays black and white in both themes. */
+    /* Contrast primitives stay black and white; surfaces use neutral gray. */
     --color-black: #000000;
     --color-white: #ffffff;
 
@@ -49,10 +49,11 @@
      Inherited custom properties are computed before a nested theme overrides them. */
   .site {
     color-scheme: light;
-    --color-background: var(--color-white);
+    --color-background: #fafafa;
     --color-text: var(--color-black);
-    --color-surface: var(--color-background);
-    --color-border: var(--color-text);
+    --color-surface: #ffffff;
+    --color-border: rgb(0 0 0 / 0.14);
+    --shadow-card: 0 8px 24px rgb(0 0 0 / 0.035);
     --color-action: var(--color-text);
     --color-on-action: var(--color-background);
     --color-focus: var(--color-text);
@@ -60,8 +61,11 @@
   }
   .site[data-theme="dark"] {
     color-scheme: dark;
-    --color-background: var(--color-black);
+    --color-background: #151515;
     --color-text: var(--color-white);
+    --color-surface: #202020;
+    --color-border: rgb(255 255 255 / 0.16);
+    --shadow-card: 0 8px 24px rgb(0 0 0 / 0.12);
   }
 
 }
