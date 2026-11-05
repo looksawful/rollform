@@ -12,8 +12,16 @@
     border-radius: var(--radius-md);
     background: var(--color-preview);
   }
-  .dice-canvas { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; }
-  .dice-canvas:focus-visible { outline: 2px solid var(--color-preview-ink); outline-offset: -3px; }
+  .dice-canvas {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    --dice-anticipate-duration: 180ms;
+    --dice-roll-duration: 2100ms;
+    --dice-settle-duration: 380ms;
+    --dice-hold-duration: 1100ms;
+  }
   .canvas-fallback {
     position: absolute;
     inset: 25%;
