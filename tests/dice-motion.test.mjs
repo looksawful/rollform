@@ -26,3 +26,13 @@ test('roll is deliberately slow and includes a visible pause on mobile', () => {
   assert.doesNotMatch(viewer, /Math\.floor\(Math\.random\(\) \* 2\)/);
   assert.match(viewer, /ease: 'sine\.inOut', onStart: \(\) => \{ host\.dataset\.motion = 'rolling'/);
 });
+
+
+test('hero has a passive seamless loop, without click controls', () => {
+  const storefront = readFileSync('src/components/Storefront.tsx', 'utf8');
+  assert.match(storefront, /<DiceViewer config=\\{initialConfig\\} continuous \\/>/);
+  assert.match(viewer, /if \\(continuous\\) \\{/);
+  assert.match(viewer, /gsap\\.timeline\\(\\{ repeat: -1 \\}\\)\\.to\\(dice\\.rotation/);
+  assert.match(viewer, /duration: 12, ease: 'none'/);
+  assert.match(viewer, /pointer-events:none/);
+});

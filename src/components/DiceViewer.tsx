@@ -6,7 +6,7 @@ import type { Vector3, Mesh } from 'three';
 import { buildGeometry, faceLabel, facePlacements } from '@/lib/diceGeometry';
 import { cssTimeSeconds } from '@/lib/cssTime';
 
-export default function DiceViewer({ config }: { config: DiceConfig }) {
+export default function DiceViewer({ config, continuous = false }: { config: DiceConfig; continuous?: boolean }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const configRef = useRef(config);
   const viewerRef = useRef<{ update: (config: DiceConfig) => void } | null>(null);
@@ -155,6 +155,20 @@ export default function DiceViewer({ config }: { config: DiceConfig }) {
         const play = () => {
           timeline?.kill();
           if (!normals.length) return;
+          if (continuous) {
+            dice.rotation.set(-0.38, 0.4, 0.12);
+            timeline = gsap.timeline({ repeat: -1 }).to(dice.rotation, {
+              y: Math.PI * 2 + 0.4, duration: 12, ease: 'none',
+              onStart: () => { host.dataset.motion = 'rolling'; },
+              onUpdate: render,
+            });
+            if (motion.matches || !visible || document.hidden) {
+              timeline.pause();
+              if (motion.matches) host.dataset.motion = 'paused';
+              render();
+            }
+            return;
+          }
           const phase = { windup: 0, roll: 0, wobble: 0 };
           const start = new THREE.Quaternion(), target = new THREE.Quaternion();
           const axis = new THREE.Vector3(0.7, 1, 0.3).normalize();
