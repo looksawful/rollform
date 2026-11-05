@@ -3,14 +3,13 @@
 import { useEffect, useRef, useState } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
-import { presets, shellColors, fontNames } from '@/lib/catalog';
+import { presets } from '@/lib/catalog';
+import { photoPath } from '@/lib/photoCredits';
 import ProductCard from './ProductCard';
 
-const slides = presets.map(product => ({
-  src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products/${product.id}.webp`,
-  width: 900,
-  height: 900,
-  alt: `3D-визуализация ${product.title}: ${product.config.shape.toUpperCase()}, ${shellColors.find(color => color.value === product.config.shell)?.name}, ${fontNames[product.config.font]}`,
+const slides = presets.map((product, index) => ({
+  src: photoPath(index),
+  alt: `Референсная фотография игровых кубиков, ${product.title}. Не продукция ROLLFORM.`,
 }));
 
 export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
@@ -61,7 +60,7 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
     <div ref={scrollerRef} className={mode === 'reel' ? 'product-scroller reel' : 'product-grid grid'}
       {...(mode === 'reel' ? { role: 'region', 'aria-label': 'В наличии', tabIndex: 0 } : {})}>
       {presets.map((product, index) =>
-        <ProductCard key={product.id} product={product} onPreview={() => setActive(index)} />)}
+        <ProductCard key={product.id} product={product} index={index} onPreview={() => setActive(index)} />)}
     </div>
     <Lightbox
       open={active !== null}

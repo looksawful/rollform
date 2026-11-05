@@ -6,25 +6,36 @@ import { ZoomIn } from 'lucide-react';
 import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
 import { fontNames, shellColors } from '@/lib/catalog';
+import { photoPath } from '@/lib/photoCredits';
 import type { Preset } from '@/lib/catalog';
 
-export default function ProductCard({ product, onPreview }: { product: Preset; onPreview: () => void }) {
+export default function ProductCard({ product, index, onPreview }: {
+  product: Preset;
+  index: number;
+  onPreview: () => void;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const { add } = useCart();
-  const addToCart = () => {
-    if (add(product.config, { kind: 'preorder_preset', presetId: product.id })) router.push(themeHref(pathname, '/cart'));
+  const detailsUrl = themeHref(pathname, '/product?item=' + encodeURIComponent(product.id));
+  const description = [
+    product.config.shape.toUpperCase(),
+    shellColors.find(color => color.value === product.config.shell)?.name,
+    fontNames[product.config.font],
+  ].join(' · ');
+
+  const buy = () => {
+    if (add(product.config, { kind: 'preorder_preset', presetId: product.id })) {
+      router.push(themeHref(pathname, '/cart'));
+    }
   };
-  const url = themeHref(pathname, '/configure?preset=' + encodeURIComponent(product.id));
+
   return <article className="product stack">
     <div className="product-media">
-      <Link className="product-visual frame" href={url}
-        aria-label={'Настроить ' + product.config.shape.toUpperCase()}>
-        <img
-          src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products/${product.id}.webp`}
-          alt=""
-          width={900} height={900} loading="lazy" decoding="async"
-        />
+      <Link className="product-visual frame" href={detailsUrl} aria-label={'Подробнее: ' + product.title}>
+        <img src={photoPath(index)} alt={'Фото-пример игровых кубиков для ' + product.title}
+          width={1000} height={800} loading="lazy" decoding="async" />
+        <span className="product-photo-label">Фото-пример</span>
       </Link>
       <button className="product-zoom" type="button" onClick={onPreview}
         aria-label={'Увеличить изображение: ' + product.title}>
@@ -32,15 +43,13 @@ export default function ProductCard({ product, onPreview }: { product: Preset; o
       </button>
     </div>
     <div className="product-copy stack">
-      <h3>{product.title}</h3>
-      <div className="product-badges cluster" aria-label="Параметры варианта">
-        <span>{product.config.shape.toUpperCase()}</span>
-        <span>{shellColors.find(color => color.value === product.config.shell)?.name}</span>
-        <span>{fontNames[product.config.font]}</span>
-      </div>
+      <h3><Link href={detailsUrl}>{product.title}</Link></h3>
+      <p className="product-description">{description}</p>
+      <p className="product-price">Цена уточняется</p>
     </div>
-    <div className="product-actions cluster">
-      <button type="button" onClick={addToCart} aria-label={'В корзину: ' + product.config.shape.toUpperCase()}>В корзину</button>
+    <div className="product-actions">
+      <button type="button" className="button button-black" onClick={buy}
+        aria-label={'Купить: ' + product.title}>Купить</button>
     </div>
   </article>;
 }

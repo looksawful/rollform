@@ -39,5 +39,5 @@ test('hero has a passive seamless loop, without click controls', () => {
 });
 
 test('Hero camera is farther away while configurator camera stays unchanged', () => {
-  assert.match(viewer, /camera\.position\.set\(0,\s*0,\s*continuous\s*\?\s*8\s*:\s*6\.6\)/);
+  assert.match(viewer, /camera\.position\.set\(0,\s*0,\s*continuous\s*\?\s*10\s*:\s*6\.6\)/);
 });

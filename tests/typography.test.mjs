@@ -48,12 +48,12 @@ test('body text and Prose preserve vertical rhythm without overriding Stack', ()
   assert.doesNotMatch(base, /text-transform:\s*uppercase/);
 });
 
-test('Cyrillic headings avoid aggressive tracking and mobile Hero keeps intentional split', () => {
+test('Cyrillic headings avoid aggressive tracking and mobile Hero remains responsive', () => {
   assert.match(token, /--tracking-display:\s*-0\.03em;/);
   assert.match(token, /--tracking-heading:\s*-0\.02em;/);
-  assert.match(pages, /\.hero\.split\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.05fr\)\s+minmax\(0,\s*0\.95fr\)/);
+  assert.match(section, /\.hero\.hero-centered\s*\{/);
   assert.match(pages, /\.hero h1\s*\{[^}]*font-size:\s*clamp\(/);
-  assert.match(pages, /\.hero h1\s*\{[^}]*font-size:\s*clamp\(1\.45rem,\s*7\.5vw,\s*2\.5rem\)/);
+  assert.match(section, /\.hero\.hero-centered h1\s*\{[^}]*font-size:\s*clamp\(2\.75rem,\s*12\.5vw,\s*4\.7rem\)/);
   assert.doesNotMatch([base,component,section,pages].join('\n'), /letter-spacing:\s*-0\.0[5-9]/);
   assert.doesNotMatch([base,component,section,pages].join('\n'), /text-transform:\s*uppercase/);
 });

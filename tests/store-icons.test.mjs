@@ -14,7 +14,7 @@ const pkg = JSON.parse(read('package.json'));
 test('one free tree-shaken Lucide pack, with specific imports only', () => {
   assert.ok(pkg.dependencies?.['lucide-react'], 'Install lucide-react');
   assert.match(shell, /import\s*\{\s*Menu,\s*ShoppingBag\s*\}\s*from\s*'lucide-react'/);
-  assert.match(cart, /import\s*\{\s*Minus,\s*Plus\s*\}\s*from\s*'lucide-react'/);
+  assert.match(cart, /import\s*\{\s*Minus,\s*Plus,\s*ShoppingBag\s*\}\s*from\s*'lucide-react'/);
   assert.match(config, /import\s*\{\s*ShoppingBag\s*\}\s*from\s*'lucide-react'/);
   assert.doesNotMatch(shell + cart + config, /import\s+\*\s+as\s+\w+\s+from\s+['"]lucide-react/);
 });

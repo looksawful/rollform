@@ -8,8 +8,8 @@ const source = readFileSync(path.join(root, 'src/components/ProductCard.tsx'), '
 
 test('product covers use photographs rather than SVG sketches', () => {
   assert.match(source, /<img\b/);
-  assert.match(source, /product\.id/);
-  assert.match(source, /NEXT_PUBLIC_BASE_PATH/);
+  assert.match(source, /photoPath\(index\)/);
+  assert.match(source, /Фото-пример/);
   assert.doesNotMatch(source, /DiceGlyph/);
 });
 

@@ -15,7 +15,7 @@ export default function Storefront() {
       <div className="hero-object"><DiceViewer config={initialConfig} continuous /></div>
       <div className="hero-copy stack">
         <h1 id="hero-title">Заголовок</h1>
-        <p>Текст</p>
+        <p>Внимание! Этот текст является рыбой!</p>
         <Link className="button button-black" href={themeHref(pathname, "/configure")}>Собрать кубик</Link>
       </div>
     </section>
@@ -24,29 +24,51 @@ export default function Storefront() {
       <p className="section-intro">Примеры сочетаний формы, цвета и шрифта. Изображения иллюстративные.</p>
       <ProductGallery mode="reel" />
     </section>
-    <section className="wrapper section prose" id="about">
-      <h2 className="section-title">О нас</h2>
-      <p>Внимание, этот текст является рыбой.</p>
+    <section className="wrapper section about-section" id="about">
+      <div className="editorial-grid">
+        <div className="editorial-copy stack">
+          <p className="eyebrow">О проекте</p>
+          <h2 className="section-title">О нас</h2>
+          <p>Внимание! Этот текст является рыбой!</p>
+          <Link href={themeHref(pathname, '/production')} className="text-link">Изготовление и получение</Link>
+        </div>
+        <figure className="editorial-photo">
+          <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/dice-02.webp`}
+            alt="Фотография реальных игровых кубиков из смолы, пример другого автора"
+            width={1000} height={680} loading="lazy" decoding="async" />
+          <figcaption>Фотография-пример, не изделие ROLLFORM</figcaption>
+        </figure>
+      </div>
+      <div className="editorial-mini-grid">
+        <figure className="editorial-photo">
+          <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/process-example.webp`}
+            alt="Пример работы с эпоксидной смолой" width={760} height={1000} loading="lazy" decoding="async" />
+          <figcaption>Референс процесса. Не производство ROLLFORM</figcaption>
+        </figure>
+        <figure className="editorial-photo">
+          <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/dice-07.webp`}
+            alt="Макросъёмка настольных игральных кубиков" width={1000} height={680} loading="lazy" decoding="async" />
+          <figcaption>Референс игровой продукции</figcaption>
+        </figure>
+      </div>
     </section>
     <section className="wrapper section stack" id="faq">
       <h2 className="section-title">Частые вопросы</h2>
       <div className="faq-list">
-        <details>
-          <summary>Можно ли изменить вариант из каталога?</summary>
-          <p>Да. Откройте вариант в конструкторе и измените форму, цвет или шрифт.</p>
-        </details>
-        <details>
-          <summary>Чем отличаются D4, D6 и другие формы?</summary>
-          <p>Число после D обозначает количество граней. В конструкторе доступны D4, D6, D8, D10, D12, D20 и процентный D%.</p>
-        </details>
-        <details>
-          <summary>Будет ли кубик точно таким, как на изображении?</summary>
-          <p>Изображения и 3D-модели иллюстративные. Материал, оттенок и отделка реального изделия требуют подтверждения.</p>
-        </details>
-        <details>
-          <summary>Когда изготовят кубик и как его получить?</summary>
-          <p>Условия для готовых и заказных вариантов собраны на странице <Link href={themeHref(pathname, '/production')}>«Изготовление и доставка»</Link>.</p>
-        </details>
+        {[
+          'Как выбрать кубик?',
+          'Какие формы доступны?',
+          'Можно изменить цвет?',
+          'Что с материалами?',
+          'Можно заказать свой вариант?',
+          'Как узнать стоимость?',
+          'Когда будет готов заказ?',
+          'Как получить кубики?',
+          'Как связаться с вами?',
+        ].map(question => <details key={question}>
+          <summary>{question}</summary>
+          <p>Внимание! Этот текст является рыбой!</p>
+        </details>)}
       </div>
     </section>
     <section className="wrapper section stack" id="contacts">

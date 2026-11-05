@@ -43,7 +43,7 @@ test('all documented layout primitives have real CSS algorithms', () => {
   assert.match(css, /--cover-min-height/);
 });
 
-test('layout composition reuses primitives with a deliberate mobile split exception', () => {
+test('layout composition reuses patterns and adapts the existing commerce pages', () => {
   const home = read('src/components/Storefront.tsx');
   const card = read('src/components/ProductCard.tsx');
   const catalog = read('src/app/catalog/page.tsx');
@@ -53,14 +53,14 @@ test('layout composition reuses primitives with a deliberate mobile split except
   const pages = read('src/styles/pages.css');
   assert.match(read('src/components/ProductGallery.tsx'), /product-scroller reel/);
   assert.match(home, /id="about"/);
-  assert.match(home, /className="wrapper section prose"/);
+  assert.match(home, /className="wrapper section about-section"/);
   assert.match(card, /className="product-visual frame"/);
   assert.match(read('src/components/ProductGallery.tsx'), /product-grid grid/);
-  assert.match(cart, /className="empty-state box cover stack"/);
+  assert.match(cart, /className="empty-state stack"/);
   assert.match(contacts, /page-section stack/);
   assert.match(contacts, /<ContactContent/);
   assert.match(shell, /className="wrapper footer-inner switcher"/);
-  assert.match(pages, /\.hero\.split\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1\.05fr\)\s+minmax\(0,\s*0\.95fr\)/);
+  assert.match(read('src/styles/sections.css'), /\.hero\.hero-centered\s*\{/);
 });
 
 test('Bento layout is preserved but disconnected until the copy is validated', () => {
@@ -101,7 +101,7 @@ test('storefront restores catalog, product cards, about, and contacts', () => {
   assert.match(contact, /ContactContent/);
   assert.match(chrome, /Юридическая информация/);
   assert.match(chrome, /Контакты/);
-  assert.match(card, /В корзину/);
+  assert.match(card, /Купить/);
 });
 
 test('copy stays generic while contact form is clearly marked as non-sending', () => {
@@ -112,11 +112,11 @@ test('copy stays generic while contact form is clearly marked as non-sending', (
     read('src/components/ProductCard.tsx') + read('src/app/catalog/page.tsx') +
     read('src/app/contacts/page.tsx');
   assert.match(home, />Заголовок<\/h1>/);
-  assert.match(home, />Текст<\/p>/);
+  assert.match(home, /Внимание! Этот текст является рыбой!/);
   assert.match(home, />Собрать кубик<\/Link>/);
   assert.match(builder, /<span>В корзину<\/span><ShoppingBag/);
   assert.doesNotMatch(cart, /makeOrderText|clipboard|textarea|order-draft/);
-  assert.doesNotMatch(content, /демо|прототип|черновик|не отправляется|предзаказ/i);
+  assert.doesNotMatch(content, /реальная оплата|оплата прошла|успешно отправлено/i);
 });
 
 test('brand placeholder is not a fabricated brand name', () => {
@@ -128,12 +128,14 @@ test('brand placeholder is not a fabricated brand name', () => {
   assert.match(layout, /title: 'Лого'/);
 });
 
-test('mobile header has hamburger navigation and always-visible cart shortcut', () => {
+test('header reveals after scroll and only shows cart when items exist', () => {
   const shell = read('src/components/SiteShell.tsx');
   const css = read('src/styles/pages.css');
   assert.match(shell, /<details className="mobile-menu"/);
   assert.match(shell, /<summary aria-label="Меню"/);
+  assert.match(shell, /count > 0 && <Link/);
   assert.match(shell, /className="cart-shortcut"/);
+  assert.match(shell, /setRevealed\(true\)/);
   assert.match(shell, /<ShoppingBag className="icon" aria-hidden="true"\s*\/>/);
   assert.match(css, /\.mobile-menu\s*\{/);
   assert.match(css, /\.cart-shortcut\s*\{/);
@@ -152,7 +154,7 @@ test('homepage offers keyboard-accessible horizontal catalog and mobile split', 
 
 test('about section uses the requested placeholder paragraph', () => {
   const home = read('src/components/Storefront.tsx');
-  assert.match(home, /Внимание, этот текст является рыбой/);
+  assert.match(home, /Внимание! Этот текст является рыбой!/);
 });
 
 test('monochrome design tokens separate primitive colors from semantic roles', () => {
@@ -197,7 +199,7 @@ test('horizontal product reel centers and gently scales cards as they scroll', (
   const pages = read('src/styles/pages.css');
   const gallery = read('src/components/ProductGallery.tsx');
   assert.match(gallery, /product-scroller reel/);
-  assert.match(pages, /--reel-card-size:\s*clamp\(17rem,\s*30vw,\s*24rem\)/);
+  assert.match(pages, /--reel-card-size:\s*clamp\(17rem,\s*30vw,\s*23rem\)/);
   assert.match(pages, /padding-inline:\s*max\(0px,\s*calc\(\(100% - var\(--reel-card-size\)\) \/ 2\)\)/);
   assert.match(pages, /scroll-snap-type:\s*x mandatory/);
   assert.match(pages, /scroll-snap-align:\s*center/);
@@ -214,7 +216,7 @@ test('centered Hero composition preserves approved copy and passive 3D motion', 
   assert.match(home, /className="wrapper hero hero-centered"/);
   assert.match(home, /<DiceViewer config=\{initialConfig\} continuous \/>/);
   assert.match(home, />Заголовок<\/h1>/);
-  assert.match(home, />Текст<\/p>/);
+  assert.match(home, /Внимание! Этот текст является рыбой!/);
   assert.match(home, />Собрать кубик<\/Link>/);
   assert.match(css, /\.hero-centered \.hero-object\s*\{[^}]*position:\s*absolute;/);
   assert.match(css, /\.hero-centered \.hero-copy\s*\{[^}]*align-items:\s*center;/);

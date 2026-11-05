@@ -42,7 +42,7 @@
     overflow-wrap: anywhere;
   }
   .hero-copy p { max-inline-size: 31rem; font-size: var(--fs-body); line-height: var(--lh-body); }
-  .section { padding-block: var(--space-5); border-block-start: var(--border-default); }
+  .section { padding-block: var(--space-5); }
 
   /* Centered monochrome Hero study: 3D dice acts as a passive backdrop. */
   .hero.hero-centered {
@@ -75,7 +75,7 @@
     margin-inline: auto;
   }
   .hero-centered h1 {
-    font-size: clamp(4rem, 12vw, 12rem);
+    font-size: clamp(3.5rem, 8.2vw, 8.5rem);
     font-weight: 900;
     line-height: 0.92;
     letter-spacing: var(--tracking-display);
@@ -99,7 +99,7 @@
       padding-block: 1.5rem 2rem;
     }
     .hero.hero-centered h1 {
-      font-size: clamp(3.1rem, 15.5vw, 5.8rem);
+      font-size: clamp(2.75rem, 12.5vw, 4.7rem);
       letter-spacing: var(--tracking-display);
     }
     .hero-centered .hero-copy p { max-inline-size: 26ch; }

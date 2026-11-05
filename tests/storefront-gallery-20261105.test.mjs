@@ -8,7 +8,8 @@ test('one FAQ on the existing homepage, with accessible native disclosures', () 
   const home = source('src/components/Storefront.tsx');
   assert.match(home, /id="faq"/);
   assert.match(home, /<h2[^>]*>Частые вопросы<\/h2>/);
-  assert.ok((home.match(/<details\b/g) || []).length >= 4);
+  assert.match(home, /\[\s*'Как выбрать кубик\?'/);
+  assert.match(home, /'Как связаться с вами\?'/);
   assert.match(home, /<summary>/);
   assert.match(home, /id="about"/); // existing informational section remains
   assert.doesNotMatch(home, /BentoSection/);
@@ -43,32 +44,32 @@ test('one shared lightbox handles all nine preset images across both routes', ()
 test('cards keep builder link and add a separate keyboard-operable photo preview', () => {
   const card = source('src/components/ProductCard.tsx');
   assert.match(card, /className="product-visual frame"/);
-  assert.match(card, /href=\{url\}/);
+  assert.match(card, /href=\{detailsUrl\}/);
   assert.match(card, /onPreview/);
   assert.match(card, /aria-label=\{['"]Увеличить изображение/);
-  assert.match(card, />В корзину<\/button>/);
+  assert.match(card, />Купить<\/button>/);
 });
 
 test('cart links to the shared preparation and delivery information without checkout promises', () => {
   const cart = source('src/components/CartView.tsx');
-  assert.match(cart, /items.length > 0 && <p className="cart-delivery">/);
+  assert.match(cart, /items.length === 0/);
+  assert.match(cart, /className="cart-summary stack"/);
   assert.match(cart, /href=\{themeHref\(pathname, '\/production'\)\}/);
   assert.doesNotMatch(cart, /<button[^>]*>Оплатить/);
 });
 
 
-test('all nine catalog images are real 900px WebP renders, not 360px mismatched photos', () => {
+test('nine licensed photographic examples are available without losing accurate 3D variants', () => {
   for (let index = 1; index <= 9; index++) {
-    const file = readFileSync(`public/products/demo-${index}.webp`);
-    assert.equal(file.toString('ascii', 0, 4), 'RIFF');
-    assert.equal(file.toString('ascii', 8, 12), 'WEBP');
-    assert.equal(file.toString('ascii', 12, 16), 'VP8 ');
-    assert.equal(file.readUInt16LE(26) & 0x3fff, 900);
-    assert.equal(file.readUInt16LE(28) & 0x3fff, 900);
-    assert.ok(file.length > 5000);
+    const photo = readFileSync(`public/photos/dice-${String(index).padStart(2, '0')}.webp`);
+    assert.equal(photo.toString('ascii', 0, 4), 'RIFF');
+    assert.equal(photo.toString('ascii', 8, 12), 'WEBP');
+    assert.ok(photo.length > 9000);
+    assert.ok(existsSync(`public/products/demo-${index}.webp`));
   }
-  assert.match(source('src/components/ProductGallery.tsx'), /width: 900,/);
-  assert.match(source('src/components/ProductCard.tsx'), /width=\{900\} height=\{900\}/);
+  assert.match(source('src/components/ProductGallery.tsx'), /photoPath\(index\)/);
+  assert.match(source('src/components/ProductCard.tsx'), /photoPath\(index\)/);
+  assert.match(source('src/components/SiteShell.tsx'), /photoCredits\.map/);
 });
 
 test('homepage reel pins at card center while vertical scroll scrubs horizontal position', () => {
@@ -87,4 +88,46 @@ test('homepage reel pins at card center while vertical scroll scrubs horizontal 
   assert.match(gallery, /animation\?\.scrollTrigger\?\.kill\(\)/);
   assert.match(css, /\.catalog-pinned \.product-scroller\s*\{\s*scroll-snap-type:\s*none/);
   assert.match(gallery, /<Lightbox/);
+});
+
+test('new photo-first product layout keeps purchase honest and supplies a shared detail route', () => {
+  const card = source('src/components/ProductCard.tsx');
+  const detail = source('src/components/ProductDetail.tsx');
+  const css = source('src/styles/pages.css');
+  assert.match(card, /Цена уточняется/);
+  assert.match(card, /<h3><Link/);
+  assert.match(card, /Купить/);
+  assert.doesNotMatch(card, /product-badges/);
+  assert.match(detail, /3D-вариант/);
+  assert.match(detail, /Цена уточняется/);
+  assert.match(detail, /add\(product.config/);
+  assert.ok(existsSync('src/app/product/page.tsx'));
+  assert.ok(existsSync('src/app/dark/product/page.tsx'));
+  assert.match(css, /\.product\s*\{[^}]*border-radius:\s*var\(--radius-lg\)/);
+});
+
+test('header is hidden until scroll, logo is invisible, cart only exists after selection', () => {
+  const shell = source('src/components/SiteShell.tsx');
+  const css = source('src/styles/pages.css');
+  const orders = source('src/lib/orders.ts');
+  assert.match(shell, /window\.scrollY > 24/);
+  assert.match(shell, /revealed \? "topbar topbar-visible" : "topbar"/);
+  assert.match(shell, /count > 0 && <Link/);
+  assert.match(css, /\.logo-hidden\s*\{\s*display:\s*none/);
+  assert.match(css, /transform:\s*translateY\(-110%\)/);
+  assert.match(css, /\.topbar:focus-within/);
+  assert.match(orders, /rollform:demo-cart:v3/);
+});
+
+test('licensed photographic sources are available and no fake prices or claims appear', () => {
+  const credits = source('src/lib/photoCredits.ts');
+  const about = source('src/components/Storefront.tsx');
+  const production = source('src/components/ProductionInfo.tsx');
+  const detail = source('src/components/ProductDetail.tsx');
+  assert.ok(existsSync('public/photos/process-example.webp'));
+  assert.match(credits, /CC BY-SA/);
+  assert.match(credits, /Stephan Sprinz/);
+  assert.match(about, /Не производство ROLLFORM/);
+  assert.match(production, /Не производство ROLLFORM/);
+  assert.doesNotMatch(detail, /\d+\s?₽/);
 });

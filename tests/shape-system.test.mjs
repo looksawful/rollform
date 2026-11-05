@@ -22,8 +22,8 @@ test('shape design uses just four reusable Material-inspired tokens', () => {
 test('primary, choice, quantity, catalog and dialog action buttons have capsule shapes', () => {
   assert.match(components, /\.button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
   assert.match(components, /\.pill-list button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
-  assert.match(components, /\.quantity button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
-  assert.match(pages, /\.product-actions :is\(a, button\)\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
+  assert.match(pages, /\.quantity button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
+  assert.match(pages, /\.product-actions \.button\s*\{[^}]*inline-size:\s*100%/);
   assert.match(pages, /\.dialog-actions button, \.legal-dialog form button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
 });
 

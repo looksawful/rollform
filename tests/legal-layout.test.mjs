@@ -58,8 +58,8 @@ test('all existing layout algorithms are reused where appropriate', () => {
   assert.match(builder, /className="pill-list cluster"/);
   assert.match(home, /className="bento-viewport scroller"/);
   assert.match(home, /className="bento-card box"/);
-  assert.match(css, /container-type:\s*inline-size/);
-  assert.match(css, /@container\s*\(width\s*<\s*18rem\)/);
+  assert.match(css, /\.product\s*\{[^}]*border:\s*var\(--border-default\)/);
+  assert.match(css, /\.product-detail\s*\{[^}]*display:\s*grid/);
   assert.match(patterns, /\.prose\s*>\s*:is\(p,\s*ul,\s*ol\)/);
   assert.match(patterns, /--measure/);
 });

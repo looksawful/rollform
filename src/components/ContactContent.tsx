@@ -32,17 +32,17 @@ export default function ContactContent() {
     </div>
     <form className="contact-form stack" onSubmit={onSubmit}>
       <h3>Написать нам</h3>
-      <p>Форма для демонстрации. Сообщения не отправляются.</p>
+      <p>Демонстрационная форма. Сообщения не отправляются, контакты для связи уточняются.</p>
       <label className="stack" htmlFor="contact-name">Имя
         <input id="contact-name" name="name" type="text" autoComplete="name" required maxLength={80} />
       </label>
-      <label className="stack" htmlFor="contact-reply">Контакт для ответа
-        <input id="contact-reply" name="reply" type="text" required maxLength={150} />
+      <label className="stack" htmlFor="contact-reply">Электронная почта
+        <input id="contact-reply" name="reply" type="email" autoComplete="email" required maxLength={150} />
       </label>
       <label className="stack" htmlFor="contact-message">Сообщение
         <textarea id="contact-message" name="message" rows={4} required maxLength={1500} />
       </label>
-      <button className="button button-black" type="submit">Отправить</button>
+      <button className="button button-black" type="submit">Проверить сообщение</button>
       {attempted && <p role="status">Сообщение не отправлено: форма работает в демонстрационном режиме.</p>}
     </form>
   </div>;

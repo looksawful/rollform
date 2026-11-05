@@ -23,15 +23,16 @@ test('Bento retained as a disconnected draft component',()=>{
   assert.doesNotMatch(s,/>Весь каталог<\/Link>/);
   assert.match(s,/<ContactContent\s*\/>/);
 });
-test('stock cards use existing preset data, fact badges and one actual action',()=>{
+test('stock cards show photographic references, readable metadata, price placeholder and buy action',()=>{
   const card=read('src/components/ProductCard.tsx');
   const catalog=read('src/app/catalog/page.tsx');
-  assert.match(card,/<h3>\{product\.title\}<\/h3>/);
-  assert.match(card,/className="product-badges/);
-  assert.match(card,/<span>\{product\.config\.shape\.toUpperCase\(\)\}<\/span>/);
-  assert.match(card,/<button[^>]*>В корзину<\/button>/);
+  assert.match(card,/<h3><Link href=\{detailsUrl\}>\{product\.title\}<\/Link><\/h3>/);
+  assert.match(card,/className="product-description"/);
+  assert.match(card,/className="product-price"/);
+  assert.match(card,/product\.config\.shape\.toUpperCase\(\)/);
+  assert.match(card,/>Купить<\/button>/);
   assert.doesNotMatch(card,/>Настроить<\/Link>|>Кнопка<\/Link>/);
-  assert.match(card,/alt=""/);
+  assert.match(card,/photoPath\(index\)/);
   assert.match(catalog,/>Кубики в наличии<\/h1>/);
 });
 test('builder, cart and production pages honor accepted copy decisions',()=>{
@@ -41,8 +42,8 @@ test('builder, cart and production pages honor accepted copy decisions',()=>{
   assert.match(builder,/>Собери сам<\/h1>/);
   assert.match(builder,/<h2>Количество граней<\/h2>/);
   assert.match(builder,/href=\{themeHref\(pathname, '\/production'\)\}/);
-  assert.match(cart,/Корзина пока пуста/);
-  assert.match(cart,/>В каталог<\/Link>/);
+  assert.match(cart,/Пока ничего нет/);
+  assert.match(cart,/>Смотреть кубики<\/Link>/);
   assert.match(cart,/>Удалить<\/button>/);
   assert.match(data,/name: 'Цвет 1'/);
   assert.match(data,/grotesk: 'Шрифт 1'/);
@@ -54,7 +55,7 @@ test('contact channels and a truthful demo contact form appear on both screens',
  const ui=read('src/components/ContactContent.tsx');
  const home=read('src/components/Storefront.tsx');
  const page=read('src/app/contacts/page.tsx');
- for(const s of ['Телефон','Telegram','Instagram','Почта','Имя','Контакт для ответа','Сообщение','Отправить'])assert.ok(ui.includes(s),s);
+ for(const s of ['Телефон','Telegram','Instagram','Почта','Имя','Электронная почта','Сообщение','Проверить сообщение'])assert.ok(ui.includes(s),s);
  assert.match(ui,/<form/);assert.match(ui,/onSubmit=\{onSubmit\}/);
  assert.match(ui,/Сообщения не отправляются/);
  assert.match(ui,/role="status"/);

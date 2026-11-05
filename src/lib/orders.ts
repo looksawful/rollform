@@ -7,7 +7,7 @@ export type CartOrigin =
   | { kind: 'preorder_custom' };
 
 export type CartItem = { id: string; origin: CartOrigin; config: DiceConfig; quantity: number };
-export const CART_KEY = 'rollform:demo-cart:v2';
+export const CART_KEY = 'rollform:demo-cart:v3';
 
 export function sameConfig(a: DiceConfig, b: DiceConfig) {
   return a.shape === b.shape && a.shell === b.shell && a.font === b.font;
