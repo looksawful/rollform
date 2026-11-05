@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Minus, Plus } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
@@ -26,10 +27,10 @@ export default function CartView() {
           <div className="cart-entry-actions stack">
             <div className="quantity cluster">
               <button aria-label={'Уменьшить количество: ' + describe(item)}
-                disabled={item.quantity <= 1} onClick={() => change(item.id, -1)}>−</button>
+                disabled={item.quantity <= 1} onClick={() => change(item.id, -1)}><Minus className="icon" aria-hidden="true" /></button>
               <span aria-live="polite">{item.quantity}</span>
               <button aria-label={'Увеличить количество: ' + describe(item)}
-                disabled={item.quantity >= 99} onClick={() => change(item.id, +1)}>+</button>
+                disabled={item.quantity >= 99} onClick={() => change(item.id, +1)}><Plus className="icon" aria-hidden="true" /></button>
             </div>
             <button className="text-action" aria-label={'Удалить: ' + describe(item)}
               onClick={() => remove(item.id)}>Кнопка</button>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Menu, ShoppingBag } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { CartProvider, useCart } from './CartState';
@@ -33,7 +34,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
             if (e.key === 'Escape') { e.currentTarget.open = false; e.currentTarget.querySelector('summary')?.focus(); }
           }}>
             <summary aria-label="Меню">
-              <span className="hamburger-lines" aria-hidden="true"><span/><span/><span/></span>
+              <Menu className="icon" aria-hidden="true" />
             </summary>
             <nav className="mobile-nav stack" aria-label="Мобильное меню" onClick={e => {
               e.currentTarget.closest('details')?.removeAttribute('open');
@@ -41,11 +42,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
           </details>
           <Link href={link("/cart")} className="cart-shortcut" aria-label={'Корзина (' + count + ')'}
             aria-current={path === link('/cart') ? 'page' : undefined}>
-            <svg aria-hidden="true" className="icon" viewBox="0 0 24 24" width="24" height="24" fill="none"
-              stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 8h16l-1 12H5L4 8Z"/>
-              <path d="M9 9V6a3 3 0 0 1 6 0v3"/>
-            </svg>
+            <ShoppingBag className="icon" aria-hidden="true" />
             <span className="cart-shortcut-label">Корзина</span>
             <span className="cart-count" aria-hidden="true">{count}</span>
           </Link>

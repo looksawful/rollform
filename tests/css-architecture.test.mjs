@@ -121,7 +121,7 @@ test('content stays generic, with no draft, copy action, or demo notice', () => 
   assert.match(home, />Заголовок<\/h1>/);
   assert.match(home, />Текст<\/p>/);
   assert.match(home, />Кнопка<\/Link>/);
-  assert.match(builder, />В корзину<\/button>/);
+  assert.match(builder, /<span>В корзину<\/span><ShoppingBag/);
   assert.doesNotMatch(cart, /makeOrderText|clipboard|textarea|order-draft/);
   assert.doesNotMatch(content, /демо|прототип|черновик|не отправляется|предзаказ/i);
 });
@@ -141,7 +141,7 @@ test('mobile header has hamburger navigation and always-visible cart shortcut', 
   assert.match(shell, /<details className="mobile-menu"/);
   assert.match(shell, /<summary aria-label="Меню"/);
   assert.match(shell, /className="cart-shortcut"/);
-  assert.match(shell, /<svg[^>]*aria-hidden="true"/);
+  assert.match(shell, /<ShoppingBag className="icon" aria-hidden="true"\s*\/>/);
   assert.match(css, /\.mobile-menu\s*\{/);
   assert.match(css, /\.cart-shortcut\s*\{/);
 });

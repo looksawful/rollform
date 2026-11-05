@@ -55,6 +55,7 @@
     inline-size: var(--icon-size, 1.5rem);
     block-size: var(--icon-size, 1.5rem);
     flex: none;
+    stroke-width: 1.8;
   }
 
   .frame { aspect-ratio: var(--frame-ratio, 1); overflow: hidden; }

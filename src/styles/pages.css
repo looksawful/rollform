@@ -22,8 +22,6 @@
     cursor: pointer;
   }
   .mobile-menu summary::-webkit-details-marker { display: none; }
-  .hamburger-lines { display: grid; gap: 0.3rem; inline-size: 1.25rem; }
-  .hamburger-lines span { display: block; block-size: 2px; background: var(--color-text); }
   .mobile-nav {
     position: absolute;
     inset-block-start: calc(100% + 0.2rem);
