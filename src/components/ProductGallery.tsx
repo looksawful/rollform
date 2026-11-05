@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
-import { presets } from '@/lib/catalog';
+import { presets, shellColors, fontNames } from '@/lib/catalog';
 import ProductCard from './ProductCard';
 
 const slides = presets.map(product => ({
   src: `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products/${product.id}.webp`,
-  width: 360,
-  height: 360,
-  alt: `Иллюстрация ${product.title}, ${product.config.shape.toUpperCase()}`,
+  width: 900,
+  height: 900,
+  alt: `3D-визуализация ${product.title}: ${product.config.shape.toUpperCase()}, ${shellColors.find(color => color.value === product.config.shell)?.name}, ${fontNames[product.config.font]}`,
 }));
 
 export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {

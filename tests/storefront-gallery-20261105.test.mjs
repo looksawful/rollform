@@ -55,3 +55,18 @@ test('cart links to the shared preparation and delivery information without chec
   assert.match(cart, /href=\{themeHref\(pathname, '\/production'\)\}/);
   assert.doesNotMatch(cart, /<button[^>]*>Оплатить/);
 });
+
+
+test('all nine catalog images are real 900px WebP renders, not 360px mismatched photos', () => {
+  for (let index = 1; index <= 9; index++) {
+    const file = readFileSync(`public/products/demo-${index}.webp`);
+    assert.equal(file.toString('ascii', 0, 4), 'RIFF');
+    assert.equal(file.toString('ascii', 8, 12), 'WEBP');
+    assert.equal(file.toString('ascii', 12, 16), 'VP8 ');
+    assert.equal(file.readUInt16LE(26) & 0x3fff, 900);
+    assert.equal(file.readUInt16LE(28) & 0x3fff, 900);
+    assert.ok(file.length > 5000);
+  }
+  assert.match(source('src/components/ProductGallery.tsx'), /width: 900,/);
+  assert.match(source('src/components/ProductCard.tsx'), /width=\{900\} height=\{900\}/);
+});

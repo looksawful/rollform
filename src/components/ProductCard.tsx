@@ -23,7 +23,7 @@ export default function ProductCard({ product, onPreview }: { product: Preset; o
         <img
           src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products/${product.id}.webp`}
           alt=""
-          width={360} height={360} loading="lazy" decoding="async"
+          width={900} height={900} loading="lazy" decoding="async"
         />
       </Link>
       <button className="product-zoom" type="button" onClick={onPreview}
