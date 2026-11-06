@@ -15,7 +15,7 @@ test('links use canonical paths without theme-dependent routing', () => {
     assert.doesNotMatch(source, /themeHref|useThemeRoute/, file);
   }
   assert.match(read('src/components/SiteShell.tsx'), /href=\{href\}/);
-  assert.match(read('src/components/CartView.tsx'), /href="\\/catalog"/);
+  assert.ok(read('src/components/CartView.tsx').includes('href="/catalog"'));
 });
 test('client review release is fixed to light while shared theme CSS is retained', () => {
   const shell = read('src/components/SiteShell.tsx');
