@@ -15,13 +15,13 @@ test('About uses one responsive split photo instead of a collage', () => {
 });
 
 test('Production displays a split interactive map without photo or blocked tile requests', () => {
-  const production = read('src/components/ProductionInfo.tsx');
+  const production = read('src/components/DeliveryInfo.tsx');
   const css = read('src/styles/pages.css');
   assert.doesNotMatch(production, /production-photo|photos\/process-example\.webp|<img\b/);
   assert.match(production, /<iframe/);
   assert.match(production, /openstreetmap\.org\/export\/embed\.html/);
-  assert.match(production, /marker=55\.752/);
-  assert.match(production, /title="Интерактивная карта Москвы"/);
+  assert.doesNotMatch(production, /marker=|mlat=|mlon=/);
+  assert.match(production, /title="Обзорная карта Москвы"/);
   assert.doesNotMatch(production, /Это не адрес самовывоза/);
   assert.doesNotMatch(production, /sandbox=|referrerPolicy="no-referrer"/);
   assert.match(production, /referrerPolicy="strict-origin-when-cross-origin"/);
@@ -67,7 +67,7 @@ test('stock and custom-production copy lives where customers choose their cube',
   const made = 'Изготовление начинается после согласования формы, цвета и шрифта.';
   const pickup = 'Способ получения и дату согласуют перед оформлением заказа.';
 
-  const homeStock = home.split('className="wrapper catalog-heading"')[1]?.split('<ProductGallery')[0] || '';
+  const homeStock = home.split('className="wrapper catalog-heading prose"')[1]?.split('<ProductGallery')[0] || '';
   assert.ok(homeStock.includes('В наличии'));
   assert.ok(homeStock.includes(stock), 'stock description beside the homepage stock heading');
   assert.ok(catalog.includes(stock), 'stock description in catalog introduction');
@@ -76,5 +76,5 @@ test('stock and custom-production copy lives where customers choose their cube',
   assert.ok(configurator.includes(made) && configurator.includes(pickup), 'production terms beside configurator controls');
   assert.doesNotMatch(production, /Кубики в наличии|Кубики на заказ|production-options|Готовые варианты можно забрать|Изготовление начинается после согласования|Способ получения и дату/);
   assert.doesNotMatch(pages, /\.production-options/);
-  assert.match(production, /className="production-map"/);
+  assert.match(read('src/components/DeliveryInfo.tsx'), /className="production-map"/);
 });

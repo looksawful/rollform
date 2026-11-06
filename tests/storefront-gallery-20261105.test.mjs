@@ -12,7 +12,7 @@ test('one FAQ on the existing homepage, with accessible native disclosures', () 
   assert.match(home, /'Как связаться с вами\?'/);
   assert.match(home, /<summary>/);
   assert.match(home, /id="about"/); // existing informational section remains
-  assert.doesNotMatch(home, /BentoSection/);
+  assert.match(home, /<BentoSection \/>/);
 });
 
 test('production remains a map route while stock and custom terms move to shopping pages', () => {
@@ -21,8 +21,8 @@ test('production remains a map route while stock and custom terms move to shoppi
   const catalog = source('src/app/catalog/page.tsx');
   const detail = source('src/components/ProductDetail.tsx');
   const config = source('src/components/Configurator.tsx');
-  assert.match(production, /Изготовление и доставка/);
-  assert.match(production, /className="production-map"/);
+  assert.match(production, /Как оформить заказ/);
+  assert.match(source('src/components/DeliveryInfo.tsx'), /className="production-map"/);
   assert.doesNotMatch(production, /Кубики на заказ|Кубики в наличии|production-options/);
   assert.match(home, /в течение недели/);
   assert.match(catalog, /в течение недели/);
@@ -127,8 +127,8 @@ test('no-credit-needed photos and prices are consistent across all screens', () 
   assert.doesNotMatch(source('src/components/ProductDetail.tsx'), /Цена уточняется|фотография приведена/i);
 });
 
-test('homepage and cart are free from prototype disclaimers', () => {
-  const components = ['SiteShell', 'Storefront', 'ProductCard', 'ProductDetail', 'CartView', 'ProductionInfo'];
+test('form and temporary legal details are honest without unrelated photo disclaimers', () => {
+  const components = ['Storefront', 'ProductCard', 'ProductDetail', 'CartView'];
   for(const component of components) {
     const file = source(`src/components/${component}.tsx`);
     assert.doesNotMatch(file, /демонстрацион|демо[- ]сайт|Фото-пример|референс|Не производство|Источники фотографий/i, component);
@@ -143,7 +143,7 @@ test('homepage has an explicit catalog link and restored logo', () => {
   const home = source('src/components/Storefront.tsx');
   const shell = source('src/components/SiteShell.tsx');
   const css = source('src/styles/pages.css');
-  assert.match(home, /className="wrapper catalog-heading"/);
+  assert.match(home, /className="wrapper catalog-heading prose"/);
   assert.match(home, />Весь каталог/);
   assert.match(home, /themeHref\(pathname, '\/catalog'\)/);
   assert.match(shell, /className="logo"/);
@@ -172,10 +172,10 @@ test('home shows manufacturing and collection after stock, separate from About U
   const production = source('src/components/ProductionInfo.tsx');
   const css = source('src/styles/pages.css');
   assert.match(home, /import ProductionInfo from/);
-  assert.match(home, /<ProductGallery mode="reel" \/>[\s\S]*?<\/section>\s*<ProductionInfo onHome \/>\s*<section className="wrapper section about-section"/);
+  assert.match(home, /<ProductGallery mode="reel" \/>[\s\S]*?<\/section>\s*<ProductionInfo onHome \/>\s*<BentoSection \/>\s*<section className="wrapper section about-section"/);
   assert.doesNotMatch(home, /<p className="eyebrow">О проекте<\/p>/);
   assert.doesNotMatch(home, /<Link[^>]+\/production[^>]*>Изготовление и получение<\/Link>/);
-  assert.match(production, /<h2 className="section-title">Изготовление и получение<\/h2>/);
-  assert.match(production, /<h1 className="page-title">Изготовление и доставка<\/h1>/);
+  assert.match(production, /<h2 className="section-title">Как оформить заказ<\/h2>/);
+  assert.match(production, /<h1 className="page-title">Как оформить заказ<\/h1>/);
   assert.doesNotMatch(css, /\.production-options/);
 });

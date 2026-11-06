@@ -8,6 +8,7 @@ import DiceViewer from './DiceViewer';
 import ProductGallery from './ProductGallery';
 import ProductionInfo from './ProductionInfo';
 import ContactContent from './ContactContent';
+import BentoSection from './BentoSection';
 import { diceQuery, initialConfig, randomDiceConfig } from '@/lib/catalog';
 
 export default function Storefront() {
@@ -24,7 +25,7 @@ export default function Storefront() {
       </div>
     </section>
     <section className="section stack catalog-section" id="catalog">
-      <div className="wrapper catalog-heading">
+      <div className="wrapper catalog-heading prose">
         <h2 className="section-title">В наличии</h2>
         <p>Готовые варианты можно забрать самостоятельно или получить курьерской доставкой в течение недели.</p>
       </div>
@@ -34,13 +35,14 @@ export default function Storefront() {
       </div>
     </section>
     <ProductionInfo onHome />
+    <BentoSection />
     <section className="wrapper section about-section" id="about">
       <figure className="about-panorama editorial-photo">
         <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/dice-02.webp`}
           alt="Игральные кубики, панорамное изображение"
           width={1600} height={640} loading="lazy" decoding="async" />
       </figure>
-      <div className="editorial-copy stack">
+      <div className="editorial-copy prose">
         <h2 className="section-title">О нас</h2>
         <p>В этом разделе будет история проекта: как появилась идея и что определяет характер коллекции. Пока мы используем временный текст, чтобы проверить ритм длинного абзаца и сочетание с фотографиями. После утверждения содержания он будет заменён полноценным описанием.</p>
       </div>

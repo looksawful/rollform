@@ -70,8 +70,11 @@ test('cart hydration rejects malformed and legacy entries instead of crashing', 
 
 test('quantity changes keep selections and have bounds', () => {
   const saved = addCartItem([], { origin: { kind: 'preorder_custom' }, config: initialConfig });
-  assert.equal(changeQuantity(saved, saved[0].id, -1)[0].quantity, 1);
+  assert.deepEqual(changeQuantity(saved, saved[0].id, -1), []);
   assert.equal(changeQuantity(saved, saved[0].id, +1)[0].quantity, 2);
   assert.equal(changeQuantity(saved, saved[0].id, +200)[0].quantity, 99);
-  assert.equal(changeQuantity(saved, saved[0].id, -200)[0].quantity, 1);
+  assert.deepEqual(changeQuantity(saved, saved[0].id, -200), []);
+  assert.deepEqual(changeQuantity(saved, saved[0].id, 0.5), saved);
+  const other = addCartItem(saved, { origin: { kind: 'preorder_custom' }, config: { ...initialConfig, shape: 'd6' } });
+  assert.deepEqual(changeQuantity(other, saved[0].id, -1), [other[1]]);
 });

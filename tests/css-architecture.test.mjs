@@ -63,11 +63,11 @@ test('layout composition reuses patterns and adapts the existing commerce pages'
   assert.match(read('src/styles/sections.css'), /\.hero\.hero-centered\s*\{/);
 });
 
-test('Bento layout is preserved but disconnected until the copy is validated', () => {
+test('Bento layout is visible before About with the existing two-row grid', () => {
   const home = read('src/components/Storefront.tsx');
   const bento = read('src/components/BentoSection.tsx');
   const css = read('src/styles/pages.css');
-  assert.doesNotMatch(home, /bento-section|BentoSection|bento-grid/);
+  assert.match(home, /<BentoSection \/>[\s\S]*id="about"/);
   assert.match(bento, /className="bento-grid"/);
   assert.match(bento, /className="bento-viewport scroller"/);
   assert.match(bento, /tabIndex=\{0\}/);

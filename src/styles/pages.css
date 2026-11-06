@@ -74,8 +74,9 @@
   .cart-entry-copy h2 { font-size: var(--fs-title); line-height: var(--lh-title); }
   .cart-entry-copy p { font-size: var(--fs-small); }
   .cart-price { font-weight: 700; }
-  .cart-entry-actions { --stack-space: 0.5rem; }
-  .quantity { white-space: nowrap; }
+  .cart-entry-actions { --stack-space: 0.75rem; flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .cart-remove { --cluster-gap: 0.4rem; }
+  .quantity { --cluster-gap: 0.5rem; flex-wrap: nowrap; white-space: nowrap; }
   .quantity button { display: grid; place-items: center; min-inline-size: 2.75rem; min-block-size: 2.75rem; border: var(--border-default); border-radius: var(--radius-full); }
   .text-action { align-self: start; min-block-size: 2.75rem; padding: 0; background: none; border: none; font-size: var(--fs-small); line-height: var(--lh-small); text-decoration: underline; text-underline-offset: 0.3em; }
   .empty-state { --stack-space: 1rem; align-items: flex-start; min-block-size: 20rem; border: var(--border-default); border-radius: var(--radius-lg); padding: clamp(1.5rem, 5vw, 4rem); }
@@ -92,6 +93,7 @@
   /* Kevin Powell's named-area Bento approach, adapted to five monochrome cells.
      The narrow-screen scrollport preserves two rows and readable card widths. */
   .bento-section { padding-block: clamp(1.5rem, 3vw, 3rem); }
+  .site main > .bento-section { min-block-size: 0; }
   .bento-section .section-title {
     font-size: clamp(1.5rem, 1.125rem + 1vw, 2.625rem);
     margin-block-end: var(--space-2);
@@ -292,6 +294,36 @@
     gap: clamp(2rem, 5vw, 5rem);
   }
   .production-copy { --stack-space: var(--space-3); min-inline-size: 0; }
+  .order-process { --stack-space: var(--space-4); }
+  .order-steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .order-step { position: relative; --stack-space: 1rem; min-inline-size: 0; }
+  .order-step .icon { --icon-size: 1.5rem; }
+  .order-step h3, .production-copy h3 { font-size: var(--fs-title); line-height: var(--lh-title); }
+  .order-step a { text-decoration: underline; text-underline-offset: 0.2em; }
+  .step-number {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: var(--border-default);
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    background: var(--color-background);
+  }
+  .order-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 1.375rem;
+    inset-inline: 3.5rem calc(-1 * var(--space-3) + 0.75rem);
+    border-block-start: var(--border-default);
+  }
   .production-map {
     display: flex;
     inline-size: 100%;
@@ -345,6 +377,7 @@
 
   .footer { padding-block: var(--space-4); }
   .footer-inner { --switcher-threshold: 34rem; }
+  .footer-details { margin-block-start: var(--space-4); padding-block-start: var(--space-3); border-block-start: var(--border-default); font-size: var(--fs-small); }
   .footer h2 { font-size: var(--fs-body); line-height: var(--lh-title); font-weight: 700; }
   .footer p { color: var(--color-text); line-height: var(--lh-body); }
   .eyebrow { font-size: var(--fs-small); font-weight: 700; letter-spacing: 0.07em; }
@@ -366,6 +399,8 @@
 
 
   @media (width <= 56rem) {
+    .order-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .order-step:nth-child(2)::after { content: none; }
     .production-info { grid-template-columns: minmax(0, 1fr); }
     .about-section { grid-template-columns: minmax(0, 1fr); }
     .about-panorama img { aspect-ratio: 16 / 9; }
@@ -381,6 +416,16 @@
     .configure-preview { min-block-size: clamp(21rem, 65vw, 34rem); }
   }
   @media (width <= 36rem) {
+    .order-steps { grid-template-columns: minmax(0, 1fr); }
+    .order-step { padding-inline-start: 4rem; min-block-size: 5rem; }
+    .step-number { position: absolute; inset-inline-start: 0; }
+    .order-step:not(:last-child)::after {
+      content: '';
+      inset-block: 3.5rem calc(-1 * var(--space-3) + 0.75rem);
+      inset-inline: 1.375rem auto;
+      border-block-start: 0;
+      border-inline-start: var(--border-default);
+    }
     .product-detail-thumbs button { font-size: 0.8rem; }
 
     /* Inherited Cluster wraps header actions when enlarged Cyrillic needs room. */
@@ -396,7 +441,7 @@
     .hero h1 { font-size: clamp(1.45rem, 7.5vw, 2.5rem); }
     .hero-copy .button { min-block-size: 2.75rem; padding: 0.5rem 0.75rem; gap: 0.5rem; max-inline-size: 100%; min-inline-size: 0; overflow-wrap: anywhere; }
     .cart-entry { grid-template-columns: 5rem minmax(0, 1fr); gap: 0.75rem; }
-    .cart-entry-actions { grid-column: 2; }
+    .cart-entry-actions { grid-column: 1 / -1; }
     .cart-entry-actions { align-items: start; }
   }
 }

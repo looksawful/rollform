@@ -19,8 +19,10 @@ export default function ContactContent() {
   };
   return <div className="contact-content switcher">
     <div className="stack contact-options">
-      <h3>Связаться с нами</h3>
-      <p>Здесь позже появятся настоящие способы связи с командой проекта. Сейчас размещены временные реквизиты для проверки оформления контактного блока. Адреса и телефон ниже демонстрационные и не предназначены для связи.</p>
+      <div className="prose">
+        <h3>Связаться с нами</h3>
+        <p>Здесь позже появятся настоящие способы связи с командой проекта. Сейчас размещены временные реквизиты для проверки оформления контактного блока. Адреса и телефон ниже демонстрационные и не предназначены для связи.</p>
+      </div>
       <ul className="contact-methods stack">
         {channels.map(({ title, detail, Icon }) =>
           <li className="contact-method" key={title}>
@@ -32,9 +34,11 @@ export default function ContactContent() {
         )}
       </ul>
     </div>
-    <form className="contact-form stack" onSubmit={onSubmit} onInput={() => setSubmitted(false)} aria-describedby="contact-demo-note">
-      <h3>Написать нам</h3>
-      <p id="contact-demo-note">Это демонстрационная форма. Сообщения не отправляются и не сохраняются.</p>
+    <form id="contact-form" className="contact-form stack" onSubmit={onSubmit} onInput={() => setSubmitted(false)} aria-describedby="contact-demo-note">
+      <div className="prose">
+        <h3>Написать нам</h3>
+        <p id="contact-demo-note">Это демонстрационная форма. Сообщения не отправляются и не сохраняются.</p>
+      </div>
       <label className="stack" htmlFor="contact-name">Имя
         <input id="contact-name" name="name" type="text" autoComplete="name" required maxLength={80} />
       </label>

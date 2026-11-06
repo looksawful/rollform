@@ -13,11 +13,11 @@ test('approved Russian header labels and icon-only cart',()=>{
   assert.doesNotMatch(s, /LegalDialogs|photoCredits|photo-credits/);
   assert.doesNotMatch(s,/<p>Текст<\/p>/);
 });
-test('Bento retained as a disconnected draft component',()=>{
+test('Bento is shown with neutral placeholders before About',()=>{
   const s=read('src/components/Storefront.tsx');
   const b=read('src/components/BentoSection.tsx');
-  assert.doesNotMatch(s,/BentoSection|bento-section|bento-grid/);
-  for(const t of ['Любая форма','Семь вариантов кубика','Любой цвет','Три варианта цвета','Разные шрифты','Шесть вариантов на выбор','Качественные материалы','Приятные на ощупь'])assert.ok(b.includes(t),t);
+  assert.match(s, /<BentoSection \/>[\s\S]*id="about"/);
+  assert.doesNotMatch(b, /эпоксидной смолы|Качественный баланс|Шесть вариантов|Три варианта/);
   assert.match(b,/className="bento-grid"/);
   assert.match(s,/>В наличии<\/h2>/);
   assert.doesNotMatch(s,/>Весь каталог<\/Link>/);
@@ -45,12 +45,12 @@ test('builder, cart and production pages honor accepted copy decisions',()=>{
   assert.match(builder,/href=\{themeHref\(pathname, '\/production'\)\}/);
   assert.match(cart,/Пока ничего нет/);
   assert.match(cart,/>Смотреть кубики<\/Link>/);
-  assert.match(cart,/>Удалить<\/button>/);
+  assert.match(cart,/<Trash2[^>]*\/>.*<span>Удалить<\/span>/);
   assert.match(data,/name: 'Цвет 1'/);
   assert.match(data,/grotesk: 'Шрифт 1'/);
   assert.ok(existsSync('src/app/production/page.tsx'));
   assert.ok(existsSync('src/app/dark/production/page.tsx'));
-  assert.match(read('src/components/ProductionInfo.tsx'),/Изготовление и доставка/);
+  assert.match(read('src/components/ProductionInfo.tsx'),/Как оформить заказ/);
 });
 test('prototype contact details are fictitious, without mail, phone or Telegram destinations', () => {
   const ui = read('src/components/ContactContent.tsx');

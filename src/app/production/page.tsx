@@ -1,2 +1,3 @@
 import ProductionInfo from '@/components/ProductionInfo';
-export default function ProductionPage() { return <ProductionInfo />; }
+import DeliveryInfo from '@/components/DeliveryInfo';
+export default function ProductionPage() { return <><ProductionInfo /><DeliveryInfo /></>; }

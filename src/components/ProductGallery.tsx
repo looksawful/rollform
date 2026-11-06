@@ -6,6 +6,7 @@ import ProductCard from './ProductCard';
 
 export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const positionRef = useRef(0);
   const [looping, setLooping] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,10 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
     let cycleWidth = 0;
     let visible = false;
     let userPauseUntil = 0;
+    let autoPosition = 0;
+    let hoverCard: Element | null = null;
+    let hoverPaused = false;
+    let hoverTimer: ReturnType<typeof setTimeout> | undefined;
     let drag: { pointer: number; x: number; left: number; moved: boolean } | undefined;
     let suppressClick = false;
     let clickReset: ReturnType<typeof setTimeout> | undefined;
@@ -46,11 +51,13 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
       const next = cycleWidth + (((previous - cycleWidth) % cycleWidth) + cycleWidth) % cycleWidth;
       if (Math.abs(previous - next) < 0.5) return;
       scroller.scrollLeft = next;
+      autoPosition += next - previous;
       if (drag) drag.left += next - previous;
     };
     const update = () => {
       frame = 0;
       wrap();
+      positionRef.current = looping ? scroller.scrollLeft - cycleWidth : scroller.scrollLeft;
       const remaining = scroller.scrollWidth - scroller.clientWidth - scroller.scrollLeft;
       scroller.dataset.canScrollStart = String(looping || scroller.scrollLeft > 1);
       scroller.dataset.canScrollEnd = String(looping || remaining > 1);
@@ -74,6 +81,7 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
         if (next > 0) {
           cycleWidth = next;
           scroller.scrollLeft = cycleWidth * (1 + (((progress % 1) + 1) % 1));
+          autoPosition = scroller.scrollLeft;
         }
       }
       scheduleUpdate();
@@ -84,23 +92,26 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
       const delta = lastTime ? Math.min(64, time - lastTime) : 0;
       lastTime = time;
       if (looping && visible && !document.hidden && !drag &&
-        time >= userPauseUntil && !scroller.querySelector('.product:hover') &&
+        time >= userPauseUntil && !hoverPaused &&
         !scroller.contains(document.activeElement)) {
-        scroller.scrollLeft += delta * 0.03;
-      }
+        // Preserve subpixel progress, including at 120/144Hz and browser zoom.
+        autoPosition += delta * 0.03;
+        scroller.scrollLeft = autoPosition;
+      } else autoPosition = scroller.scrollLeft;
       autoFrame = requestAnimationFrame(animate);
     };
     let observer: IntersectionObserver | undefined;
     if (looping) {
       cycleWidth = measure();
-      if (cycleWidth > 0) scroller.scrollLeft = cycleWidth;
+      if (cycleWidth > 0) scroller.scrollLeft = cycleWidth + positionRef.current;
+      autoPosition = scroller.scrollLeft;
       observer = new IntersectionObserver(entries => {
         visible = entries.some(entry => entry.isIntersecting);
         lastTime = 0;
       }, { rootMargin: '160px' });
       observer.observe(scroller);
       autoFrame = requestAnimationFrame(animate);
-    }
+    } else scroller.scrollLeft = positionRef.current;
 
     const down = (event: PointerEvent) => {
       userPauseUntil = performance.now() + 1600;
@@ -110,6 +121,17 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
       drag = { pointer: event.pointerId, x: event.clientX, left: scroller.scrollLeft, moved: false };
     };
     const move = (event: PointerEvent) => {
+      // A stationary cursor exposed by scrolling into the reel is not intent.
+      // Pause only after the mouse moves over a card and dwells there.
+      if (event.pointerType === 'mouse' && !drag && matchMedia('(hover: hover)').matches) {
+        const card = (event.target as Element).closest('.product');
+        if (card !== hoverCard) {
+          clearTimeout(hoverTimer);
+          hoverCard = card;
+          hoverPaused = false;
+          if (card) hoverTimer = setTimeout(() => { hoverPaused = true; }, 180);
+        }
+      }
       if (!drag || event.pointerId !== drag.pointer) return;
       if (!(event.buttons & 1)) { drag = undefined; return; }
       const distance = event.clientX - drag.x;
@@ -121,6 +143,11 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
       }
       event.preventDefault();
       scroller.scrollLeft = drag.left - distance;
+    };
+    const leave = () => {
+      clearTimeout(hoverTimer);
+      hoverCard = null;
+      hoverPaused = false;
     };
     const finish = (event: PointerEvent) => {
       userPauseUntil = performance.now() + 1600;
@@ -158,6 +185,7 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
     scroller.addEventListener('scroll', scheduleUpdate, { passive: true });
     scroller.addEventListener('pointerdown', down);
     scroller.addEventListener('pointermove', move);
+    scroller.addEventListener('pointerleave', leave);
     scroller.addEventListener('pointerup', finish);
     scroller.addEventListener('pointercancel', finish);
     scroller.addEventListener('lostpointercapture', finish);
@@ -170,11 +198,13 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
       cancelAnimationFrame(frame);
       cancelAnimationFrame(autoFrame);
       clearTimeout(clickReset);
+      clearTimeout(hoverTimer);
       observer?.disconnect();
       resize.disconnect();
       scroller.removeEventListener('scroll', scheduleUpdate);
       scroller.removeEventListener('pointerdown', down);
       scroller.removeEventListener('pointermove', move);
+      scroller.removeEventListener('pointerleave', leave);
       scroller.removeEventListener('pointerup', finish);
       scroller.removeEventListener('pointercancel', finish);
       scroller.removeEventListener('lostpointercapture', finish);

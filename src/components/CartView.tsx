@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Minus, Plus, ShoppingBag } from 'lucide-react';
+import { Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
@@ -42,13 +42,11 @@ export default function CartView() {
               <h2>{index >= 0 ? presets[index].title : 'Свой вариант'} · {item.config.shape.toUpperCase()}</h2>
               <p>{shellColors.find(x => x.value === item.config.shell)?.name} · {fontNames[item.config.font]}</p>
               <p className="cart-price">{formatPrice(priceForCartItem(item))} / шт.</p>
-              <button className="text-action" aria-label={'Удалить из корзины: ' + describe(item)}
-                onClick={() => remove(item.id)}>Удалить</button>
             </div>
             <div className="cart-entry-actions stack">
               <div className="quantity cluster" aria-label={'Количество: ' + describe(item)}>
                 <button aria-label={'Уменьшить количество: ' + describe(item)}
-                  disabled={item.quantity <= 1} onClick={() => change(item.id, -1)}>
+                  onClick={() => change(item.id, -1)}>
                   <Minus className="icon" aria-hidden="true" />
                 </button>
                 <span aria-live="polite">{item.quantity}</span>
@@ -57,6 +55,8 @@ export default function CartView() {
                   <Plus className="icon" aria-hidden="true" />
                 </button>
               </div>
+              <button className="text-action cart-remove cluster" aria-label={'Удалить из корзины: ' + describe(item)}
+                onClick={() => remove(item.id)}><Trash2 className="icon" aria-hidden="true" /><span>Удалить</span></button>
             </div>
           </article>;
         })}</div>
@@ -64,7 +64,7 @@ export default function CartView() {
           <h2>Итого</h2>
           <p className="cart-total">{formatPrice(total)}</p>
           <Link href={themeHref(pathname, '/production')}>Изготовление и доставка</Link>
-          <Link href={themeHref(pathname, '/catalog')} className="button button-black">Продолжить выбор</Link>
+          <Link href={themeHref(pathname, '/contacts#contact-form')} className="button button-black">Оформить заказ</Link>
         </div>
       </>}
   </section>;

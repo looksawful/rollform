@@ -173,13 +173,14 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
       }
     });
     for (const theme of ['', 'dark/']) {
-      await t.test(`${theme || 'light/'} full-width manual reel`, async () => {
+      await t.test(`${theme || 'light/'} seamless automatic reel and manual controls`, async () => {
         exceptions.length = 0;
         await send('Page.navigate', { url: new URL(theme, base).href });
         await until(`!!document.querySelector('.product-scroller .product') && document.readyState === 'complete'`);
         await delay(800);
         const geometry = await evaluate(`(() => {
-          const reel = document.querySelector('.product-scroller'), first = reel.firstElementChild;
+          const reel = document.querySelector('.product-scroller');
+          const first = Array.from(reel.querySelectorAll('.product')).find(card => card.getBoundingClientRect().right > 0);
           const style = getComputedStyle(reel), rect = reel.getBoundingClientRect();
           return { width: rect.width, viewport: document.documentElement.clientWidth, left: rect.left,
             first: first.getBoundingClientRect().left, scrollbar: style.scrollbarWidth,
@@ -188,7 +189,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
             linkBelow: document.querySelector('#catalog .catalog-link').getBoundingClientRect().top >= rect.bottom };
         })()`);
         assert.ok(Math.abs(geometry.width - geometry.viewport) <= 1, 'Reel fills the viewport');
-        assert.ok(geometry.first >= 0 && geometry.first < geometry.viewport * 0.12, 'First card has no centering hole');
+        assert.ok(geometry.first < geometry.viewport * 0.12, 'Visible cards have no centering hole');
         assert.equal(geometry.scrollbar, 'none');
         assert.equal(geometry.webkitScrollbar, 'none');
         assert.equal(geometry.arrows, false);
@@ -196,6 +197,24 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         assert.equal(geometry.linkBelow, true, 'Catalog link is below the reel');
         await evaluate(`document.querySelector('.product-scroller').scrollIntoView({block:'center',behavior:'instant'})`);
         await delay(150);
+        await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 1, y: 1 });
+        const autoBefore = await evaluate(`document.querySelector('.product-scroller').scrollLeft`);
+        await delay(1200);
+        const autoDelta = await evaluate(`document.querySelector('.product-scroller').scrollLeft - ${autoBefore}`);
+        assert.ok(autoDelta > 15 && autoDelta < 65, 'Reel advances smoothly at roughly 30px/sec');
+        const hoverPoint = await evaluate(`(() => {
+          const cards = Array.from(document.querySelectorAll('.product-scroller .product'));
+          const r = cards.find(card => { const b = card.getBoundingClientRect(); return b.left > 0 && b.right < innerWidth; }).getBoundingClientRect();
+          return { x:r.left+r.width/2, y:r.top+r.height/2 };
+        })()`);
+        await send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...hoverPoint });
+        await delay(350);
+        const paused = await evaluate(`document.querySelector('.product-scroller').scrollLeft`);
+        await delay(400);
+        assert.equal(await evaluate(`document.querySelector('.product-scroller').scrollLeft`), paused, 'Intentional hover pauses');
+        await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 1, y: 1 });
+        await delay(400);
+        assert.ok(await evaluate(`document.querySelector('.product-scroller').scrollLeft > ${paused+4}`), 'Leaving resumes');
         const point = await evaluate(`(() => { const r = document.querySelector('.product-scroller').getBoundingClientRect(); return {x:r.width*0.65,y:r.top+r.height*0.3}; })()`);
         const url = await evaluate('location.href');
         await send('Input.dispatchMouseEvent', { type: 'mousePressed', ...point, button: 'left', buttons: 1, clickCount: 1 });
@@ -209,31 +228,102 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         const beforeWheel = await evaluate(`document.querySelector('.product-scroller').scrollLeft`);
         await send('Input.dispatchMouseEvent', { type: 'mouseWheel', ...point, deltaY: 240, deltaX: 0, modifiers: 8 });
         await until(`document.querySelector('.product-scroller').scrollLeft > ${beforeWheel+50}`);
-        const scales = await evaluate(`Array.from(document.querySelectorAll('.product-scroller > .product')).map(card => {
+        const scales = await evaluate(`Array.from(document.querySelectorAll('.product-scroller .product')).map(card => {
           const style = getComputedStyle(card); return Number(style.scale === 'none' ? new DOMMatrix(style.transform).a : style.scale);
         })`);
         assert.ok(Math.max(...scales) - Math.min(...scales) > 0.06, 'Center and side cards have different scales');
         assert.equal(await evaluate(`!!document.querySelector('.pin-spacer')`), false, 'Vertical scrolling does not pin or drive the reel');
-        const chosenPosition = await evaluate(`document.querySelector('.product-scroller').scrollLeft`);
+        const chosenPosition = await evaluate(`(() => {
+          const s = document.querySelector('.product-scroller');
+          return s.scrollLeft - (s.querySelector('[data-copy="1"] .product').offsetLeft - s.querySelector('[data-copy="0"] .product').offsetLeft);
+        })()`);
         await send('Emulation.setEmulatedMedia', {
           features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
         });
-        await until(`Array.from(document.querySelectorAll('.product-scroller > .product')).every(card => ['none','1'].includes(getComputedStyle(card).scale))`);
-        assert.equal(await evaluate(`document.querySelector('.product-scroller').scrollLeft`), chosenPosition, 'Changing motion preference preserves the chosen card');
+        await until(`document.querySelectorAll('.product-scroller .product').length === 9 && Array.from(document.querySelectorAll('.product-scroller .product')).every(card => ['none','1'].includes(getComputedStyle(card).scale))`);
+        assert.ok(Math.abs(await evaluate(`document.querySelector('.product-scroller').scrollLeft`) - chosenPosition) < 2, 'Changing motion preference preserves the chosen card');
+        const still = await evaluate(`document.querySelector('.product-scroller').scrollLeft`);
+        await delay(400);
+        assert.equal(await evaluate(`document.querySelector('.product-scroller').scrollLeft`), still, 'Reduced motion disables automatic travel');
+        await evaluate(`document.querySelector('.product-scroller').scrollLeft += 80`);
+        assert.ok(await evaluate(`document.querySelector('.product-scroller').scrollLeft > ${still+40}`), 'Reduced motion retains manual scrolling');
         await send('Emulation.setEmulatedMedia', {
           features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
         });
-        await evaluate(`document.querySelector('.product-scroller').scrollTo({left:0,behavior:'instant'})`);
+        await until(`document.querySelectorAll('.product-scroller .product').length === 27`);
         await delay(300);
-        const button = await evaluate(`(() => { const r = document.querySelector('.product-scroller button').getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; })()`);
+        const button = await evaluate(`(() => { const r = Array.from(document.querySelectorAll('.product-scroller button')).find(b => { const r=b.getBoundingClientRect(); return r.left>0 && r.right<innerWidth; }).getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; })()`);
         await send('Input.dispatchMouseEvent', {type:'mousePressed',...button,button:'left',clickCount:1});
         await send('Input.dispatchMouseEvent', {type:'mouseReleased',...button,button:'left',clickCount:1});
         await until(`Number(document.querySelector('.cart-count')?.textContent) > 0`);
         assert.equal(await evaluate('location.href'), url, 'Add-to-cart remains a separate button');
-        const card = await evaluate(`(() => { const r = document.querySelector('.product-scroller .product-open').getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/3}; })()`);
+        const card = await evaluate(`(() => { const r = Array.from(document.querySelectorAll('.product-scroller .product-open')).find(b => { const r=b.getBoundingClientRect(); return r.left>0 && r.right<innerWidth; }).getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/3}; })()`);
         await send('Input.dispatchMouseEvent', {type:'mousePressed',...card,button:'left',clickCount:1});
         await send('Input.dispatchMouseEvent', {type:'mouseReleased',...card,button:'left',clickCount:1});
         await until(`location.pathname.endsWith('/product/') && !!document.querySelector('h1')`);
+        assert.deepEqual(exceptions, []);
+      });
+      await t.test(`${theme || 'light/'} cart, checkout, delivery and content layout`, async () => {
+        for (const width of [320, 390, 768, 1440]) {
+          await send('Emulation.setDeviceMetricsOverride', { width, height: 1000, deviceScaleFactor: 1, mobile: false });
+          await send('Page.navigate', { url: new URL(theme, base).href });
+          await until(`document.readyState === 'complete' && !!document.querySelector('.order-steps')`);
+          assert.equal(await evaluate(`document.querySelectorAll('.order-steps > li').length`), 4);
+          assert.equal(await evaluate(`!!(document.querySelector('.bento-section').compareDocumentPosition(document.querySelector('#about')) & Node.DOCUMENT_POSITION_FOLLOWING)`), true);
+          assert.equal(await evaluate(`document.querySelectorAll('.bento-card').length`), 5);
+          assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Home fits ${width}px`);
+
+          await send('Page.navigate', { url: new URL(theme + 'configure/', base).href });
+          await until(`document.readyState === 'complete' && !!document.querySelector('.configure-controls')`);
+          await delay(150);
+          await evaluate(`localStorage.removeItem('rollform:demo-cart:v3')`);
+          await send('Page.reload');
+          await until(`document.readyState === 'complete' && !!document.querySelector('.configure-controls')`);
+          await delay(150);
+          await evaluate(`Array.from(document.querySelectorAll('.configure-controls button')).find(b => b.textContent.includes('В корзину')).click()`);
+          await until(`Number(document.querySelector('.cart-count')?.textContent) === 1`);
+          await send('Page.navigate', { url: new URL(theme + 'cart/', base).href });
+          await until(`!!document.querySelector('.cart-entry')`);
+          assert.equal(await evaluate(`document.querySelector('.quantity button').disabled`), false);
+          assert.ok(await evaluate(`!!document.querySelector('.cart-entry-actions .cart-remove svg')`));
+          assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Cart fits ${width}px`);
+          assert.equal(await evaluate(`document.querySelector('.cart-summary .button').textContent`), 'Оформить заказ');
+          await evaluate(`document.querySelector('.quantity button:last-child').click()`);
+          await until(`document.querySelector('.quantity span').textContent === '2'`);
+          await evaluate(`document.querySelector('.quantity button').click()`);
+          await until(`document.querySelector('.quantity span').textContent === '1'`);
+          await send('Page.reload');
+          await until(`document.querySelector('.quantity span')?.textContent === '1'`);
+          await evaluate(`document.querySelector('.cart-summary .button').click()`);
+          await until(`location.hash === '#contact-form' && !!document.querySelector('#contact-form')`);
+          assert.ok((await evaluate('location.pathname')).endsWith(theme + 'contacts/'), 'Checkout retains theme');
+          await until(`!!document.querySelector('#delivery iframe')`);
+          assert.ok(await evaluate(`document.querySelector('#delivery').textContent.includes('Адрес самовывоза пока не подтверждён')`));
+          assert.ok(await evaluate(`!document.querySelector('#delivery iframe').src.includes('marker=')`));
+          assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Contacts fit ${width}px`);
+          await evaluate(`document.querySelector('#delivery').scrollIntoView({block:'center',behavior:'instant'})`);
+          await delay(200);
+          const mapPoint = await evaluate(`(() => {const r=document.querySelector('.production-map-frame').getBoundingClientRect(); return {x:r.left+r.width/2,y:Math.max(100,Math.min(innerHeight-100,r.top+r.height/2))};})()`);
+          const pageBefore = await evaluate('scrollY');
+          await send('Input.dispatchMouseEvent', { type: 'mouseWheel', ...mapPoint, deltaX: 0, deltaY: 100 });
+          await delay(150);
+          assert.ok(await evaluate(`scrollY > ${pageBefore+20}`), 'Inactive map lets the page scroll');
+          await evaluate(`document.querySelector('.production-map-activate').focus()`);
+          await send('Input.dispatchKeyEvent', { type:'keyDown', key:'Enter', code:'Enter', windowsVirtualKeyCode:13 });
+          await send('Input.dispatchKeyEvent', { type:'keyUp', key:'Enter', code:'Enter', windowsVirtualKeyCode:13 });
+          await until(`document.querySelector('.production-map-frame').dataset.active === 'true'`);
+          assert.equal(await evaluate(`document.querySelector('.production-map-frame iframe').tabIndex`), 0);
+          await evaluate(`Array.from(document.querySelectorAll('.production-map button')).find(b=>b.textContent.includes('Выключить')).click()`);
+          await until(`document.querySelector('.production-map-frame').dataset.active === 'false'`);
+          await send('Page.navigate', { url: new URL(theme + 'cart/', base).href });
+          await until(`!!document.querySelector('.cart-entry')`);
+          await evaluate(`document.querySelector('.quantity button').click()`);
+          await until(`!!document.querySelector('.empty-state')`);
+          await send('Page.reload');
+          await until(`document.readyState === 'complete' && !!document.querySelector('.empty-state')`);
+          assert.equal(await evaluate(`JSON.parse(localStorage.getItem('rollform:demo-cart:v3')).length`), 0, 'Deletion persists');
+        }
+        await send('Emulation.setDeviceMetricsOverride', { width:1440, height:1100, deviceScaleFactor:1, mobile:false });
         assert.deepEqual(exceptions, []);
       });
       await t.test(theme ? 'dark' : 'light', async () => {
@@ -260,7 +350,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         const home = new URL(theme, base).href;
         await send('Page.navigate', { url: home });
         await until(`document.readyState === 'complete' && !!document.querySelector('.dice-canvas canvas')`);
-        const title = '#production > .section-title';
+        const title = '#production .section-title';
         assert.equal(await evaluate(`getComputedStyle(document.querySelector('${title}')).opacity`), '1', 'Offscreen content starts visible');
         const firstEntry = await sampleEntry(title);
         assert.ok(firstEntry.some(opacity => opacity < 0.99), 'Copy reveals on its first entry');
@@ -275,7 +365,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         await send('Emulation.setEmulatedMedia', {
           features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
         });
-        await until(`['#production > .section-title', '#faq .section-title'].every(selector => {
+        await until(`['#production .section-title', '#faq .section-title'].every(selector => {
           const element = document.querySelector(selector);
           return getComputedStyle(element).opacity === '1' && !element.style.transform && !element.style.opacity;
         })`);

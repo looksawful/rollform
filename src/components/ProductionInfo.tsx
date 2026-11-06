@@ -1,40 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Box, Send, Clock, Truck } from 'lucide-react';
+import { themeHref } from '@/lib/themeRoutes';
 
 export default function ProductionInfo({ onHome = false }: { onHome?: boolean }) {
-  const [mapActive, setMapActive] = useState(false);
+  const pathname = usePathname();
+  const href = (path: string) => themeHref(pathname, path);
   return <section id={onHome ? 'production' : undefined}
-    className={`wrapper section production-info${onHome ? '' : ' page-section'}`}>
-    <div className="production-copy stack">
-      {onHome ? <h2 className="section-title">Изготовление и получение</h2> : <h1 className="page-title">Изготовление и доставка</h1>}
-      <div className="production-intro stack">
-        {!onHome && <p className="eyebrow">Процесс и получение</p>}
-        <p>У готовых кубиков и вариантов на заказ разные сроки подготовки.</p>
-      </div>
+    className={`wrapper section order-process stack${onHome ? '' : ' page-section'}`}>
+    <div className="production-intro prose">
+      {onHome ? <h2 className="section-title">Как оформить заказ</h2> : <h1 className="page-title">Как оформить заказ</h1>}
+      <p>Выберите готовый кубик или соберите свой вариант. Затем согласуйте детали, готовность и удобный способ получения через контактную форму.</p>
     </div>
-    <div className="production-map">
-      <div className="production-map-frame" data-active={mapActive ? 'true' : 'false'}
-        onPointerLeave={() => setMapActive(false)}
-        onBlurCapture={event => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setMapActive(false);
-        }}>
-        <iframe
-          title="Интерактивная карта Москвы"
-          src="https://www.openstreetmap.org/export/embed.html?bbox=37.6065%2C55.7465%2C37.6275%2C55.7585&layer=mapnik&marker=55.7520%2C37.6175"
-          loading="lazy"
-          tabIndex={mapActive ? 0 : -1}
-          referrerPolicy="strict-origin-when-cross-origin"
-        />
-        {!mapActive && <button type="button" className="production-map-activate"
-          aria-label="Включить управление картой" onClick={() => setMapActive(true)}>
-          <span>Управлять картой</span>
-        </button>}
-      </div>
-      <div className="production-map-caption">
-        <a href="https://www.openstreetmap.org/?mlat=55.7520&mlon=37.6175#map=16/55.7520/37.6175"
-          target="_blank" rel="noopener noreferrer">Открыть карту</a>
-      </div>
-    </div>
+    <ol className="order-steps" aria-label="Шаги оформления заказа">
+      <li className="order-step stack">
+        <span className="step-number" aria-hidden="true">1</span>
+        <Box className="icon" aria-hidden="true" />
+        <div className="prose"><h3>Выберите кубик</h3>
+          <p>Найдите вариант в <Link href={href('/catalog')}>каталоге</Link> или <Link href={href('/configure')}>создайте свой</Link> в конструкторе.</p></div>
+      </li>
+      <li className="order-step stack">
+        <span className="step-number" aria-hidden="true">2</span>
+        <Send className="icon" aria-hidden="true" />
+        <div className="prose"><h3>Оформите заказ</h3>
+          <p>Укажите выбранный вариант и способ связи в <Link href={href('/contacts#contact-form')}>контактной форме</Link>. Пока форма демонстрационная и не отправляет заявки.</p></div>
+      </li>
+      <li className="order-step stack">
+        <span className="step-number" aria-hidden="true">3</span>
+        <Clock className="icon" aria-hidden="true" />
+        <div className="prose"><h3>Дождитесь готовности</h3>
+          <p>Детали изготовления и дату готовности необходимо согласовать с командой перед подтверждением заказа.</p></div>
+      </li>
+      <li className="order-step stack">
+        <span className="step-number" aria-hidden="true">4</span>
+        <Truck className="icon" aria-hidden="true" />
+        <div className="prose"><h3>Заберите заказ</h3>
+          <p>Выберите самовывоз или доставку. <Link href={href('/contacts#delivery')}>Адрес и условия получения</Link> уточняются при согласовании.</p></div>
+      </li>
+    </ol>
   </section>;
 }

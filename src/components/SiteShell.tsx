@@ -12,7 +12,7 @@ const menuLinks = [
   { href: '/', label: 'Главная' },
   { href: '/catalog', label: 'Кубики' },
   { href: '/configure', label: 'Собери сам' },
-  { href: '/#about', label: 'О нас' },
+  { href: '/about', label: 'О нас' },
   { href: '/contacts', label: 'Контакты' },
 ];
 
@@ -117,6 +117,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
           <h2>Навигация</h2>
           <Link href={link("/catalog")}>Каталог</Link>
           <Link href={link("/configure")}>Конструктор</Link>
+          <Link href={link("/about")}>О нас</Link>
           <Link href={link("/production")}>Изготовление и доставка</Link>
         </nav>
         <div className="stack">
@@ -125,6 +126,12 @@ function SiteChrome({ children }: { children: ReactNode }) {
           <span>hello@kubiki.example</span>
           <span>+7 (000) 000-00-00</span>
         </div>
+      </div>
+      <div className="wrapper footer-details prose">
+        <h2>Реквизиты</h2>
+        <p>ИП Иванов Иван Иванович — временный образец имени продавца.</p>
+        <p>ИНН, ОГРНИП, адрес регистрации и банковские реквизиты: не указаны, ожидают подтверждения.</p>
+        <p>Демонстрационный прототип. Данные продавца и контакты временные; заявки и оплата не принимаются.</p>
       </div>
     </footer>
   </div>;

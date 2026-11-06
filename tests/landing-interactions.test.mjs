@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read = f => readFileSync(f,'utf8');
 test('responsive split production, map activation and no placeholder',()=>{
- const p=read('src/components/ProductionInfo.tsx'),c=read('src/styles/pages.css');
+ const p=read('src/components/DeliveryInfo.tsx'),c=read('src/styles/pages.css');
  assert.match(p,/production-copy stack/);
  assert.match(p,/production-map-frame/);
  assert.doesNotMatch(p,/На карте временно указан Кремль\. Это не адрес самовывоза/);
@@ -43,7 +43,8 @@ test('automatic seamless reel with accessible reduced motion fallback and hover 
  assert.match(s,/cycleWidth/);
  assert.match(s,/looping \? \[0, 1, 2\]/);
  assert.match(s,/aria-hidden=\{copy !== 1/);
- assert.match(s,/\.product:hover/);
+ assert.match(s,/!hoverPaused/);
+ assert.match(s,/autoPosition \+= delta \* 0\.03/);
  assert.match(c,/\.product-scroller\[data-looping="true"\]/);
  assert.match(c,/\.product\s*\{[^}]*transition:/);
  assert.match(c,/prefers-reduced-motion:\s*reduce/);

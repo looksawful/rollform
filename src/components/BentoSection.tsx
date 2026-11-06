@@ -1,10 +1,10 @@
-/* Скрытая секция-концепт. Тексты о материалах и количестве вариантов требуют подтверждения. */
+/* Видимый макет: окончательные тексты добавим после согласования. */
 const cards = [
-  { title: 'Любая форма', text: 'Семь вариантов кубика' },
-  { title: 'Любой цвет', text: 'Три варианта цвета' },
-  { title: 'Разные шрифты', text: 'Шесть вариантов на выбор' },
-  { title: 'Качественные материалы', text: 'Производим сами из качественной эпоксидной смолы' },
-  { title: 'Приятные на ощупь', text: 'Качественный баланс и приятная текстура' },
+  { title: 'Форма', text: 'Текст' },
+  { title: 'Цвет', text: 'Текст' },
+  { title: 'Шрифт', text: 'Текст' },
+  { title: 'Заголовок', text: 'Текст' },
+  { title: 'Заголовок', text: 'Текст' },
 ];
 
 export default function BentoSection() {
@@ -12,8 +12,8 @@ export default function BentoSection() {
     <h2 id="benefits-title" className="section-title">Возможности</h2>
     <div className="bento-viewport scroller" role="region" aria-label="Возможности" tabIndex={0}>
       <div className="bento-grid">
-        {cards.map(({ title, text }) =>
-          <article className="bento-card box" key={title}>
+        {cards.map(({ title, text }, index) =>
+          <article className="bento-card box" key={index}>
             <h3>{title}</h3><p>{text}</p>
           </article>
         )}
