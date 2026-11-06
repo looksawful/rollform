@@ -2,8 +2,6 @@
 
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
 import { photoPath } from '@/lib/photoAssets';
 import { formatPrice, priceForPreset } from '@/lib/pricing';
@@ -14,12 +12,11 @@ export default function ProductCard({ product, index, duplicate = false }: {
   index: number;
   duplicate?: boolean;
 }) {
-  const pathname = usePathname();
   const { add, items } = useCart();
   const quantity = items.filter(item =>
     item.origin.kind === 'preorder_preset' && item.origin.presetId === product.id
   ).reduce((sum, item) => sum + item.quantity, 0);
-  const detailsUrl = themeHref(pathname, '/product?item=' + encodeURIComponent(product.id));
+  const detailsUrl = '/product?item=' + encodeURIComponent(product.id);
 
   const addToCart = () => {
     add(product.config, { kind: 'preorder_preset', presetId: product.id });
