@@ -278,3 +278,12 @@ test('hero 3D canvas floats on the site background at desktop and mobile widths'
   assert.match(viewer, /WebGLRenderer\(\{\s*alpha:\s*true/);
   assert.match(viewer, /renderer\.setClearColor\(0xffffff,\s*0\)/);
 });
+
+test('Hero alone enlarges the 3D preview slightly without changing its frame or configurator', () => {
+  const css = read('src/styles/sections.css');
+  const heroDice = css.match(/\.hero-centered \.dice-canvas\s*\{([^}]*)\}/)?.[1] || '';
+  const sharedDice = css.match(/(?<![\w.-])\.dice-canvas\s*\{([^}]*)\}/)?.[1] || '';
+  assert.match(heroDice, /transform:\s*scale\(1\.08\);/);
+  assert.doesNotMatch(sharedDice, /transform:\s*scale\(/);
+  assert.match(css, /\.hero-centered \.hero-object\s*\{[^}]*background:\s*transparent;/);
+});

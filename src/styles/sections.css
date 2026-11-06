@@ -66,6 +66,7 @@
     opacity: 1;
     pointer-events: none;
   }
+  .hero-centered .dice-canvas { transform: scale(1.08); }
   .hero-centered .hero-copy {
     --stack-space: clamp(0.85rem, 2vw, 1.5rem);
     justify-content: flex-start;
