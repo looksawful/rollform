@@ -2,8 +2,6 @@
 
 import Link from 'next/link';
 import { Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
 import { fontNames, shellColors, presets } from '@/lib/catalog';
 import { photoPath } from '@/lib/photoAssets';
@@ -16,7 +14,6 @@ const describe = (item: CartItem) =>
 
 export default function CartView() {
   const { items, change, remove } = useCart();
-  const pathname = usePathname();
   const total = items.reduce((sum, item) => sum + priceForCartItem(item) * item.quantity, 0);
   return <section className="wrapper section page-section cart-page stack">
     <p className="eyebrow">Ваш выбор</p>
@@ -26,7 +23,7 @@ export default function CartView() {
           <ShoppingBag className="empty-icon" aria-hidden="true" />
           <h2>Пока ничего нет</h2>
           <p>Выберите вариант из каталога или создайте свой.</p>
-          <Link href={themeHref(pathname, '/catalog')} className="button button-black">Смотреть кубики</Link>
+          <Link href="/catalog" className="button button-black">Смотреть кубики</Link>
         </div>
       : <>
         <div className="cart-lines stack">{items.map(item => {
@@ -63,8 +60,8 @@ export default function CartView() {
         <div className="cart-summary stack">
           <h2>Итого</h2>
           <p className="cart-total">{formatPrice(total)}</p>
-          <Link href={themeHref(pathname, '/production')}>Изготовление и доставка</Link>
-          <Link href={themeHref(pathname, '/contacts#contact-form')} className="button button-black">Оформить заказ</Link>
+          <Link href="/production">Изготовление и доставка</Link>
+          <Link href="/contacts#contact-form" className="button button-black">Оформить заказ</Link>
         </div>
       </>}
   </section>;
