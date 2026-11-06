@@ -139,11 +139,13 @@ test('no-credit-needed photos and prices are consistent across all screens', () 
 });
 
 test('homepage and cart are free from prototype disclaimers', () => {
-  const components = ['SiteShell', 'Storefront', 'ProductCard', 'ProductDetail', 'CartView', 'ContactContent', 'ProductionInfo'];
+  const components = ['SiteShell', 'Storefront', 'ProductCard', 'ProductDetail', 'CartView', 'ProductionInfo'];
   for(const component of components) {
     const file = source(`src/components/${component}.tsx`);
     assert.doesNotMatch(file, /демонстрацион|демо[- ]сайт|Фото-пример|референс|Не производство|Источники фотографий/i, component);
   }
+  const contacts = source('src/components/ContactContent.tsx');
+  assert.match(contacts, /Это демонстрационная форма\. Сообщения не отправляются/);
   assert.ok(!existsSync('src/lib/photoCredits.ts'));
   assert.ok(!existsSync('src/components/LegalDialogs.tsx'));
 });

@@ -112,7 +112,7 @@ test('copy stays generic while contact form is clearly marked as non-sending', (
     read('src/components/ProductCard.tsx') + read('src/app/catalog/page.tsx') +
     read('src/app/contacts/page.tsx');
   assert.match(home, />Заголовок<\/h1>/);
-  assert.match(home, /Внимание! Этот текст является рыбой!/);
+  assert.match(home, /Здесь появится рассказ о кубиках и возможностях конструктора/);
   assert.match(home, />Собрать кубик<\/Link>/);
   assert.match(builder, /<span>В корзину<\/span><ShoppingBag/);
   assert.doesNotMatch(cart, /makeOrderText|clipboard|textarea|order-draft/);
@@ -154,7 +154,7 @@ test('homepage offers keyboard-accessible horizontal catalog and mobile split', 
 
 test('about section uses the requested placeholder paragraph', () => {
   const home = read('src/components/Storefront.tsx');
-  assert.match(home, /Внимание! Этот текст является рыбой!/);
+  assert.match(home, /В этом разделе будет история проекта/);
 });
 
 test('monochrome design tokens separate primitive colors from semantic roles', () => {
@@ -216,7 +216,7 @@ test('centered Hero composition preserves approved copy and passive 3D motion', 
   assert.match(home, /className="wrapper hero hero-centered"/);
   assert.match(home, /<DiceViewer config=\{initialConfig\} continuous \/>/);
   assert.match(home, />Заголовок<\/h1>/);
-  assert.match(home, /Внимание! Этот текст является рыбой!/);
+  assert.match(home, /Здесь появится рассказ о кубиках и возможностях конструктора/);
   assert.match(home, />Собрать кубик<\/Link>/);
   assert.match(css, /\.hero-centered \.hero-object\s*\{[^}]*position:\s*absolute;/);
   assert.match(css, /\.hero-centered \.hero-copy\s*\{[^}]*align-items:\s*center;/);
