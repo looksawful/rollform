@@ -80,6 +80,73 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
     await send('Emulation.setEmulatedMedia', {
       features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
     });
+    // Protect the responsive Hero and real, directly loadable links.
+    for (const [width, mobile] of [[320, true], [390, true], [430, true], [768, true], [900, false], [1024, false], [1440, false]]) {
+      await t.test(`Hero at ${width}px`, async () => {
+        await send('Emulation.setDeviceMetricsOverride', {
+          width, height: 900, deviceScaleFactor: 1, mobile,
+        });
+        for (const theme of ['', 'dark/']) {
+          await send('Page.navigate', { url: new URL(theme, base).href });
+          await until(`document.readyState === 'complete' && !!document.querySelector('.hero-copy .button')`);
+          const layout = await evaluate(`(() => {
+            const rect = selector => {
+              const r = document.querySelector(selector).getBoundingClientRect();
+              return { left: r.left, right: r.right, width: r.width };
+            };
+            return {
+              object: rect('.hero-object'), copy: rect('.hero-copy'),
+              button: rect('.hero-copy .button'),
+              viewport: document.documentElement.clientWidth,
+              contentWidth: document.documentElement.scrollWidth,
+              destination: document.querySelector('.hero-copy .button').href,
+            };
+          })()`);
+          assert.ok(layout.contentWidth <= layout.viewport + 1, 'Hero never causes page overflow');
+          assert.ok(layout.destination.endsWith('/configure/'), 'Hero CTA opens the configurator');
+          if (mobile) {
+            assert.ok(Math.abs(layout.button.width - layout.copy.width) < 2,
+              'Mobile primary CTA fills the content width');
+          } else {
+            assert.ok(layout.object.right < layout.copy.left,
+              'Desktop 3D dice stays to the left of the copy');
+            assert.ok(layout.button.width < layout.copy.width - 20,
+              'Desktop CTA keeps its compact width');
+          }
+          if (width === 390 || width === 1440) {
+            const target = await evaluate(`(() => {
+              const r = document.querySelector('.hero-copy .button').getBoundingClientRect();
+              return {x:r.left+r.width/2, y:r.top+r.height/2};
+            })()`);
+            await send('Input.dispatchMouseEvent', {type:'mousePressed', ...target,
+              button:'left', buttons:1, clickCount:1});
+            await send('Input.dispatchMouseEvent', {type:'mouseReleased', ...target,
+              button:'left', buttons:0, clickCount:1});
+            await until(`location.pathname.endsWith('/configure/') &&
+              document.querySelector('h1')?.textContent === 'Собери сам'`);
+          }
+        }
+      });
+    }
+    await send('Emulation.setDeviceMetricsOverride', {
+      width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false,
+    });
+    await t.test('all published navigation URLs respond without errors', async () => {
+      for (const theme of ['', 'dark/']) {
+        await send('Page.navigate', { url: new URL(theme, base).href });
+        await until(`document.readyState === 'complete' && !!document.querySelector('.hero-copy .button')`);
+        const links = await evaluate(`Array.from(document.querySelectorAll('a[href]'))
+          .map(a => a.href).filter(href => href.startsWith(location.origin) && !href.includes('#'))`);
+        for (const href of new Set([...links, ...[
+          'catalog/', 'configure/', 'contacts/', 'production/', 'product/', 'cart/'
+        ].map(path => new URL(path, new URL(theme, base)).href)])) {
+          const result = await evaluate(`fetch(${JSON.stringify(href)}, {cache: 'no-store'})
+            .then(response => ({status: response.status, ok: response.ok, url: response.url}))
+            .catch(error => ({error: String(error)}))`);
+          assert.equal(result?.status, 200, `Broken route: ${href}: ${JSON.stringify(result)}`);
+        }
+      }
+    });
     for (const theme of ['', 'dark/']) {
       await t.test(`${theme || 'light/'} full-width manual reel`, async () => {
         exceptions.length = 0;
