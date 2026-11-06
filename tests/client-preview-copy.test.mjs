@@ -51,18 +51,22 @@ test('builder, cart and production pages honor accepted copy decisions',()=>{
   assert.ok(existsSync('src/app/dark/production/page.tsx'));
   assert.match(read('src/components/ProductionInfo.tsx'),/Изготовление и доставка/);
 });
-test('contacts expose working email and Telegram links and a mail composer', () => {
+test('prototype contact details are fictitious, without mail, phone or Telegram destinations', () => {
   const ui = read('src/components/ContactContent.tsx');
+  const shell = read('src/components/SiteShell.tsx');
   const home = read('src/components/Storefront.tsx');
   const page = read('src/app/contacts/page.tsx');
-  for(const s of ['Telegram', 'Электронная почта', 'Имя', 'Сообщение', 'Написать']) {
-    assert.ok(ui.includes(s), s);
+  for (const value of ['kubiki.example', 'hello@kubiki.example', '+7 (000) 000-00-00']) {
+    assert.ok(ui.includes(value), value);
   }
-  assert.match(ui, /mailto:i@lookawful\.ru/);
-  assert.match(ui, /https:\/\/t\.me\/looksawful/);
-  assert.match(ui, /window\.location\.href/);
-  assert.match(ui, /onSubmit=\{onSubmit\}/);
-  assert.doesNotMatch(ui, /Демонстрационная|не отправляются|уточняются/);
+  assert.match(shell, /hello@kubiki\.example/);
+  assert.match(shell, /\+7 \(000\) 000-00-00/);
+  assert.doesNotMatch(ui + shell, /lookawful\.ru|@looksawful|t\.me\/looksawful/i);
+  assert.doesNotMatch(ui + shell, /mailto:|tel:|window\.location\.href/i);
+  assert.match(ui, /event\.preventDefault\(\)/);
+  assert.match(ui, /setSubmitted\(true\)/);
+  assert.match(ui, /Сообщения не отправляются и не сохраняются/);
+  assert.match(ui, /role="status"/);
   assert.match(home, /<ContactContent\s*\/>/);
   assert.match(page, /<ContactContent\s*\/>/);
 });
@@ -80,10 +84,19 @@ test('in-stock delivery copy matches the agreed week timeframe, not an unspecifi
   assert.match(production, /в течение недели/);
 });
 
-test('contact icons are paired with actual reachable destinations', () => {
+test('contact icons remain semantic but demo details are not links', () => {
   const contacts = read('src/components/ContactContent.tsx');
-  assert.match(contacts, /Mail, Send/);
-  assert.match(contacts, /href: 'mailto:i@lookawful\.ru'/);
-  assert.match(contacts, /href: 'https:\/\/t\.me\/looksawful'/);
-  assert.doesNotMatch(contacts, /Instagram|Телефон|данные для связи уточняются/i);
+  const css = read('src/styles/pages.css');
+  assert.match(contacts, /import \{ Globe, Mail, Phone \} from 'lucide-react'/);
+  assert.match(contacts, /className="contact-method"/);
+  assert.match(css, /\.contact-method > \.cluster/);
+  assert.doesNotMatch(contacts, /href:|<a |mailto:|tel:/);
+});
+
+test('Hero, About and FAQ placeholders use full paragraphs', () => {
+  const home = read('src/components/Storefront.tsx');
+  assert.doesNotMatch(home, /Внимание! Этот текст является рыбой!/);
+  assert.match(home, /<h1 id="hero-title">[^<]+<\/h1>\s*<p>[^<]+\.[^<]+\.[^<]+\.<\/p>/);
+  assert.match(home, /<h2 className="section-title">О нас<\/h2>\s*<p>[^<]+\.[^<]+\.[^<]+\.<\/p>/);
+  assert.match(home, /<summary>\{question\}<\/summary>\s*<p>[^<]+\.[^<]+\.[^<]+\.<\/p>/);
 });

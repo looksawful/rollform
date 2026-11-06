@@ -224,9 +224,8 @@
   }
   .contact-method:first-child { border-block-start: var(--border-default); }
   .contact-method .icon { --icon-size: 1.375rem; }
-  .contact-method a { inline-size: 100%; text-decoration: none; }
-  .contact-method a:hover strong { text-decoration: underline; text-underline-offset: 0.25em; }
-  .contact-method a .stack { --stack-space: 0.2rem; }
+  .contact-method > .cluster { inline-size: 100%; }
+  .contact-method .stack { --stack-space: 0.2rem; }
 
   .contact-form { --stack-space: 1rem; }
   .contact-form label { --stack-space: 0.35rem; font-size: var(--fs-small); font-weight: 600; }
