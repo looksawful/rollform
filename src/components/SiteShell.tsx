@@ -88,6 +88,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
       <div className="wrapper topbar-inner cluster">
         <Link href={link("/")} className="logo" aria-label="На главную">
           <img className="logo-mark" src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/brand/rollform-logo.svg`} width={45} height={48} alt="" />
+          <span className="logo-word">Лого</span>
         </Link>
         <nav className="nav cluster desktop-nav" aria-label="Основное меню">{navigation}</nav>
         <div className="header-actions cluster">
