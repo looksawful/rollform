@@ -134,7 +134,7 @@ test('header reveals after scroll and always shows cart, with conditional count'
   const css = read('src/styles/pages.css');
   assert.match(shell, /<details className="mobile-menu"/);
   assert.match(shell, /<summary aria-label="Меню"/);
-  assert.ok(shell.includes('<Link href={link("/cart")} className="cart-shortcut"'));
+  assert.ok(shell.includes('<Link href={"/cart"} className="cart-shortcut"'));
   assert.ok(shell.includes('{count > 0 && <span className="cart-count"'));
   assert.ok(!shell.includes('{count > 0 && <Link'));
   assert.match(shell, /className="cart-shortcut"/);
