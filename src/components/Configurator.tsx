@@ -31,7 +31,7 @@ export default function Configurator() {
     next.set(key, value);
     window.history.replaceState(null, '', `?${next}`);
   };
-  const createRandomDice = () => router.replace(`${'/configure'}?${diceQuery(randomDiceConfig(Math.random, config.shell))}`);
+  const createRandomDice = () => router.replace(`/configure?${diceQuery(randomDiceConfig(Math.random, config.shell))}`);
   const addCustom = () => { if (add(config, { kind: 'preorder_custom' })) router.push('/cart'); };
 
   return <section className="wrapper section page-section">
