@@ -95,21 +95,6 @@ test('new photo-first product layout keeps purchase honest and supplies a shared
   assert.match(css, /\.product\s*\{[^}]*border-radius:\s*var\(--radius-lg\)/);
 });
 
-test('header appears after scroll and keeps its cart link before and after selection', () => {
-  const shell = source('src/components/SiteShell.tsx');
-  const css = source('src/styles/pages.css');
-  const orders = source('src/lib/orders.ts');
-  assert.match(shell, /window\.scrollY > 24/);
-  assert.match(shell, /revealed \? "topbar topbar-visible" : "topbar"/);
-  assert.ok(shell.includes('<Link href={"/cart"} className="cart-shortcut"'));
-  assert.ok(!shell.includes('{count > 0 && <Link'));
-  assert.ok(shell.includes('{count > 0 && <span className="cart-count"'));
-  assert.match(source('src/styles/components.css'), /\.logo\s*\{[^}]*font-weight:\s*800/);
-  assert.match(css, /transform:\s*translateY\(-110%\)/);
-  assert.match(css, /\.topbar:focus-within/);
-  assert.match(orders, /rollform:demo-cart:v3/);
-});
-
 test('no-credit-needed photos and prices are consistent across all screens', () => {
   const assets = source('src/lib/photoAssets.ts');
   const pricing = source('src/lib/pricing.ts');

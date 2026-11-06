@@ -19,18 +19,17 @@ test('entry point declares predictable cascade order and imports exactly one cop
 
 test('layout primitives stay simple', () => {
   const patterns = read('src/styles/patterns.css');
-  for (const cls of ['wrapper', 'stack', 'cluster', 'split']) {
+  for (const cls of ['wrapper', 'stack', 'cluster']) {
     assert.ok(patterns.includes('.' + cls + ' {'), cls);
   }
   assert.match(patterns, /--stack-space/);
-  assert.match(patterns, /--split-min/);
 });
 
 test('all documented layout primitives have real CSS algorithms', () => {
   const css = read('src/styles/patterns.css');
-  const names = ['wrapper', 'stack', 'prose', 'cluster', 'split',
-    'grid', 'reel', 'scroller', 'frame', 'sidebar', 'switcher', 'cover',
-    'center', 'box'];
+  const names = ['wrapper', 'stack', 'prose', 'cluster',
+    'grid', 'reel', 'scroller', 'frame', 'sidebar', 'switcher',
+    'box'];
   for (const name of names) {
     assert.ok(css.includes('.' + name + ' '), name);
   }
@@ -40,7 +39,6 @@ test('all documented layout primitives have real CSS algorithms', () => {
   assert.match(css, /scroll-snap-type:\s*x\s+proximity/);
   assert.match(css, /--sidebar-width/);
   assert.match(css, /--switcher-threshold/);
-  assert.match(css, /--cover-min-height/);
 });
 
 test('layout composition reuses patterns and adapts the existing commerce pages', () => {

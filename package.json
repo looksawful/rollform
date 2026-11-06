@@ -7,7 +7,8 @@
     "build": "next build",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
-    "test:navigation": "node --test tests/navigation.browser.mjs"
+    "test:navigation": "node --test tests/navigation.browser.mjs",
+    "verify": "npm test && npm run typecheck && npm run build && npm run test:navigation"
   },
   "dependencies": {
     "gsap": "3.15.1",

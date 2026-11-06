@@ -1,14 +1,47 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { createReadStream, existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { extname, join, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
 
 // Run against a running dev server, static preview, or deployed project site.
 // ROLLFORM_TEST_URL=http://localhost:3000/ npm run test:navigation
-const base = process.env.ROLLFORM_TEST_URL;
-assert.ok(base, 'Set ROLLFORM_TEST_URL to the site being tested');
+async function localBase(t) {
+  const root = resolve('out');
+  assert.ok(existsSync(join(root, 'index.html')), 'Run npm run build before the browser test');
+  const html = readFileSync(join(root, 'index.html'), 'utf8');
+  const basePath = html.includes('/rollform/_next/') ? '/rollform' : '';
+  const types = {
+    '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml',
+    '.woff2': 'font/woff2', '.webp': 'image/webp', '.png': 'image/png',
+    '.jpg': 'image/jpeg', '.glb': 'model/gltf-binary', '.json': 'application/json',
+  };
+  const server = createServer((request, response) => {
+    const pathname = new URL(request.url || '/', 'http://localhost').pathname;
+    if (basePath && !pathname.startsWith(basePath + '/')) {
+      response.writeHead(404).end();
+      return;
+    }
+    const path = resolve(root, '.' + decodeURIComponent(pathname.slice(basePath.length)));
+    if (path !== root && !path.startsWith(root + sep)) {
+      response.writeHead(403).end();
+      return;
+    }
+    try {
+      const file = statSync(path).isDirectory() ? join(path, 'index.html') : path;
+      response.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream' });
+      createReadStream(file).pipe(response);
+    } catch {
+      response.writeHead(404).end();
+    }
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  return 'http://127.0.0.1:' + server.address().port + basePath + '/';
+}
 const executable = process.env.CHROME_PATH || [
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
   '/usr/bin/google-chrome', '/usr/bin/chromium',
@@ -17,6 +50,7 @@ assert.ok(executable, 'Set CHROME_PATH to an installed Chrome/Chromium executabl
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 test('page motion and navigation', { timeout: 180000 }, async t => {
+  const base = process.env.ROLLFORM_TEST_URL || await localBase(t);
   const profile = mkdtempSync(join(tmpdir(), 'rollform-navigation-'));
   const browser = spawn(executable, [
     '--headless=new', '--remote-debugging-port=0', '--user-data-dir=' + profile,

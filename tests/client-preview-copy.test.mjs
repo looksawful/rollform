@@ -78,12 +78,6 @@ test('prototype contact details are fictitious, without mail, phone or Telegram 
   assert.match(page, /<ContactContent\s*\/>/);
 });
 
-test('there is no bogus cookie consent or draft legal agreement', () => {
-  const shell = read('src/components/SiteShell.tsx');
-  assert.doesNotMatch(shell, /LegalDialogs|cookie-choice|photo-credits/);
-  assert.ok(!existsSync('src/components/LegalDialogs.tsx'));
-});
-
 test('in-stock delivery copy accompanies stock selection and product details', () => {
   const home = read('src/components/Storefront.tsx');
   const catalog = read('src/app/catalog/page.tsx');

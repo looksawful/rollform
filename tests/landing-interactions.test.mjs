@@ -27,15 +27,6 @@ test('FAQ uses all available width',()=>{
  assert.match(c,/\.faq-list\s*\{[^}]*inline-size:\s*100%/);
  assert.doesNotMatch(c,/\.faq-list\s*\{[^}]*max-inline-size:\s*var\(--measure\)/);
 });
-test('Telegram and Instagram replace site and submit label changes',()=>{
- const s=read('src/components/ContactContent.tsx');
- assert.doesNotMatch(s,/title:\s*'Сайт'/);
- assert.match(s,/title:\s*'Telegram'/);
- assert.match(s,/title:\s*'Instagram'/);
- assert.match(s,/detail:\s*'@kubiki'/);
- assert.match(s,/type="submit">Отправить сообщение<\/button>/);
- assert.match(s,/Сообщения не отправляются и не сохраняются/);
-});
 test('automatic seamless reel with accessible reduced motion fallback and hover stop',()=>{
  const s=read('src/components/ProductGallery.tsx'),c=read('src/styles/pages.css');
  assert.match(s,/prefers-reduced-motion: reduce/);

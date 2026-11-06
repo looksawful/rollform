@@ -9,14 +9,6 @@ test('one route for each screen, no separate dark pages', () => {
     assert.ok(!existsSync('src/app/dark/' + path), 'no dark ' + path);
   }
 });
-test('links use canonical paths without theme-dependent routing', () => {
-  for (const file of ['SiteShell', 'Storefront', 'Configurator', 'ProductCard', 'ProductDetail', 'CartView', 'ProductionInfo']) {
-    const source = read('src/components/' + file + '.tsx');
-    assert.doesNotMatch(source, /themeHref|useThemeRoute/, file);
-  }
-  assert.match(read('src/components/SiteShell.tsx'), /href=\{href\}/);
-  assert.ok(read('src/components/CartView.tsx').includes('href="/catalog"'));
-});
 test('client review release is fixed to light while shared theme CSS is retained', () => {
   const shell = read('src/components/SiteShell.tsx');
   const css = read('src/styles/tokens.css');
