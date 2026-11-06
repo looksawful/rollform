@@ -30,7 +30,7 @@ test('production remains a map route while stock and custom terms move to shoppi
   assert.match(config, /Кубики на заказ/);
   assert.match(config, /Изготовление начинается после согласования/);
   assert.ok(existsSync('src/app/production/page.tsx'));
-  assert.ok(existsSync('src/app/dark/production/page.tsx'));
+  assert.ok(!existsSync('src/app/dark/production/page.tsx'));
 });
 
 test('product detail owns the photo lightbox; catalog and homepage use clickable cards', () => {
@@ -53,7 +53,7 @@ test('cards navigate to product detail and expose a separate secondary add actio
   assert.match(card, /className="product-open"/);
   assert.match(card, /href=\{detailsUrl\}/);
   assert.match(card, /button button-secondary/);
-  assert.match(card, />Добавить в корзину<\/button>/);
+  assert.match(card, /<span>Добавить в корзину<\/span>/);
   assert.doesNotMatch(card, /onPreview|product-zoom/);
 });
 
@@ -91,7 +91,7 @@ test('new photo-first product layout keeps purchase honest and supplies a shared
   assert.match(detail, /formatPrice\(priceForPreset\(product.id\)\)/);
   assert.match(detail, /add\(product.config/);
   assert.ok(existsSync('src/app/product/page.tsx'));
-  assert.ok(existsSync('src/app/dark/product/page.tsx'));
+  assert.ok(!existsSync('src/app/dark/product/page.tsx'));
   assert.match(css, /\.product\s*\{[^}]*border-radius:\s*var\(--radius-lg\)/);
 });
 

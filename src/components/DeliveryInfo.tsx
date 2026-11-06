@@ -16,18 +16,21 @@ export default function DeliveryInfo() {
         <p>Способ, стоимость, географию и сроки доставки согласуют индивидуально до подтверждения заказа. Подтверждённых тарифов и сроков пока нет.</p>
       </div>
     </div>
-    <div className="production-map">
-      <div className="production-map-frame" data-active={mapActive ? 'true' : 'false'}
+    <div className="production-map" onBlurCapture={event => {
+      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setMapActive(false);
+    }}>
+      <div className="production-map-frame" tabIndex={-1} data-active={mapActive ? 'true' : 'false'}
         onPointerLeave={() => setMapActive(false)}
         onKeyDown={event => { if (event.key === 'Escape') setMapActive(false); }}
-        onBlurCapture={event => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setMapActive(false);
-        }}>
+        >
         <iframe title="Обзорная карта Москвы"
           src="https://www.openstreetmap.org/export/embed.html?bbox=37.3%2C55.5%2C37.9%2C55.9&layer=mapnik"
           loading="lazy" tabIndex={mapActive ? 0 : -1} referrerPolicy="strict-origin-when-cross-origin" />
         {!mapActive && <button type="button" className="production-map-activate"
-          aria-label="Включить управление картой" onClick={() => setMapActive(true)}>
+          aria-label="Включить управление картой" onClick={event => {
+            setMapActive(true);
+            event.currentTarget.parentElement?.focus({ preventScroll: true });
+          }}>
           <span>Управлять картой</span>
         </button>}
       </div>

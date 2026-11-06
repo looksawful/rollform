@@ -1,5 +1,10 @@
 /* Component appearances and states. Layout algorithms live in patterns.css. */
 @layer components {
+  :is(button, a, summary):active { opacity: 0.75; }
+  :is(.order-step, .footer, .production-map-caption) a:hover { text-decoration-thickness: 0.15em; }
+  .faq-list summary:hover { background: var(--color-surface); }
+  .production-map-activate:active span { transform: scale(0.98); }
+  .quantity button:hover { background: var(--color-text); color: var(--color-background); }
   .topbar-inner {
     --cluster-justify: space-between;
     --cluster-gap: 2rem;
@@ -80,6 +85,26 @@
   }
   .button-secondary { color: var(--color-text); background: transparent; }
   .button-secondary:hover { background: var(--color-preview); }
+  :where(.theme-toggle, .cart-shortcut, .mobile-menu summary, .quantity button, .pill-list button,
+    .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumb, .nav a, .mobile-nav a) {
+    transition: transform 160ms ease, background-color 160ms ease, opacity 160ms ease;
+  }
+  :where(.theme-toggle, .cart-shortcut, .mobile-menu summary, .quantity button):hover {
+    background: var(--color-surface);
+  }
+  :where(.product-detail-thumbs button, .text-action, .catalog-link, .breadcrumb, .nav a, .mobile-nav a):hover {
+    opacity: 0.75;
+  }
+  :where(.theme-toggle, .cart-shortcut, .mobile-menu summary, .quantity button, .pill-list button,
+    .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumb, .nav a, .mobile-nav a):active {
+    transform: scale(0.96);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :where(.theme-toggle, .cart-shortcut, .mobile-menu summary, .quantity button, .pill-list button,
+      .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumb, .nav a, .mobile-nav a) {
+      transition: none;
+    }
+  }
   .visually-hidden {
     position: absolute;
     inline-size: 1px;

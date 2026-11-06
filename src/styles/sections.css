@@ -22,6 +22,26 @@
     --dice-settle-duration: 380ms;
     --dice-hold-duration: 2200ms;
   }
+  .dice-preview-badge {
+    position: absolute;
+    inset-block-start: 1rem;
+    inset-inline-end: 1rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: var(--border-default);
+    border-radius: var(--radius-full);
+    padding: 0.35rem 0.65rem;
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-card);
+    font-size: var(--fs-small);
+    font-weight: 600;
+    pointer-events: none;
+  }
+  .dice-preview-badge .icon { --icon-size: 1rem; }
+  .dice-canvas:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -3px; }
   .canvas-fallback {
     position: absolute;
     inset: 25%;
@@ -60,16 +80,19 @@
   .hero-centered .hero-object {
     position: absolute;
     inset: 0;
-    z-index: -1;
+    z-index: 0;
     min-block-size: 0;
     border: 0;
     border-radius: 0;
     background: transparent;
     opacity: 1;
-    pointer-events: none;
+    pointer-events: auto;
   }
   .hero-centered .dice-canvas { transform: scale(1.08); }
   .hero-centered .hero-copy {
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
     --stack-space: clamp(0.85rem, 2vw, 1.5rem);
     justify-content: flex-start;
     align-items: center;
@@ -77,6 +100,7 @@
     max-inline-size: 76rem;
     margin-inline: auto;
   }
+  .hero-centered .hero-copy > * { pointer-events: auto; }
   .hero-centered h1 {
     font-size: clamp(3.5rem, 8.2vw, 8.5rem);
     font-weight: 900;

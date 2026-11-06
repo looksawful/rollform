@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { themeHref } from '@/lib/themeRoutes';
@@ -15,14 +15,14 @@ export default function ProductCard({ product, index, duplicate = false }: {
   duplicate?: boolean;
 }) {
   const pathname = usePathname();
-  const { add } = useCart();
-  const [added, setAdded] = useState(false);
+  const { add, items } = useCart();
+  const quantity = items.filter(item =>
+    item.origin.kind === 'preorder_preset' && item.origin.presetId === product.id
+  ).reduce((sum, item) => sum + item.quantity, 0);
   const detailsUrl = themeHref(pathname, '/product?item=' + encodeURIComponent(product.id));
 
   const addToCart = () => {
-    if (add(product.config, { kind: 'preorder_preset', presetId: product.id })) {
-      setAdded(true);
-    }
+    add(product.config, { kind: 'preorder_preset', presetId: product.id });
   };
 
   return <article className="product stack">
@@ -41,8 +41,12 @@ export default function ProductCard({ product, index, duplicate = false }: {
     <div className="product-actions">
       <button type="button" className="button button-secondary" onClick={addToCart}
         tabIndex={duplicate ? -1 : undefined}
-        aria-label={'Добавить в корзину: ' + product.title}>Добавить в корзину</button>
-      <span className="visually-hidden" role="status">{added ? 'Товар добавлен в корзину' : ''}</span>
+        aria-label={'Добавить в корзину: ' + product.title + (quantity ? ', в корзине ' + quantity : '')}>
+        <Plus className="icon" aria-hidden="true" />
+        <span>Добавить в корзину</span>
+        {quantity > 0 && <span className="product-add-count" key={quantity} aria-hidden="true">{quantity}</span>}
+      </button>
+      <span className="visually-hidden" role="status">{quantity ? product.title + ': в корзине ' + quantity : ''}</span>
     </div>
   </article>;
 }

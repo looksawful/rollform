@@ -10,6 +10,7 @@ import { presets, fontNames, shellColors } from '@/lib/catalog';
 import { photoPath } from '@/lib/photoAssets';
 import { formatPrice, priceForPreset } from '@/lib/pricing';
 import { themeHref } from '@/lib/themeRoutes';
+import DiceViewer from './DiceViewer';
 import { useCart } from './CartState';
 
 export default function ProductDetail() {
@@ -35,13 +36,12 @@ export default function ProductDetail() {
     <div className="product-detail">
       <div className="product-detail-gallery">
         <div className="product-detail-main">
-          <button className="product-detail-photo-trigger" type="button"
-            onClick={() => setLightboxOpen(true)}
-            aria-label={'Увеличить изображение: ' + product.title}>
-            <img key={view} src={view === 'photo' ? photo : model}
-              alt={view === 'photo' ? 'Игральные кубики' : '3D-визуализация выбранного варианта'}
-              width={1000} height={900} />
-          </button>
+          {view === 'model' ? <DiceViewer config={product.config} /> :
+            <button className="product-detail-photo-trigger" type="button"
+              onClick={() => setLightboxOpen(true)}
+              aria-label={'Увеличить изображение: ' + product.title}>
+              <img src={photo} alt="Игральные кубики" width={1000} height={900} />
+            </button>}
         </div>
         <div className="product-detail-thumbs cluster" aria-label="Вид товара">
           <button type="button" aria-pressed={view === 'photo'} onClick={() => setView('photo')}>

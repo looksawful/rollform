@@ -13,8 +13,9 @@ test('uses GSAP timeline, Three.js quaternion and motion CSS tokens', () => {
   assert.match(css, /--dice-roll-duration/);
   assert.match(css, /--dice-hold-duration/);
 });
-test('no bespoke frame loop, physics engine or pointer controls', () => {
-  assert.doesNotMatch(viewer, /requestAnimationFrame|setTimeout|pointerdown|pointermove|onKeyDown/);
+test('uses OrbitControls rather than a bespoke pointer/physics engine', () => {
+  assert.match(viewer, /OrbitControls/);
+  assert.doesNotMatch(viewer, /requestAnimationFrame|setTimeout|pointermove/);
 });
 
 test('roll is deliberately slow and includes a visible pause on mobile', () => {
@@ -34,7 +35,7 @@ test('hero has a passive seamless loop, without click controls', () => {
   assert.match(viewer, /if \(continuous\) \{/);
   assert.match(viewer, /gsap\.timeline\(\{ repeat: -1 \}\)\.to\(dice\.rotation/);
   assert.match(viewer, /duration: 12, ease: 'none'/);
-  assert.match(viewer, /pointer-events:none/);
+  assert.match(viewer, /touch-action:none/);
   assert.match(viewer, /if \(continuous\) host\.dataset\.motion = 'rolling'/);
 });
 

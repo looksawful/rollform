@@ -32,7 +32,7 @@ test('stock cards show a photo, a prominent price and a secondary add-to-cart ac
   assert.match(card,/href=\{detailsUrl\}/);
   assert.doesNotMatch(card,/className="product-description"|onPreview|product-zoom/);
   assert.match(card,/className="button button-secondary"/);
-  assert.match(card,/>Добавить в корзину<\/button>/);
+  assert.match(card,/<span>Добавить в корзину<\/span>/);
   assert.match(card,/photoPath\(index\)/);
   assert.match(catalog,/>Кубики в наличии<\/h1>/);
 });
@@ -49,7 +49,7 @@ test('builder, cart and production pages honor accepted copy decisions',()=>{
   assert.match(data,/name: 'Цвет 1'/);
   assert.match(data,/grotesk: 'Шрифт 1'/);
   assert.ok(existsSync('src/app/production/page.tsx'));
-  assert.ok(existsSync('src/app/dark/production/page.tsx'));
+  assert.ok(!existsSync('src/app/dark/production/page.tsx'));
   assert.match(read('src/components/ProductionInfo.tsx'),/Как оформить заказ/);
 });
 test('prototype contact details are fictitious, without mail, phone or Telegram destinations', () => {

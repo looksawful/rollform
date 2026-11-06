@@ -12,7 +12,16 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
   useEffect(() => {
     if (mode !== 'reel') return;
     const preference = matchMedia('(prefers-reduced-motion: reduce)');
-    const sync = () => setLooping(!preference.matches);
+    const sync = () => {
+      const scroller = scrollerRef.current;
+      if (scroller) {
+        const first = scroller.querySelector<HTMLElement>('[data-copy="0"] .product');
+        const middle = scroller.querySelector<HTMLElement>('[data-copy="1"] .product');
+        positionRef.current = first && middle
+          ? scroller.scrollLeft - (middle.offsetLeft - first.offsetLeft) : scroller.scrollLeft;
+      }
+      setLooping(!preference.matches);
+    };
     sync();
     preference.addEventListener('change', sync);
     return () => preference.removeEventListener('change', sync);

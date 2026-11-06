@@ -54,11 +54,14 @@ export function readSavedDice(raw: string | null): DiceConfig | null {
   return diceQuery(config) === raw ? config : null;
 }
 
-export function randomDiceConfig(random: () => number = Math.random): DiceConfig {
+export function randomDiceConfig(
+  random: () => number = Math.random,
+  previousShell?: DiceConfig['shell'],
+): DiceConfig {
   const pick = <T,>(values: readonly T[]): T => values[Math.floor(random() * values.length)];
   return {
     shape: pick(diceShapes),
-    shell: pick(shellColors).value,
+    shell: pick(previousShell ? shellColors.filter(color => color.value !== previousShell) : shellColors).value,
     font: pick(fontStyles),
   };
 }

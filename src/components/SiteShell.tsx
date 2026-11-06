@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { Menu, ShoppingBag } from 'lucide-react';
+import { Menu, Moon, ShoppingBag, Sun } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { CartProvider, useCart } from './CartState';
-import { isDarkPath, themeHref } from '@/lib/themeRoutes';
+import { themeHref } from '@/lib/themeRoutes';
 
 const menuLinks = [
   { href: '/', label: 'Главная' },
@@ -20,6 +20,17 @@ function SiteChrome({ children }: { children: ReactNode }) {
   const { count } = useCart();
   const mainRef = useRef<HTMLElement>(null);
   const [revealed, setRevealed] = useState(false);
+  const [dark, setDark] = useState(false);
+  useEffect(() => {
+    try { setDark(localStorage.getItem('rollform:theme') === 'dark'); }
+    catch { /* Storage is optional. */ }
+  }, []);
+  const toggleTheme = () => {
+    const next = !dark;
+    setDark(next);
+    try { localStorage.setItem('rollform:theme', next ? 'dark' : 'light'); }
+    catch { /* The theme still works until navigation. */ }
+  };
   useEffect(() => {
     const reveal = () => {
       if (window.scrollY > 24) {
@@ -77,7 +88,6 @@ function SiteChrome({ children }: { children: ReactNode }) {
       media?.revert();
     };
   }, [pathname]);
-  const dark = isDarkPath(pathname);
   const path = pathname.replace(/\/$/, '');
   const link = (href: string) => themeHref(pathname, href);
   const navigation = menuLinks.map(({ href, label }) =>
@@ -92,6 +102,11 @@ function SiteChrome({ children }: { children: ReactNode }) {
         </Link>
         <nav className="nav cluster desktop-nav" aria-label="Основное меню">{navigation}</nav>
         <div className="header-actions cluster">
+          <button type="button" className="theme-toggle" onClick={toggleTheme}
+            aria-pressed={dark} aria-label={dark ? 'Включить светлую тему' : 'Включить тёмную тему'}
+            title={dark ? 'Светлая тема' : 'Тёмная тема'}>
+            {dark ? <Sun className="icon" aria-hidden="true" /> : <Moon className="icon" aria-hidden="true" />}
+          </button>
           <details className="mobile-menu" onKeyDown={e => {
             if (e.key === 'Escape') { e.currentTarget.open = false; e.currentTarget.querySelector('summary')?.focus(); }
           }}>

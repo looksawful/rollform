@@ -2,7 +2,7 @@
    until a consumer provides them, with local fallbacks in patterns.css. */
 @layer theme {
   :root {
-    /* Light is the default; /dark always has its own dark scope. */
+    /* Light is the default; header control stores the user's preference. */
     color-scheme: light;
     /* Contrast primitives stay black and white; surfaces use neutral gray. */
     --color-black: #000000;

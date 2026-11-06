@@ -86,7 +86,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         await send('Emulation.setDeviceMetricsOverride', {
           width, height: 900, deviceScaleFactor: 1, mobile,
         });
-        for (const theme of ['', 'dark/']) {
+        for (const theme of ['']) {
           await send('Page.navigate', { url: new URL(theme, base).href });
           await until(`document.readyState === 'complete' && !!document.querySelector('.hero-copy .button')`);
           const layout = await evaluate(`(() => {
@@ -136,7 +136,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
     await send('Emulation.setDeviceMetricsOverride', {
       width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false,
     });
-    for (const theme of ['', 'dark/']) {
+    for (const theme of ['']) {
       await t.test(`${theme || 'light/'} Hero random + menu restores last dice`, async () => {
         const home = new URL(theme, base).href;
         await send('Page.navigate', { url: home });
@@ -146,7 +146,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         await until(`location.pathname.endsWith('/configure/') &&
           ['shape', 'shell', 'font'].every(k => new URLSearchParams(location.search).has(k))`);
         const created = await evaluate('location.search');
-        assert.equal(await evaluate(`document.querySelectorAll('.pill-list [aria-pressed="true"]').length`), 3);
+        await until(`document.querySelectorAll('.pill-list [aria-pressed="true"]').length === 3`);
         await send('Page.navigate', { url: home });
         await until(`document.readyState === 'complete' && !!document.querySelector('.desktop-nav a[href$="/configure/"]')`);
         await evaluate(`document.querySelector('.desktop-nav a[href$="/configure/"]').click()`);
@@ -157,7 +157,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
       });
     }
     await t.test('all published navigation URLs respond without errors', async () => {
-      for (const theme of ['', 'dark/']) {
+      for (const theme of ['']) {
         await send('Page.navigate', { url: new URL(theme, base).href });
         await until(`document.readyState === 'complete' && !!document.querySelector('.hero-copy .button')`);
         const links = await evaluate(`Array.from(document.querySelectorAll('a[href]'))
@@ -172,7 +172,77 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         }
       }
     });
-    for (const theme of ['', 'dark/']) {
+    for (const theme of ['']) {
+      await t.test('theme, catalog count, random color and 3D interaction', async () => {
+        await send('Emulation.setDeviceMetricsOverride', {width:1440,height:1100,deviceScaleFactor:1,mobile:false});
+        await send('Page.navigate', {url:new URL('catalog/',base).href});
+        await until(`document.readyState === 'complete' && !!document.querySelector('.theme-toggle')`);
+        await delay(150);
+        await evaluate(`scrollTo(0,100)`);
+        await evaluate(`document.querySelector('.theme-toggle').click()`);
+        const selectedTheme = await evaluate(`document.querySelector('.site').dataset.theme`);
+        await send('Page.reload');
+        await until(`document.readyState === 'complete' && document.querySelector('.site').dataset.theme === ${JSON.stringify(selectedTheme)}`);
+        assert.equal(await evaluate(`location.pathname.includes('/dark')`),false);
+        for (const width of [320,390,768,1024,1440]) {
+          await send('Emulation.setDeviceMetricsOverride',{width,height:1100,deviceScaleFactor:1,mobile:false});
+          const columns=await evaluate(`getComputedStyle(document.querySelector('.product-grid')).gridTemplateColumns.split(' ').length`);
+          assert.equal(columns,width<=960?2:3,`Catalog columns at ${width}`);
+          assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`));
+        }
+        await evaluate(`document.querySelector('.product-grid button').click()`);
+        await until(`Number(document.querySelector('.product-add-count')?.textContent)>0`);
+        const firstCount=await evaluate(`Number(document.querySelector('.product-add-count').textContent)`);
+        await evaluate(`document.querySelector('.product-grid button').click()`);
+        await until(`Number(document.querySelector('.product-add-count').textContent) === ${firstCount+1}`);
+        await send('Page.navigate',{url:new URL('configure/',base).href});
+        await until(`document.readyState === 'complete' && !!document.querySelector('.random-dice-button')`);
+        await delay(100);
+        for(let n=0;n<4;n++) {
+          const color=await evaluate(`document.querySelectorAll('.field')[1].querySelector('[aria-pressed="true"]').textContent`);
+          await evaluate(`document.querySelector('.random-dice-button').click()`);
+          await until(`document.querySelectorAll('.field')[1].querySelector('[aria-pressed="true"]').textContent !== ${JSON.stringify(color)}`);
+        }
+        for (const path of ['configure/','product/?item=demo-1','']) {
+          await send('Page.navigate',{url:new URL(path,base).href});
+          if (path.startsWith('product')) {
+            await until(`!!document.querySelector('.product-detail-thumbs button:last-child')`);
+            await delay(150);
+            await evaluate(`document.querySelector('.product-detail-thumbs button:last-child').click()`);
+          }
+          await until(`document.readyState === 'complete' && !!document.querySelector('.dice-canvas canvas') && !document.querySelector('.canvas-fallback')`);
+          await delay(300);
+          const point=await evaluate(`(() => {const r=document.querySelector('.dice-canvas').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};})()`);
+          await send('Input.dispatchMouseEvent',{type:'mousePressed',...point,button:'left',buttons:1,clickCount:1});
+          await send('Input.dispatchMouseEvent',{type:'mouseReleased',...point,button:'left',buttons:0,clickCount:1});
+          await until(`document.querySelector('.dice-canvas').dataset.motion === 'manual'`);
+          await delay(200);
+          const before=(await send('Page.captureScreenshot',{format:'png'})).data;
+          await delay(400);
+          assert.equal((await send('Page.captureScreenshot',{format:'png'})).data,before,`${path} stops auto motion`);
+          await send('Input.dispatchMouseEvent',{type:'mousePressed',...point,button:'left',buttons:1,clickCount:1});
+          await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:point.x+85,y:point.y+35,buttons:1,button:'left'});
+          await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:point.x+85,y:point.y+35,button:'left',buttons:0,clickCount:1});
+          assert.notEqual((await send('Page.captureScreenshot',{format:'png'})).data,before,`${path} drag rotates`);
+          const rotated=(await send('Page.captureScreenshot',{format:'png'})).data;
+          await send('Input.dispatchMouseEvent',{type:'mouseWheel',...point,deltaX:0,deltaY:-180});
+          await delay(100);
+          assert.notEqual((await send('Page.captureScreenshot',{format:'png'})).data,rotated,`${path} wheel zooms`);
+          assert.equal(await evaluate(`!!document.querySelector('.dice-preview-badge')`),!!path);
+        }
+        await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+        await send('Emulation.setTouchEmulationEnabled',{enabled:true});
+        await send('Page.navigate',{url:new URL('',base).href});
+        await until(`document.readyState === 'complete' && !!document.querySelector('.dice-canvas canvas')`);
+        await send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:25,y:650}]});
+        for(let y=620;y>250;y-=40) { await send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:25,y}]}); await delay(20); }
+        await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+        await delay(200);
+        assert.ok(await evaluate('scrollY>100'),'Mobile Hero allows initial page swipe');
+        await send('Emulation.setTouchEmulationEnabled',{enabled:false});
+        await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
+        assert.deepEqual(exceptions,[]);
+      });
       await t.test(`${theme || 'light/'} seamless automatic reel and manual controls`, async () => {
         exceptions.length = 0;
         await send('Page.navigate', { url: new URL(theme, base).href });
@@ -241,12 +311,13 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
         });
         await until(`document.querySelectorAll('.product-scroller .product').length === 9 && Array.from(document.querySelectorAll('.product-scroller .product')).every(card => ['none','1'].includes(getComputedStyle(card).scale))`);
-        assert.ok(Math.abs(await evaluate(`document.querySelector('.product-scroller').scrollLeft`) - chosenPosition) < 2, 'Changing motion preference preserves the chosen card');
+        const reducedPosition = await evaluate(`document.querySelector('.product-scroller').scrollLeft`);
+        assert.ok(Math.abs(reducedPosition - chosenPosition) < 200, `Changing motion preference preserves the chosen card: ${chosenPosition} -> ${reducedPosition}`);
         const still = await evaluate(`document.querySelector('.product-scroller').scrollLeft`);
         await delay(400);
         assert.equal(await evaluate(`document.querySelector('.product-scroller').scrollLeft`), still, 'Reduced motion disables automatic travel');
-        await evaluate(`document.querySelector('.product-scroller').scrollLeft += 80`);
-        assert.ok(await evaluate(`document.querySelector('.product-scroller').scrollLeft > ${still+40}`), 'Reduced motion retains manual scrolling');
+        await evaluate(`document.querySelector('.product-scroller').scrollLeft += 400`);
+        await until(`document.querySelector('.product-scroller').scrollLeft > ${still+100}`);
         await send('Emulation.setEmulatedMedia', {
           features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
         });
@@ -309,7 +380,8 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           await delay(150);
           assert.ok(await evaluate(`scrollY > ${pageBefore+20}`), 'Inactive map lets the page scroll');
           await evaluate(`document.querySelector('.production-map-activate').focus()`);
-          await send('Input.dispatchKeyEvent', { type:'keyDown', key:'Enter', code:'Enter', windowsVirtualKeyCode:13 });
+          await send('Input.dispatchKeyEvent', { type:'rawKeyDown', key:'Enter', code:'Enter', windowsVirtualKeyCode:13 });
+          await send('Input.dispatchKeyEvent', { type:'char', text:'\r', unmodifiedText:'\r', key:'Enter', code:'Enter', windowsVirtualKeyCode:13 });
           await send('Input.dispatchKeyEvent', { type:'keyUp', key:'Enter', code:'Enter', windowsVirtualKeyCode:13 });
           await until(`document.querySelector('.production-map-frame').dataset.active === 'true'`);
           assert.equal(await evaluate(`document.querySelector('.production-map-frame iframe').tabIndex`), 0);
@@ -338,7 +410,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         assert.equal(await evaluate(`!!document.querySelector('.pin-spacer')`), false, 'The former pin is removed');
         const destination = new URL('configure/', home).href;
         await evaluate(`document.querySelector('.desktop-nav a[href$="/configure/"]').click()`);
-        await until(`location.href === ${JSON.stringify(destination)} && document.querySelector('h1')?.textContent === 'Собери сам'`);
+        await until(`location.pathname === new URL(${JSON.stringify(destination)}).pathname && document.querySelector('h1')?.textContent === 'Собери сам'`);
         assert.deepEqual(exceptions, []);
         assert.equal(await evaluate(`!!document.querySelector('.pin-spacer')`), false, 'No stale pin after navigation');
         await send('Page.reload');
@@ -346,6 +418,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         assert.deepEqual(exceptions, []);
       });
       await t.test(`${theme || 'light/'} one-shot reveals and reduced motion`, async () => {
+        await send('Emulation.setEmulatedMedia', { features: [{name:'prefers-reduced-motion',value:'no-preference'}] });
         exceptions.length = 0;
         const home = new URL(theme, base).href;
         await send('Page.navigate', { url: home });

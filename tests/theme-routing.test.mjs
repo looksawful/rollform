@@ -1,51 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import path from 'node:path';
-import { isDarkPath, themeHref } from '../src/lib/themeRoutes.ts';
+import { themeHref } from '../src/lib/themeRoutes.ts';
+const read = path => readFileSync(path, 'utf8');
 
-const root = process.cwd();
-const read = file => readFileSync(path.join(root, file), 'utf8');
-
-test('light and dark URLs use the same six screens', () => {
-  for (const route of ['page.tsx', 'catalog/page.tsx', 'configure/page.tsx', 'cart/page.tsx', 'contacts/page.tsx', 'production/page.tsx']) {
-    assert.ok(existsSync(path.join(root, 'src/app', route)), route);
-    assert.ok(existsSync(path.join(root, 'src/app/dark', route)), 'dark/' + route);
+test('one route for each screen, no separate dark pages', () => {
+  for (const path of ['page.tsx', 'catalog/page.tsx', 'configure/page.tsx', 'cart/page.tsx', 'contacts/page.tsx', 'production/page.tsx', 'product/page.tsx']) {
+    assert.ok(existsSync('src/app/' + path), path);
+    assert.ok(!existsSync('src/app/dark/' + path), 'no dark ' + path);
   }
 });
-
-test('theme is selected by URL, not OS preference or similar-looking path', () => {
-  for (const pathname of ['/dark', '/dark/', '/dark/catalog/', '/dark/cart/']) {
-    assert.equal(isDarkPath(pathname), true, pathname);
-  }
-  for (const pathname of ['/', '/catalog/', '/cart/', '/darkness', '/dark-mode/']) {
-    assert.equal(isDarkPath(pathname), false, pathname);
-  }
-});
-
-test('all internal links remain inside their selected theme', () => {
-  for (const href of ['/', '/#about', '/catalog', '/configure', '/cart', '/contacts', '/configure?preset=demo-1','/production']) {
+test('links do not depend on the selected theme', () => {
+  for (const href of ['/', '/#about', '/catalog', '/configure', '/cart', '/contacts', '/production', '/product?item=demo-1']) {
     assert.equal(themeHref('/catalog/', href), href);
-    assert.equal(themeHref('/dark/catalog/', href), '/dark' + href);
+    assert.equal(themeHref('/dark/catalog/', href), href);
   }
 });
-
-test('theme applies on first render without a JS theme switcher', () => {
+test('theme persists in the shell and CSS uses the same semantic colors', () => {
   const shell = read('src/components/SiteShell.tsx');
   const css = read('src/styles/tokens.css');
   const pages = read('src/styles/pages.css');
+  assert.match(shell, /className="theme-toggle"/);
+  assert.match(shell, /localStorage\.getItem\('rollform:theme'\)/);
+  assert.match(shell, /localStorage\.setItem\('rollform:theme'/);
   assert.match(shell, /data-theme=\{dark \? 'dark' : 'light'\}/);
-  assert.match(css, /color-scheme:\s*light;/);
   assert.match(css, /\.site\[data-theme="dark"\]\s*\{\s*color-scheme:\s*dark;/);
-  assert.match(css, /\.site\[data-theme="dark"\]\s*\{[^}]*--color-background:\s*#151515/);
   assert.match(pages, /\.site\s*\{[^}]*background:\s*var\(--color-background\)/);
-  assert.match(pages, /\.site\s*\{[^}]*color:\s*var\(--color-text\)/);
-  assert.doesNotMatch(shell, /theme-toggle/);
-});
-
-test('catalog, configurator and cart links remain on the theme URL', () => {
-  for (const file of ['src/components/Storefront.tsx', 'src/components/ProductCard.tsx',
-    'src/components/Configurator.tsx', 'src/components/CartView.tsx', 'src/components/SiteShell.tsx']) {
-    assert.match(read(file), /themeHref|useThemeHref/, file);
-  }
 });

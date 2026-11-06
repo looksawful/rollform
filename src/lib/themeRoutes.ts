@@ -1,5 +1,2 @@
-export const isDarkPath = (pathname: string): boolean =>
-  pathname === '/dark' || pathname.startsWith('/dark/');
-
-export const themeHref = (pathname: string, href: string): string =>
-  isDarkPath(pathname) ? '/dark' + href : href;
+// Theme is a local preference, not an alternative routing tree.
+export const themeHref = (_pathname: string, href: string): string => href;

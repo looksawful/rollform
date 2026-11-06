@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { Orbit } from 'lucide-react';
 import type { DiceConfig } from '@/lib/catalog';
 import type { Vector3, Mesh } from 'three';
 import { buildGeometry, faceLabel, facePlacements } from '@/lib/diceGeometry';
@@ -23,10 +24,11 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
 
     (async () => {
       try {
-        const [THREE, { gsap }, { GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+        const [THREE, { gsap }, { GLTFLoader }, { RoomEnvironment }, { OrbitControls }] = await Promise.all([
           import('three'), import('gsap'),
           import('three/addons/loaders/GLTFLoader.js'),
           import('three/addons/environments/RoomEnvironment.js'),
+          import('three/addons/controls/OrbitControls.js'),
         ]);
         if (closed) return;
 
@@ -41,8 +43,16 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         renderer.setClearColor(0xffffff, 0);
         const canvas = renderer.domElement;
         canvas.setAttribute('aria-hidden', 'true');
-        canvas.style.cssText = 'display:block;width:100%;height:100%;pointer-events:none';
+        canvas.style.cssText = 'display:block;width:100%;height:100%;touch-action:none';
         host.append(canvas);
+        const controls = new OrbitControls(camera, canvas);
+        controls.enablePan = false;
+        controls.enableDamping = false;
+        controls.minDistance = continuous ? 8.3 : 5.2;
+        controls.maxDistance = continuous ? 12 : 8.2;
+        controls.zoomSpeed = 0.6;
+        controls.enabled = false;
+        canvas.style.touchAction = 'pan-y';
 
         const environment = new RoomEnvironment();
         const pmrem = new THREE.PMREMGenerator(renderer);
@@ -78,6 +88,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const frameInterval = continuous ? 33 : 0;
         const onScroll = () => { scrollPauseUntil = performance.now() + 140; };
         let timeline: ReturnType<typeof gsap.timeline> | null = null;
+        let interacted = false;
 
         const clearShape = () => {
           timeline?.kill();
@@ -162,6 +173,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const play = () => {
           timeline?.kill();
           if (!normals.length) return;
+          if (interacted) { host.dataset.motion = 'manual'; render(true); return; }
           if (continuous) {
             dice.rotation.set(-0.38, 0.4, 0.12);
             timeline = gsap.timeline({ repeat: -1 }).to(dice.rotation, {
@@ -233,6 +245,34 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
             render();
           } else if (!visible || document.hidden) timeline.pause();
         };
+        const stopAuto = () => {
+          controls.enabled = true;
+          canvas.style.touchAction = 'none';
+          if (interacted) return;
+          interacted = true;
+          timeline?.kill();
+          timeline = null;
+          host.dataset.motion = 'manual';
+          render(true);
+        };
+        const activate = (event: PointerEvent) => { if (event.pointerType === 'mouse') stopAuto(); };
+        const tap = () => stopAuto();
+        canvas.addEventListener('pointerdown', activate, true);
+        canvas.addEventListener('click', tap);
+        const onKeyDown = (event: KeyboardEvent) => {
+          const step = 0.15;
+          if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+          event.preventDefault();
+          stopAuto();
+          if (event.key === 'ArrowLeft') dice.rotation.y -= step;
+          if (event.key === 'ArrowRight') dice.rotation.y += step;
+          if (event.key === 'ArrowUp') dice.rotation.x -= step;
+          if (event.key === 'ArrowDown') dice.rotation.x += step;
+          render(true);
+        };
+        controls.addEventListener('start', stopAuto);
+        controls.addEventListener('change', () => render(true));
+        host.addEventListener('keydown', onKeyDown);
         const update = (next: DiceConfig) => {
           surface.color.set(next.shell === '#000000' ? '#191919' : next.shell);
           if (next.shape !== renderedShape || next.font !== renderedFont) void buildShape(next);
@@ -292,6 +332,10 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         cleanup = () => {
           request++;
           timeline?.kill();
+          controls.dispose();
+          canvas.removeEventListener('pointerdown', activate, true);
+          canvas.removeEventListener('click', tap);
+          host.removeEventListener('keydown', onKeyDown);
           observer.disconnect();
           visibility.disconnect();
           motion.removeEventListener('change', onMotion);
@@ -315,8 +359,11 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
     return () => { closed = true; cleanup?.(); };
   }, []);
 
-  return <div ref={hostRef} className="dice-canvas" role="img" data-motion="paused"
-    aria-label={'3D-модель ' + config.shape.toUpperCase()}>
+  return <div ref={hostRef} className="dice-canvas" role="group" tabIndex={0} data-motion="paused"
+    aria-label={'3D-модель ' + config.shape.toUpperCase() + '. Вращение перетаскиванием или стрелками, масштаб колёсиком.'}>
+    {!continuous && <span className="dice-preview-badge" aria-hidden="true">
+      <Orbit className="icon" />3D-превью
+    </span>}
     {fallback && <div className="canvas-fallback" style={{ backgroundColor: config.shell }}>{config.shape.toUpperCase()}</div>}
   </div>;
 }
