@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Box } from 'lucide-react';
-import { themeHref } from '@/lib/themeRoutes';
 import DiceViewer from './DiceViewer';
 import ProductGallery from './ProductGallery';
 import ProductionInfo from './ProductionInfo';
@@ -14,9 +13,8 @@ import ScrollProgress from './ScrollProgress';
 import { diceQuery, initialConfig, randomDiceConfig } from '@/lib/catalog';
 
 export default function Storefront() {
-  const pathname = usePathname();
   const router = useRouter();
-  const createRandomDice = () => router.push(`${themeHref(pathname, '/configure')}?${diceQuery(randomDiceConfig())}`);
+  const createRandomDice = () => router.push(`/configure?${diceQuery(randomDiceConfig())}`);
   return <>
     <section className="wrapper hero hero-centered" aria-labelledby="hero-title">
       <div className="hero-object"><DiceViewer config={initialConfig} continuous /></div>
@@ -33,7 +31,7 @@ export default function Storefront() {
       </div>
       <ProductGallery mode="reel" />
       <div className="wrapper catalog-footer">
-        <Link className="catalog-link" href={themeHref(pathname, '/catalog')}>Весь каталог <span aria-hidden="true">↗</span></Link>
+        <Link className="catalog-link" href="/catalog">Весь каталог <span aria-hidden="true">↗</span></Link>
       </div>
     </section>
     <ProductionInfo onHome />
