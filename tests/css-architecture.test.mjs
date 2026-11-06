@@ -253,3 +253,14 @@ test('Hero uses desktop split and mobile full-width CTA without replacing curren
   assert.match(mobile, /\.hero-centered \.hero-copy \.button\s*\{[^}]*inline-size:\s*100%/);
   assert.match(css.slice(0, mobileStart), /\.hero-centered \.hero-object\s*\{[^}]*position:\s*absolute/);
 });
+
+test('desktop topbar spans viewport with centered navigation and equal flexible edge slots', () => {
+  const css = read('src/styles/components.css');
+  const desktop = css.split('@media (width > 56rem)')[1] || '';
+  assert.match(desktop, /\.topbar-inner\s*\{[^}]*inline-size:\s*100%/);
+  assert.match(desktop, /\.topbar-inner\s*\{[^}]*padding-inline:/);
+  assert.match(desktop, /\.topbar-inner\s*>\s*\.logo,\s*\.topbar-inner\s*>\s*\.header-actions\s*\{[^}]*flex:\s*1 1 0/);
+  assert.match(desktop, /\.topbar-inner\s*>\s*\.header-actions\s*\{[^}]*justify-content:\s*flex-end/);
+  assert.match(desktop, /\.topbar-inner\s*>\s*\.desktop-nav\s*\{[^}]*flex-wrap:\s*nowrap/);
+  assert.match(read('src/styles/pages.css'), /\.mobile-menu\s*\{\s*display:\s*none/);
+});
