@@ -28,6 +28,7 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /rollform
+      - run: npm run test:navigation
       # GitHub Pages caches HTML for 600s, but old hashed assets vanish after deployment.
       # Keep recent assets so previously cached HTML can still hydrate.
       - name: Restore previously deployed Next.js assets
