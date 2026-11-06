@@ -1,6 +1,6 @@
 @layer components {
   .hero {
-    min-block-size: min(48rem, calc(100svh - var(--header-height)));
+    min-block-size: 100svh;
     padding-block: clamp(2rem, 3vw, 4rem);
   }
   .hero-object {
@@ -43,6 +43,9 @@
   }
   .hero-copy p { max-inline-size: 31rem; font-size: var(--fs-body); line-height: var(--lh-body); }
   .section { padding-block: var(--space-5); }
+  /* Full-screen editorial panels; keep the horizontally scrolled catalog content-sized. */
+  main > .section:not(.catalog-section) { min-block-size: 100svh; }
+  main > .section.stack:not(.catalog-section) { justify-content: center; }
 
   /* Centered monochrome Hero study: 3D dice acts as a passive backdrop. */
   .hero.hero-centered {
@@ -51,7 +54,6 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     place-items: stretch;
-    min-block-size: clamp(38rem, calc(100svh - var(--header-height)), 62rem);
     padding-block: clamp(2rem, 4vw, 4rem);
     text-align: center;
   }
@@ -103,7 +105,6 @@
   }
   @media (width <= 36rem) {
     .hero.hero-centered {
-      min-block-size: clamp(34rem, calc(100svh - var(--header-height)), 52rem);
       padding-block: 1.5rem 2rem;
     }
     .hero.hero-centered h1 {
@@ -119,7 +120,6 @@
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       align-items: center;
       gap: clamp(2rem, 5vw, 6rem);
-      min-block-size: min(48rem, calc(100svh - var(--header-height)));
       text-align: left;
     }
     .hero-centered .hero-object {

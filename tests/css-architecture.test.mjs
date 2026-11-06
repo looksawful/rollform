@@ -277,3 +277,14 @@ test('Hero alone enlarges the 3D preview slightly without changing its frame or 
   assert.doesNotMatch(sharedDice, /transform:\s*scale\(/);
   assert.match(css, /\.hero-centered \.hero-object\s*\{[^}]*background:\s*transparent;/);
 });
+
+test('Hero and ordinary panels fill the viewport; scroll-linked product reel stays content-sized', () => {
+  const sections = read('src/styles/sections.css');
+  const pages = read('src/styles/pages.css');
+  assert.match(sections, /\.hero\s*\{[^}]*min-block-size:\s*100svh;/);
+  assert.match(sections, /main\s*>\s*\.section:not\(\.catalog-section\)\s*\{[^}]*min-block-size:\s*100svh;/);
+  assert.match(sections, /main\s*>\s*\.section\.stack:not\(\.catalog-section\)\s*\{[^}]*justify-content:\s*center;/);
+  assert.match(pages, /\.about-section\s*\{[^}]*align-content:\s*center;/);
+  assert.doesNotMatch(sections, /\.hero\.hero-centered\s*\{[^}]*min-block-size:/);
+  assert.match(read('src/components/Storefront.tsx'), /<section className="section stack catalog-section" id="catalog">/);
+});

@@ -312,7 +312,7 @@
   .editorial-photo { margin: 0; min-inline-size: 0; }
   .editorial-photo img { inline-size: 100%; block-size: 100%; aspect-ratio: 1.4; object-fit: cover; border-radius: var(--radius-lg); background: var(--color-preview); }
   .editorial-photo figcaption { padding-block-start: 0.5rem; font-size: var(--fs-small); opacity: 0.65; }
-  .about-section { display: grid; gap: var(--space-3); }
+  .about-section { display: grid; gap: var(--space-3); align-content: center; }
   .about-section > .editorial-copy { max-inline-size: var(--measure); }
   .about-panorama img { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 2.65; object-fit: cover; }
 
