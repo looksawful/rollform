@@ -264,3 +264,17 @@ test('desktop topbar spans viewport with centered navigation and equal flexible 
   assert.match(desktop, /\.topbar-inner\s*>\s*\.desktop-nav\s*\{[^}]*flex-wrap:\s*nowrap/);
   assert.match(read('src/styles/pages.css'), /\.mobile-menu\s*\{\s*display:\s*none/);
 });
+
+test('hero 3D canvas floats on the site background at desktop and mobile widths', () => {
+  const css = read('src/styles/sections.css');
+  const viewer = read('src/components/DiceViewer.tsx');
+  const desktop = css.split('@media (width > 56rem)')[1] || '';
+  const objectDesktop = desktop.match(/\.hero-centered \.hero-object\s*\{([^}]*)\}/)?.[1] || '';
+  const objectHero = css.match(/\.hero-centered \.hero-object\s*\{([^}]*)\}/)?.[1] || '';
+  assert.match(objectHero, /background:\s*transparent;/);
+  assert.match(objectHero, /border:\s*0;/);
+  assert.match(objectHero, /border-radius:\s*0;/);
+  assert.doesNotMatch(objectDesktop, /(?:^|\s)(?:background|border|border-radius|box-shadow|backdrop-filter)\s*:/);
+  assert.match(viewer, /WebGLRenderer\(\{\s*alpha:\s*true/);
+  assert.match(viewer, /renderer\.setClearColor\(0xffffff,\s*0\)/);
+});
