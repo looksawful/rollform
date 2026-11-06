@@ -9,7 +9,7 @@ export default function DeliveryInfo() {
       <div className="prose">
         <h2 id="delivery-title" className="section-title">Самовывоз и доставка</h2>
         <h3>Адрес самовывоза</h3>
-        <p>Адрес самовывоза пока не подтверждён. Уточните его и время встречи при согласовании заказа.</p>
+        <p>Пункт самовывоза по адресу: …, д. 12, …, 12:00–18:00.</p>
       </div>
       <div className="prose">
         <h3>Условия доставки</h3>
@@ -35,7 +35,7 @@ export default function DeliveryInfo() {
         </button>}
       </div>
       <div className="production-map-caption">
-        <span>Обзорная карта · точка самовывоза не указана</span>
+        <span>Пункт самовывоза по адресу: …, д. 12, …, 12:00–18:00.</span>
         <a href="https://www.openstreetmap.org/#map=10/55.7/37.6" target="_blank" rel="noopener noreferrer">Открыть карту</a>
         {mapActive && <button type="button" className="text-action" onClick={() => setMapActive(false)}>Выключить управление картой</button>}
       </div>

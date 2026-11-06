@@ -179,8 +179,8 @@ test('fixed light and dark route scopes control related variables without OS pre
   assert.match(tokens, /\.site\[data-theme="dark"\]\s*\{\s*color-scheme:\s*dark;/);
   assert.match(tokens, /\.site\[data-theme="dark"\]\s*\{[^}]*--color-background:\s*#151515/);
   assert.match(tokens, /\.site\[data-theme="dark"\]\s*\{[^}]*--color-text:\s*var\(--color-white\)/);
-  assert.match(shell, /data-theme=\{dark \? 'dark' : 'light'\}/);
-  assert.match(shell, /className="theme-toggle"/);
+  assert.match(shell, /data-theme="light"/);
+  assert.doesNotMatch(shell, /className="theme-toggle"/);
 });
 
 test('site CSS uses semantic theme roles, not raw colors or legacy ink-paper tokens', () => {

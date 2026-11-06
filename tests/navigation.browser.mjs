@@ -173,16 +173,16 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
       }
     });
     for (const theme of ['']) {
-      await t.test('theme, catalog count, random color and 3D interaction', async () => {
+      await t.test('light-only review, catalog count, random color and 3D interaction', async () => {
         await send('Emulation.setDeviceMetricsOverride', {width:1440,height:1100,deviceScaleFactor:1,mobile:false});
         await send('Page.navigate', {url:new URL('catalog/',base).href});
-        await until(`document.readyState === 'complete' && !!document.querySelector('.theme-toggle')`);
+        await until(`document.readyState === 'complete' && !!document.querySelector('.product-grid')`);
         await delay(150);
         await evaluate(`scrollTo(0,100)`);
-        await evaluate(`document.querySelector('.theme-toggle').click()`);
-        const selectedTheme = await evaluate(`document.querySelector('.site').dataset.theme`);
+        await evaluate(`localStorage.setItem('rollform:theme','dark')`);
         await send('Page.reload');
-        await until(`document.readyState === 'complete' && document.querySelector('.site').dataset.theme === ${JSON.stringify(selectedTheme)}`);
+        await until(`document.readyState === 'complete' && document.querySelector('.site').dataset.theme === 'light'`);
+        assert.equal(await evaluate(`!!document.querySelector('.theme-toggle')`),false,'Theme control is absent');
         assert.equal(await evaluate(`location.pathname.includes('/dark')`),false);
         for (const width of [320,390,768,1024,1440]) {
           await send('Emulation.setDeviceMetricsOverride',{width,height:1100,deviceScaleFactor:1,mobile:false});
@@ -388,6 +388,14 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           assert.equal(await evaluate(`document.querySelectorAll('.order-steps > li').length`), 4);
           assert.equal(await evaluate(`!!(document.querySelector('.bento-section').compareDocumentPosition(document.querySelector('#about')) & Node.DOCUMENT_POSITION_FOLLOWING)`), true);
           assert.equal(await evaluate(`document.querySelectorAll('.bento-card').length`), 5);
+          assert.equal(await evaluate(`getComputedStyle(document.querySelector('.bento-viewport')).scrollbarWidth`),'none');
+          assert.equal(await evaluate(`getComputedStyle(document.querySelector('.bento-viewport'),'::-webkit-scrollbar').display`),'none');
+          if (width < 600) {
+            await evaluate(`document.querySelector('.bento-viewport').scrollIntoView({block:'center',behavior:'instant'}); document.querySelector('.bento-viewport').focus({preventScroll:true})`);
+            await send('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+            await send('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+            await until(`document.querySelector('.bento-viewport').scrollLeft > 0`);
+          }
           assert.equal(await evaluate(`document.querySelector('#benefits-title').textContent`), 'О кубиках');
           assert.ok(await evaluate(`document.querySelector('.bento-grid').textContent.includes('Выбирайте из 4 цветов')`));
           assert.ok(await evaluate(`document.querySelector('#delivery iframe')?.src.includes('openstreetmap.org')`), 'Homepage retains the actual map below contacts');
@@ -419,7 +427,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           await until(`location.hash === '#contact-form' && !!document.querySelector('#contact-form')`);
           assert.ok((await evaluate('location.pathname')).endsWith(theme + 'contacts/'), 'Checkout retains theme');
           await until(`!!document.querySelector('#delivery iframe')`);
-          assert.ok(await evaluate(`document.querySelector('#delivery').textContent.includes('Адрес самовывоза пока не подтверждён')`));
+          assert.equal(await evaluate(`document.querySelector('.production-map-caption span').textContent`),'Пункт самовывоза по адресу: …, д. 12, …, 12:00–18:00.');
           assert.ok(await evaluate(`!document.querySelector('#delivery iframe').src.includes('marker=')`));
           assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Contacts fit ${width}px`);
           await evaluate(`document.querySelector('#delivery').scrollIntoView({block:'center',behavior:'instant'})`);

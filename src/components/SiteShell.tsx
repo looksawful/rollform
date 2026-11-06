@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { Menu, Moon, ShoppingBag, Sun } from 'lucide-react';
+import { Menu, ShoppingBag } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { CartProvider, useCart } from './CartState';
@@ -20,17 +20,6 @@ function SiteChrome({ children }: { children: ReactNode }) {
   const { count } = useCart();
   const mainRef = useRef<HTMLElement>(null);
   const [revealed, setRevealed] = useState(false);
-  const [dark, setDark] = useState(false);
-  useEffect(() => {
-    try { setDark(localStorage.getItem('rollform:theme') === 'dark'); }
-    catch { /* Storage is optional. */ }
-  }, []);
-  const toggleTheme = () => {
-    const next = !dark;
-    setDark(next);
-    try { localStorage.setItem('rollform:theme', next ? 'dark' : 'light'); }
-    catch { /* The theme still works until navigation. */ }
-  };
   useEffect(() => {
     const reveal = () => {
       if (window.scrollY > 24) {
@@ -94,7 +83,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
   const navigation = menuLinks.map(({ href, label }) =>
     <Link key={href} href={link(href)} aria-current={path === link(href) ? 'page' : undefined}>{label}</Link>
   );
-  return <div className="site" data-theme={dark ? 'dark' : 'light'}>
+  return <div className="site" data-theme="light">
     <header className={revealed ? "topbar topbar-visible" : "topbar"}>
       <div className="wrapper topbar-inner cluster">
         <Link href={link("/")} className="logo" aria-label="На главную">
@@ -103,11 +92,6 @@ function SiteChrome({ children }: { children: ReactNode }) {
         </Link>
         <nav className="nav cluster desktop-nav" aria-label="Основное меню">{navigation}</nav>
         <div className="header-actions cluster">
-          <button type="button" className="theme-toggle" onClick={toggleTheme}
-            aria-pressed={dark} aria-label={dark ? 'Включить светлую тему' : 'Включить тёмную тему'}
-            title={dark ? 'Светлая тема' : 'Тёмная тема'}>
-            {dark ? <Sun className="icon" aria-hidden="true" /> : <Moon className="icon" aria-hidden="true" />}
-          </button>
           <details className="mobile-menu" onKeyDown={e => {
             if (e.key === 'Escape') { e.currentTarget.open = false; e.currentTarget.querySelector('summary')?.focus(); }
           }}>

@@ -16,14 +16,12 @@ test('links do not depend on the selected theme', () => {
     assert.equal(themeHref('/dark/catalog/', href), href);
   }
 });
-test('theme persists in the shell and CSS uses the same semantic colors', () => {
+test('client review release is fixed to light while shared theme CSS is retained', () => {
   const shell = read('src/components/SiteShell.tsx');
   const css = read('src/styles/tokens.css');
   const pages = read('src/styles/pages.css');
-  assert.match(shell, /className="theme-toggle"/);
-  assert.match(shell, /localStorage\.getItem\('rollform:theme'\)/);
-  assert.match(shell, /localStorage\.setItem\('rollform:theme'/);
-  assert.match(shell, /data-theme=\{dark \? 'dark' : 'light'\}/);
+  assert.doesNotMatch(shell, /theme-toggle|rollform:theme/);
+  assert.match(shell, /data-theme="light"/);
   assert.match(css, /\.site\[data-theme="dark"\]\s*\{\s*color-scheme:\s*dark;/);
   assert.match(pages, /\.site\s*\{[^}]*background:\s*var\(--color-background\)/);
 });

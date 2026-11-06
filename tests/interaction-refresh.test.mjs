@@ -18,11 +18,10 @@ test('configurator can randomize all dice properties and never repeats the curre
   }
 });
 
-test('theme is a persistent header control, not duplicated dark routes', () => {
+test('dark theme and its header control are temporarily disabled for client review', () => {
   const shell = read('src/components/SiteShell.tsx');
-  assert.match(shell, /className="theme-toggle"/);
-  assert.match(shell, /aria-label=\{dark \? 'Включить светлую тему' : 'Включить тёмную тему'\}/);
-  assert.match(shell, /localStorage\.setItem\('rollform:theme'/);
+  assert.doesNotMatch(shell, /theme-toggle|rollform:theme/);
+  assert.match(shell, /data-theme="light"/);
   assert.ok(!existsSync('src/app/dark/page.tsx'));
 });
 
