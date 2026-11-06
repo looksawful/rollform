@@ -88,5 +88,5 @@ test('About remains the existing home section and navigation uses its anchor', (
   assert.match(home, /id="about"/);
   assert.match(home, /<BentoSection\s*\/>[\s\S]*id="about"/);
   assert.match(shell, /href:\s*'\/#about',\s*label:\s*'О нас'/);
-  assert.match(shell, /href=\{link\("\/#about"\)\}>О нас<\/Link>/);
+  assert.ok(shell.includes('<Link href={"/#about"}>О нас</Link>'));
 });
