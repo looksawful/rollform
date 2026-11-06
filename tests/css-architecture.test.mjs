@@ -239,3 +239,17 @@ test('Hero copy stays at the top, action at the bottom and mobile action fills w
   assert.match(dice, /opacity:\s*1/);
   assert.match(css, /@media\s*\(width\s*<=\s*36rem\)[\s\S]*\.hero-centered \.hero-copy \.button\s*\{[^}]*inline-size:\s*100%/);
 });
+
+test('Hero uses desktop split and mobile full-width CTA without replacing current mobile composition', () => {
+  const css = read('src/styles/sections.css');
+  const desktopStart = css.indexOf('@media (width > 56rem)');
+  const mobileStart = css.indexOf('@media (width <= 56rem)');
+  assert.ok(desktopStart > mobileStart && mobileStart > 0, 'responsive desktop and mobile rules exist');
+  const desktop = css.slice(desktopStart);
+  const mobile = css.slice(mobileStart, desktopStart);
+  assert.match(desktop, /\.hero\.hero-centered\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)/);
+  assert.match(desktop, /\.hero-centered \.hero-object\s*\{[^}]*position:\s*relative/);
+  assert.match(desktop, /\.hero-centered \.hero-copy\s*\{[^}]*align-items:\s*flex-start/);
+  assert.match(mobile, /\.hero-centered \.hero-copy \.button\s*\{[^}]*inline-size:\s*100%/);
+  assert.match(css.slice(0, mobileStart), /\.hero-centered \.hero-object\s*\{[^}]*position:\s*absolute/);
+});
