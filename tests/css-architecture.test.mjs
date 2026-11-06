@@ -226,6 +226,7 @@ test('Hero copy stays at the top, action at the bottom and mobile action fills w
   assert.match(copy, /justify-content:\s*flex-start/);
   assert.match(title, /font-weight:\s*900/);
   assert.match(action, /margin-block-start:\s*auto/);
+  assert.match(action, /gap:\s*0\.75rem/);
   assert.match(dice, /opacity:\s*1/);
   assert.match(css, /@media\s*\(width\s*<=\s*36rem\)[\s\S]*\.hero-centered \.hero-copy \.button\s*\{[^}]*inline-size:\s*100%/);
 });

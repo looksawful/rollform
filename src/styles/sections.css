@@ -90,6 +90,7 @@
   }
   .hero-centered .hero-copy .button {
     justify-content: center;
+    gap: 0.75rem;
     min-inline-size: 12rem;
     margin-block-start: auto;
   }
