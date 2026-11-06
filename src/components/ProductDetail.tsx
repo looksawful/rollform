@@ -4,18 +4,16 @@ import { useState } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import { presets, fontNames, shellColors } from '@/lib/catalog';
 import { photoPath } from '@/lib/photoAssets';
 import { formatPrice, priceForPreset } from '@/lib/pricing';
-import { themeHref } from '@/lib/themeRoutes';
 import DiceViewer from './DiceViewer';
 import { useCart } from './CartState';
 
 export default function ProductDetail() {
   const params = useSearchParams();
-  const pathname = usePathname();
   const router = useRouter();
   const [view, setView] = useState<'photo' | 'model'>('photo');
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -26,11 +24,11 @@ export default function ProductDetail() {
   const model = `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products/${product.id}.webp`;
   const buy = () => {
     if (add(product.config, { kind: 'preorder_preset', presetId: product.id })) {
-      router.push(themeHref(pathname, '/cart'));
+      router.push('/cart');
     }
   };
   return <section className="wrapper section page-section product-detail-page">
-    <Link className="breadcrumb" href={themeHref(pathname, '/catalog')}>
+    <Link className="breadcrumb" href={'/catalog'}>
       <ArrowLeft className="icon" aria-hidden="true" /> Все кубики
     </Link>
     <div className="product-detail">
@@ -66,10 +64,10 @@ export default function ProductDetail() {
         <button type="button" className="button button-black button-fill" onClick={buy}>
           Купить <ShoppingBag className="icon" aria-hidden="true" />
         </button>
-        <Link className="button button-fill" href={themeHref(pathname, '/configure?preset=' + product.id)}>
+        <Link className="button button-fill" href={'/configure?preset=' + product.id}>
           Настроить вариант
         </Link>
-        <Link className="detail-delivery" href={themeHref(pathname, '/production')}>Изготовление и доставка</Link>
+        <Link className="detail-delivery" href={'/production'}>Изготовление и доставка</Link>
       </div>
     </div>
     <Lightbox open={lightboxOpen} close={() => setLightboxOpen(false)}
