@@ -61,7 +61,7 @@ test('cart links to the shared preparation and delivery information without chec
   const cart = source('src/components/CartView.tsx');
   assert.match(cart, /items.length === 0/);
   assert.match(cart, /className="cart-summary stack"/);
-  assert.match(cart, /href=\{themeHref\(pathname, '\/production'\)\}/);
+  assert.match(cart, /href="\/production"/);
   assert.doesNotMatch(cart, /<button[^>]*>Оплатить/);
 });
 
@@ -101,7 +101,7 @@ test('header appears after scroll and keeps its cart link before and after selec
   const orders = source('src/lib/orders.ts');
   assert.match(shell, /window\.scrollY > 24/);
   assert.match(shell, /revealed \? "topbar topbar-visible" : "topbar"/);
-  assert.ok(shell.includes('<Link href={link("/cart")} className="cart-shortcut"'));
+  assert.ok(shell.includes('<Link href={"/cart"} className="cart-shortcut"'));
   assert.ok(!shell.includes('{count > 0 && <Link'));
   assert.ok(shell.includes('{count > 0 && <span className="cart-count"'));
   assert.match(source('src/styles/components.css'), /\.logo\s*\{[^}]*font-weight:\s*800/);
@@ -147,7 +147,7 @@ test('homepage has an explicit catalog link and restored logo', () => {
   const css = source('src/styles/pages.css');
   assert.match(home, /className="wrapper catalog-heading prose"/);
   assert.match(home, />Весь каталог/);
-  assert.match(home, /themeHref\(pathname, '\/catalog'\)/);
+  assert.match(home, /href="\/catalog"/);
   assert.match(shell, /className="logo"/);
   assert.doesNotMatch(shell, /logo-hidden/);
   assert.doesNotMatch(css, /\.logo-hidden/);
