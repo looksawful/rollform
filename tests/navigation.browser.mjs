@@ -16,7 +16,7 @@ const executable = process.env.CHROME_PATH || [
 assert.ok(executable, 'Set CHROME_PATH to an installed Chrome/Chromium executable');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-test('navigation unpins the homepage before React removes its DOM', { timeout: 120000 }, async t => {
+test('page motion and navigation', { timeout: 180000 }, async t => {
   const profile = mkdtempSync(join(tmpdir(), 'rollform-navigation-'));
   const browser = spawn(executable, [
     '--headless=new', '--remote-debugging-port=0', '--user-data-dir=' + profile,
@@ -61,6 +61,17 @@ test('navigation unpins the homepage before React removes its DOM', { timeout: 1
       }
       assert.fail('Timed out: ' + expression);
     };
+    const sampleEntry = selector => evaluate(`new Promise(resolve => {
+      const element = document.querySelector(${JSON.stringify(selector)});
+      const samples = [], started = performance.now();
+      element.scrollIntoView({ block: 'center', behavior: 'instant' });
+      const sample = () => {
+        samples.push(Number(getComputedStyle(element).opacity));
+        if (performance.now() - started < 1000) requestAnimationFrame(sample);
+        else resolve(samples);
+      };
+      requestAnimationFrame(sample);
+    })`);
     await send('Page.enable');
     await send('Runtime.enable');
     await send('Emulation.setDeviceMetricsOverride', {
@@ -89,6 +100,38 @@ test('navigation unpins the homepage before React removes its DOM', { timeout: 1
         await send('Page.reload');
         await until(`document.readyState === 'complete' && document.querySelector('h1')?.textContent === 'Собери сам'`);
         assert.deepEqual(exceptions, []);
+      });
+      await t.test(`${theme || 'light/'} one-shot reveals and reduced motion`, async () => {
+        exceptions.length = 0;
+        const home = new URL(theme, base).href;
+        await send('Page.navigate', { url: home });
+        await until(`!!document.querySelector('.pin-spacer')`);
+        const title = '#production > .section-title';
+        assert.equal(await evaluate(`getComputedStyle(document.querySelector('${title}')).opacity`), '1', 'Offscreen content starts visible');
+        const firstEntry = await sampleEntry(title);
+        assert.ok(firstEntry.some(opacity => opacity < 0.99), 'Copy reveals on its first entry');
+        assert.equal(firstEntry.at(-1), 1, 'Copy finishes fully visible');
+        assert.equal(await evaluate(`document.querySelector('${title}').style.transform`), '', 'Finished motion leaves no transform');
+        await evaluate(`scrollTo({ top: 0, behavior: 'instant' })`);
+        await delay(100);
+        assert.ok((await sampleEntry(title)).every(opacity => opacity === 1), 'Copy does not replay on re-entry');
+
+        await evaluate(`document.querySelector('#faq .section-title').scrollIntoView({ block: 'center', behavior: 'instant' })`);
+        await until(`Number(getComputedStyle(document.querySelector('#faq .section-title')).opacity) < 0.99`);
+        await send('Emulation.setEmulatedMedia', {
+          features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
+        });
+        await until(`['#production > .section-title', '#faq .section-title'].every(selector => {
+          const element = document.querySelector(selector);
+          return getComputedStyle(element).opacity === '1' && !element.style.transform && !element.style.opacity;
+        })`);
+        await send('Page.reload');
+        await until(`document.readyState === 'complete' && !!document.querySelector('#faq .section-title')`);
+        assert.ok((await sampleEntry('#faq .section-title')).every(opacity => opacity === 1), 'Reduced motion is visible without a reveal');
+        assert.deepEqual(exceptions, []);
+        await send('Emulation.setEmulatedMedia', {
+          features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
+        });
       });
     }
   } finally {

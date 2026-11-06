@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Menu, ShoppingBag } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -18,6 +18,7 @@ const menuLinks = [
 
 function SiteChrome({ children }: { children: ReactNode }) {
   const { count } = useCart();
+  const mainRef = useRef<HTMLElement>(null);
   const [revealed, setRevealed] = useState(false);
   useEffect(() => {
     const reveal = () => {
@@ -31,6 +32,51 @@ function SiteChrome({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('scroll', reveal);
   }, []);
   const pathname = usePathname();
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main || !('IntersectionObserver' in window)) return;
+
+    let cancelled = false;
+    let media: { revert: () => void } | undefined;
+    const seen = new WeakSet<Element>();
+    void import('gsap').then(({ gsap }) => {
+      if (cancelled) return;
+      const mm = gsap.matchMedia();
+      media = mm;
+      mm.add('(prefers-reduced-motion: no-preference)', context => {
+        const candidates = Array.from(main.querySelectorAll<HTMLElement>(
+          '.section-title, .editorial-copy, .editorial-photo, .production-intro > .stack, .production-options > section, .contact-options',
+        )).filter(element => !element.closest('.hero, #catalog, .product-scroller, .product'));
+        // Reveal a copy group once, without also animating its nested heading.
+        const targets = candidates.filter(element => !candidates.some(parent => parent !== element && parent.contains(element)));
+        const observer = new IntersectionObserver(entries => {
+          for (const { target, isIntersecting } of entries) {
+            if (!isIntersecting || seen.has(target)) continue;
+            seen.add(target);
+            observer.unobserve(target);
+            context.add(() => {
+              const isMedia = target.matches('.editorial-photo');
+              gsap.fromTo(target, { opacity: 0, y: isMedia ? 0 : 6, scale: isMedia ? 0.99 : 1 }, {
+                opacity: 1, y: 0, scale: 1, duration: isMedia ? 0.62 : 0.48,
+                ease: 'power2.out', clearProps: 'opacity,transform',
+              });
+            });
+          }
+        }, { rootMargin: '0px 0px -8% 0px' });
+        for (const target of targets) {
+          // Keep SSR, restored scroll positions and the initial viewport visible.
+          // Offscreen content stays visible too until its observer callback runs.
+          if (target.getBoundingClientRect().top < window.innerHeight) seen.add(target);
+          if (!seen.has(target)) observer.observe(target);
+        }
+        return () => observer.disconnect();
+      });
+    }).catch(() => { /* Motion is optional; content is already visible. */ });
+    return () => {
+      cancelled = true;
+      media?.revert();
+    };
+  }, [pathname]);
   const dark = isDarkPath(pathname);
   const path = pathname.replace(/\/$/, '');
   const link = (href: string) => themeHref(pathname, href);
@@ -61,7 +107,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
         </div>
       </div>
     </header>
-    <main>{children}</main>
+    <main ref={mainRef}>{children}</main>
     <footer className="footer">
       <div className="wrapper footer-inner switcher">
         <nav className="stack" aria-label="Навигация в подвале">
