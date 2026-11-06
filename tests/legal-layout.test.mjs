@@ -19,7 +19,9 @@ test('the cart persists only after user selection, without tracking scripts', ()
   const shell = read('src/components/SiteShell.tsx');
   assert.match(state, /localStorage\.getItem/);
   assert.match(state, /localStorage\.setItem/);
-  assert.match(shell, /count > 0 && <Link/);
+  assert.ok(shell.includes('<Link href={link("/cart")} className="cart-shortcut"'));
+  assert.ok(shell.includes('{count > 0 && <span className="cart-count"'));
+  assert.ok(!shell.includes('{count > 0 && <Link'));
   assert.doesNotMatch(state + shell, /gtag\(|fbq\(|analytics\./);
 });
 

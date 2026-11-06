@@ -134,7 +134,9 @@ test('header reveals after scroll and only shows cart when items exist', () => {
   const css = read('src/styles/pages.css');
   assert.match(shell, /<details className="mobile-menu"/);
   assert.match(shell, /<summary aria-label="Меню"/);
-  assert.match(shell, /count > 0 && <Link/);
+  assert.ok(shell.includes('<Link href={link("/cart")} className="cart-shortcut"'));
+  assert.ok(shell.includes('{count > 0 && <span className="cart-count"'));
+  assert.ok(!shell.includes('{count > 0 && <Link'));
   assert.match(shell, /className="cart-shortcut"/);
   assert.match(shell, /setRevealed\(true\)/);
   assert.match(shell, /<ShoppingBag className="icon" aria-hidden="true"\s*\/>/);
