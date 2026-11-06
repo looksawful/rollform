@@ -1,11 +1,12 @@
-"""Rebuild refined bevels from ROLLFORM's canonical Three.js base geometry.
+"""Rebuild precise, narrow bevels from ROLLFORM's canonical Three.js geometry.
 
 Run from project root:
   node --experimental-strip-types scripts/export-dice-bases.mjs
-  blender -b --factory-startup --python scripts/bevel-dice.py -- --variant refined
-  blender -b --factory-startup --python scripts/bevel-dice.py -- --variant alternate
+  blender -b --factory-startup --python scripts/bevel-dice.py
 
-Only writes to scripts/.mesh-tmp; never overwrites published models.
+Compare scripts/.mesh-tmp/precise/ with published GLBs before replacing assets.
+The main polygon faces remain flat; only the narrow edge strips are smoothed.
+This script never overwrites public/models/.
 """
 import argparse
 import json
@@ -18,8 +19,8 @@ import bmesh
 
 PROJECT = Path(__file__).resolve().parent.parent
 BASES = PROJECT / "scripts" / ".mesh-tmp" / "bases.json"
-WIDTH = {"d4": 0.09, "d6": 0.08, "d8": 0.08,
-         "d10": 0.042, "d12": 0.05, "d20": 0.068}
+WIDTH = {"d4": 0.029, "d6": 0.026, "d8": 0.026,
+         "d10": 0.014, "d12": 0.016, "d20": 0.022}
 FACE_COUNT = {"d4": 4, "d6": 6, "d8": 8,
               "d10": 10, "d12": 12, "d20": 20}
 
@@ -50,36 +51,40 @@ def make_polyhedron(name, source):
     obj.select_set(True)
     bpy.context.view_layer.objects.active = obj
     for polygon in mesh.polygons:
-        polygon.use_smooth = True
+        polygon.use_smooth = False
     return obj
 
 
-def refine(obj, name, variant):
+def refine(obj, name, face_planes):
     bevel = obj.modifiers.new("Edge radius", "BEVEL")
     bevel.width = WIDTH[name]
-    bevel.segments = 6
+    bevel.segments = 4
     bevel.profile = 0.5
     bevel.limit_method = "ANGLE"
     bevel.angle_limit = math.radians(10.0)
     bevel.affect = "EDGES"
     bevel.use_clamp_overlap = True
     bevel.loop_slide = False
-    bevel.miter_outer = "MITER_ARC" if variant == "alternate" else "MITER_PATCH"
+    bevel.miter_outer = "MITER_PATCH"
     bevel.miter_inner = "MITER_ARC"
-    bevel.vmesh_method = "CUTOFF" if variant == "alternate" else "ADJ"
+    bevel.vmesh_method = "ADJ"
     bevel.harden_normals = True
     bevel.face_strength_mode = "FSTR_AFFECTED"
     bpy.ops.object.modifier_apply(modifier=bevel.name)
-    if variant == "smooth":
-        for polygon in obj.data.polygons:
-            polygon.use_smooth = True
-
-    weighted = obj.modifiers.new("Flat-face normals", "WEIGHTED_NORMAL")
-    weighted.mode = "FACE_AREA"
-    weighted.weight = 50
-    weighted.keep_sharp = True
-    weighted.use_face_influence = True
-    bpy.ops.object.modifier_apply(modifier=weighted.name)
+    # Blanket smoothing and weighted normals made planar facets look fused.
+    # Keep original main faces flat; shade only new rounded edge strips smoothly.
+    planar_count = 0
+    for polygon in obj.data.polygons:
+        is_face = any(
+            all(abs(sum(n * (obj.data.vertices[vid].co[k] - plane["center"][k])
+                        for k, n in enumerate(plane["normal"]))) < 5e-5
+                for vid in polygon.vertices)
+            for plane in face_planes
+        )
+        polygon.use_smooth = not is_face
+        planar_count += is_face
+    if planar_count != FACE_COUNT[name]:
+        raise ValueError(f"{name}: expected {FACE_COUNT[name]} planar facets, got {planar_count}")
 
     bm = bmesh.new()
     bm.from_mesh(obj.data)
@@ -91,31 +96,31 @@ def refine(obj, name, variant):
     if any(p.area <= 1e-10 for p in obj.data.polygons):
         raise ValueError(f"{name}: degenerate triangle")
     return {"vertices": n_verts, "polygons": n_faces, "tris": sum(len(p.vertices) - 2 for p in obj.data.polygons),
-            "nonmanifold": nonmanifold, "euler": n_verts - n_edges + n_faces}
+            "planar_facets": planar_count, "nonmanifold": nonmanifold,
+            "euler": n_verts - n_edges + n_faces}
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--variant", choices=["refined", "alternate", "smooth"], default="smooth")
     parser.add_argument("--shape", choices=list(WIDTH), default=None)
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
     sources = json.loads(BASES.read_text(encoding="utf-8"))
-    output = BASES.parent / args.variant
+    output = BASES.parent / "precise"
     output.mkdir(parents=True, exist_ok=True)
-    report = {"variant": args.variant, "models": {}}
+    report = {"variant": "precise", "models": {}}
 
     for name in ([args.shape] if args.shape else list(WIDTH)):
         bpy.ops.object.select_all(action="SELECT")
         bpy.ops.object.delete(use_global=False)
         obj = make_polyhedron(name, sources[name])
-        quality = refine(obj, name, args.variant)
+        quality = refine(obj, name, sources[name]["faces"])
         glb = output / f"{name}.glb"
         bpy.ops.export_scene.gltf(
             filepath=str(glb), export_format="GLB", use_selection=True,
             export_yup=False, export_materials="NONE",
             export_cameras=False, export_lights=False,
         )
-        report["models"][name] = {"bevel": WIDTH[name], "file": str(glb), **quality}
+        report["models"][name] = {"bevel": WIDTH[name], "segments": 4, "file": str(glb), **quality}
         print("ROLLFORM_MODEL", name, json.dumps(report["models"][name]))
     (output / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
 

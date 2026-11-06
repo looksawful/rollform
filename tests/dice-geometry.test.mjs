@@ -44,6 +44,11 @@ test('Blender bevel models exist and contain normals and more vertices than flat
     const attrs = document.meshes[0].primitives[0].attributes;
     assert.ok(Number.isInteger(attrs.NORMAL), shape);
     const beveledCount = document.accessors[attrs.POSITION].count;
+    const indexAccessor = document.meshes[0].primitives[0].indices;
+    const triangleCount = document.accessors[indexAccessor].count / 3;
+    // Four narrow bevel segments should not require the swollen six-segment mesh.
+    const upperBounds = { d4: 400, d6: 700, d8: 700, d10: 1200, d12: 1800, d20: 1800 };
+    assert.ok(triangleCount <= upperBounds[shape], shape + ': bevel has too many triangles');
     const flat = buildGeometry(shape);
     assert.ok(beveledCount > flat.getAttribute('position').count, shape);
     flat.dispose();
@@ -69,6 +74,16 @@ test('Blender GLB surfaces keep all number planes in their original positions', 
       const hits = ray.intersectObject(mesh);
       assert.ok(hits.length, shape + ': missing front face');
       assert.ok(hits[0].point.distanceTo(center) < 0.001, shape + ': number plane displaced');
+      // Physical dice have genuinely planar face normals, not blanket-smoothed
+      // normals spilling over from thick bevel ribbons.
+      const face = hits[0].faceIndex;
+      const vertexNormals = geometry.getAttribute('normal');
+      for (let corner = 0; corner < 3; corner++) {
+        const idx = geometry.index ? geometry.index.getX(face * 3 + corner) : face * 3 + corner;
+        const interpolated = new THREE.Vector3().fromBufferAttribute(vertexNormals, idx);
+        assert.ok(interpolated.dot(normal) > 0.99999,
+          shape + ': primary facet should be flat-shaded');
+      }
     }
     original.dispose();
     geometry.dispose();
