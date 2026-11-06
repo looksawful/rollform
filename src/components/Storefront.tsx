@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { themeHref } from '@/lib/themeRoutes';
 import DiceViewer from './DiceViewer';
 import ProductGallery from './ProductGallery';
+import ProductionInfo from './ProductionInfo';
 import ContactContent from './ContactContent';
 import { initialConfig } from '@/lib/catalog';
 
@@ -26,13 +27,12 @@ export default function Storefront() {
       </div>
       <ProductGallery mode="reel" />
     </section>
+    <ProductionInfo onHome />
     <section className="wrapper section about-section" id="about">
       <div className="editorial-grid">
         <div className="editorial-copy stack">
-          <p className="eyebrow">О проекте</p>
           <h2 className="section-title">О нас</h2>
           <p>В этом разделе будет история проекта: как появилась идея и что определяет характер коллекции. Пока мы используем временный текст, чтобы проверить ритм длинного абзаца и сочетание с фотографиями. После утверждения содержания он будет заменён полноценным описанием.</p>
-          <Link href={themeHref(pathname, '/production')} className="text-link">Изготовление и получение</Link>
         </div>
         <figure className="editorial-photo">
           <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/dice-02.webp`}

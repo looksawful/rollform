@@ -249,7 +249,7 @@
   .production-note p, .production-note a { font-size: var(--fs-small); line-height: var(--lh-small); }
   .production-note a, .footer-secondary-link { text-underline-offset: 0.3em; }
   .production-info { --stack-space: var(--space-4); }
-  .production-info h2 { font-size: var(--fs-title); line-height: var(--lh-title); }
+  .production-options h2 { font-size: var(--fs-title); line-height: var(--lh-title); }
   .production-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
   .production-options > section { --stack-space: var(--space-2); padding: clamp(1.5rem, 3vw, 3rem); border: var(--border-default); border-radius: var(--radius-lg); }
   .faq-list { max-inline-size: var(--measure); }

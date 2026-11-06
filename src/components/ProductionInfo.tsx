@@ -1,9 +1,10 @@
-export default function ProductionInfo() {
-  return <section className="wrapper section page-section production-info stack">
-    <h1 className="page-title">Изготовление и доставка</h1>
+export default function ProductionInfo({ onHome = false }: { onHome?: boolean }) {
+  return <section id={onHome ? 'production' : undefined}
+    className={`wrapper section production-info stack${onHome ? '' : ' page-section'}`}>
+    {onHome ? <h2 className="section-title">Изготовление и получение</h2> : <h1 className="page-title">Изготовление и доставка</h1>}
     <div className="production-intro editorial-grid">
       <div className="stack">
-        <p className="eyebrow">Процесс и получение</p>
+        {!onHome && <p className="eyebrow">Процесс и получение</p>}
         <p>У готовых кубиков и вариантов на заказ разные сроки подготовки.</p>
       </div>
       <figure className="editorial-photo">

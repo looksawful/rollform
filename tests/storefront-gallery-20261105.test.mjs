@@ -218,3 +218,16 @@ test('desktop-to-touch or reduced-motion switch preserves manually chosen carous
   assert.match(gallery, /scroller\.removeEventListener\('scroll', rememberPosition\)/);
   assert.match(gallery, /scroller\.scrollLeft = lastScrollLeft/);
 });
+
+test('home shows manufacturing and collection after stock, separate from About Us', () => {
+  const home = source('src/components/Storefront.tsx');
+  const production = source('src/components/ProductionInfo.tsx');
+  const css = source('src/styles/pages.css');
+  assert.match(home, /import ProductionInfo from/);
+  assert.match(home, /<ProductGallery mode="reel" \/>\s*<\/section>\s*<ProductionInfo onHome \/>\s*<section className="wrapper section about-section"/);
+  assert.doesNotMatch(home, /<p className="eyebrow">О проекте<\/p>/);
+  assert.doesNotMatch(home, /<Link[^>]+\/production[^>]*>Изготовление и получение<\/Link>/);
+  assert.match(production, /<h2 className="section-title">Изготовление и получение<\/h2>/);
+  assert.match(production, /<h1 className="page-title">Изготовление и доставка<\/h1>/);
+  assert.match(css, /\.production-options h2\s*\{/);
+});
