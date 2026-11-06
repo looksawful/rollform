@@ -1,55 +1,45 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { ZoomIn } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { themeHref } from '@/lib/themeRoutes';
 import { useCart } from './CartState';
-import { fontNames, shellColors } from '@/lib/catalog';
 import { photoPath } from '@/lib/photoAssets';
 import { formatPrice, priceForPreset } from '@/lib/pricing';
 import type { Preset } from '@/lib/catalog';
 
-export default function ProductCard({ product, index, onPreview }: {
+export default function ProductCard({ product, index }: {
   product: Preset;
   index: number;
-  onPreview: () => void;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
   const { add } = useCart();
+  const [added, setAdded] = useState(false);
   const detailsUrl = themeHref(pathname, '/product?item=' + encodeURIComponent(product.id));
-  const description = [
-    product.config.shape.toUpperCase(),
-    shellColors.find(color => color.value === product.config.shell)?.name,
-    fontNames[product.config.font],
-  ].join(' · ');
 
-  const buy = () => {
+  const addToCart = () => {
     if (add(product.config, { kind: 'preorder_preset', presetId: product.id })) {
-      router.push(themeHref(pathname, '/cart'));
+      setAdded(true);
     }
   };
 
   return <article className="product stack">
     <div className="product-media">
-      <Link className="product-visual frame" href={detailsUrl} aria-label={'Подробнее: ' + product.title}>
+      <div className="product-visual frame">
         <img src={photoPath(index)} alt={'Игральные кубики: ' + product.title}
           width={1000} height={800} loading="lazy" decoding="async" />
-      </Link>
-      <button className="product-zoom" type="button" onClick={onPreview}
-        aria-label={'Увеличить изображение: ' + product.title}>
-        <ZoomIn className="icon" aria-hidden="true" />
-      </button>
+      </div>
     </div>
     <div className="product-copy stack">
-      <h3><Link href={detailsUrl}>{product.title}</Link></h3>
-      <p className="product-description">{description}</p>
+      <h3>{product.title}</h3>
       <p className="product-price">{formatPrice(priceForPreset(product.id))}</p>
     </div>
+    <Link className="product-open" href={detailsUrl} aria-label={'Открыть товар: ' + product.title} />
     <div className="product-actions">
-      <button type="button" className="button button-black" onClick={buy}
-        aria-label={'Купить: ' + product.title}>Купить</button>
+      <button type="button" className="button button-secondary" onClick={addToCart}
+        aria-label={'Добавить в корзину: ' + product.title}>Добавить в корзину</button>
+      <span className="visually-hidden" role="status">{added ? 'Товар добавлен в корзину' : ''}</span>
     </div>
   </article>;
 }

@@ -1,20 +1,11 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState } from 'react';
-import Lightbox from 'yet-another-react-lightbox';
+import { useLayoutEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import 'yet-another-react-lightbox/styles.css';
 import { presets } from '@/lib/catalog';
-import { photoPath } from '@/lib/photoAssets';
 import ProductCard from './ProductCard';
 
-const slides = presets.map((product, index) => ({
-  src: photoPath(index),
-  alt: `Игральные кубики, ${product.title}.`,
-}));
-
 export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
-  const [active, setActive] = useState<number | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   // Revert ScrollTrigger's pin wrapper before React removes the section on navigation.
@@ -90,7 +81,7 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
     <div ref={scrollerRef} className={mode === 'reel' ? 'product-scroller reel' : 'product-grid grid'}
       {...(mode === 'reel' ? { role: 'region', 'aria-label': 'В наличии', tabIndex: 0 } : {})}>
       {presets.map((product, index) =>
-        <ProductCard key={product.id} product={product} index={index} onPreview={() => setActive(index)} />)}
+        <ProductCard key={product.id} product={product} index={index} />)}
     </div>
     {mode === 'reel' && <div className="reel-controls" aria-label="Листать карточки">
       <button type="button" onClick={() => scrollCards(-1)} aria-label="Предыдущие карточки">
@@ -100,13 +91,5 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
         <ChevronRight className="icon" aria-hidden="true" />
       </button>
     </div>}
-    <Lightbox
-      open={active !== null}
-      close={() => setActive(null)}
-      index={active ?? 0}
-      slides={slides}
-      carousel={{ finite: true }}
-      labels={{ Close: 'Закрыть', Previous: 'Предыдущее изображение', Next: 'Следующее изображение' }}
-    />
   </>;
 }

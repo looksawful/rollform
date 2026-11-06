@@ -101,7 +101,7 @@ test('storefront restores catalog, product cards, about, and contacts', () => {
   assert.match(contact, /ContactContent/);
   assert.match(chrome, /Навигация/);
   assert.match(chrome, /Контакты/);
-  assert.match(card, /Купить/);
+  assert.match(card, /Добавить в корзину/);
 });
 
 test('copy stays generic while contact form is clearly marked as non-sending', () => {

@@ -28,26 +28,28 @@ test('production and receiving conditions share the existing route', () => {
   assert.ok(existsSync('src/app/dark/production/page.tsx'));
 });
 
-test('one shared lightbox handles all nine preset images across both routes', () => {
+test('product detail owns the photo lightbox; catalog and homepage use clickable cards', () => {
   const gallery = source('src/components/ProductGallery.tsx');
+  const detail = source('src/components/ProductDetail.tsx');
   const home = source('src/components/Storefront.tsx');
   const catalog = source('src/app/catalog/page.tsx');
-  assert.match(gallery, /yet-another-react-lightbox/);
-  assert.match(gallery, /<Lightbox/);
-  assert.match(gallery, /slides=\{slides\}/);
+  assert.doesNotMatch(gallery, /yet-another-react-lightbox|<Lightbox/);
+  assert.match(detail, /yet-another-react-lightbox/);
+  assert.match(detail, /<Lightbox/);
   assert.match(gallery, /<ProductCard/);
   assert.match(home, /<ProductGallery/);
   assert.match(catalog, /<ProductGallery/);
   assert.match(gallery, /mode === 'reel'/);
 });
 
-test('cards keep builder link and add a separate keyboard-operable photo preview', () => {
+test('cards navigate to product detail and expose a separate secondary add action', () => {
   const card = source('src/components/ProductCard.tsx');
   assert.match(card, /className="product-visual frame"/);
+  assert.match(card, /className="product-open"/);
   assert.match(card, /href=\{detailsUrl\}/);
-  assert.match(card, /onPreview/);
-  assert.match(card, /aria-label=\{['"]Увеличить изображение/);
-  assert.match(card, />Купить<\/button>/);
+  assert.match(card, /button button-secondary/);
+  assert.match(card, />Добавить в корзину<\/button>/);
+  assert.doesNotMatch(card, /onPreview|product-zoom/);
 });
 
 test('cart links to the shared preparation and delivery information without checkout promises', () => {
@@ -67,7 +69,7 @@ test('nine licensed photographic examples are available without losing accurate 
     assert.ok(photo.length > 9000);
     assert.ok(existsSync(`public/products/demo-${index}.webp`));
   }
-  assert.match(source('src/components/ProductGallery.tsx'), /photoPath\(index\)/);
+  assert.match(source('src/components/ProductDetail.tsx'), /photoPath\(index\)/);
   assert.match(source('src/components/ProductCard.tsx'), /photoPath\(index\)/);
   assert.doesNotMatch(source('src/components/SiteShell.tsx'), /photoCredits|Источники фотографий/);
 });
@@ -87,7 +89,7 @@ test('homepage reel briefly previews cards then releases to native horizontal sc
   assert.match(gallery, /prefers-reduced-motion: no-preference/);
   assert.match(gallery, /media\?\.revert\(\)/);
   assert.match(css, /\.catalog-scrubbing \.product-scroller\s*\{\s*scroll-snap-type:\s*none/);
-  assert.match(gallery, /<Lightbox/);
+  assert.doesNotMatch(gallery, /<Lightbox/);
 });
 
 test('new photo-first product layout keeps purchase honest and supplies a shared detail route', () => {
@@ -95,8 +97,8 @@ test('new photo-first product layout keeps purchase honest and supplies a shared
   const detail = source('src/components/ProductDetail.tsx');
   const css = source('src/styles/pages.css');
   assert.match(card, /formatPrice\(priceForPreset\(product.id\)\)/);
-  assert.match(card, /<h3><Link/);
-  assert.match(card, /Купить/);
+  assert.match(card, /<h3>\{product\.title\}<\/h3>/);
+  assert.match(card, /Добавить в корзину/);
   assert.doesNotMatch(card, /product-badges/);
   assert.match(detail, /3D-вариант/);
   assert.match(detail, /formatPrice\(priceForPreset\(product.id\)\)/);

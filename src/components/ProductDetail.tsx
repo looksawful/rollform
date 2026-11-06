@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
@@ -15,6 +17,7 @@ export default function ProductDetail() {
   const pathname = usePathname();
   const router = useRouter();
   const [view, setView] = useState<'photo' | 'model'>('photo');
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const { add } = useCart();
   const index = Math.max(0, presets.findIndex(p => p.id === params.get('item')));
   const product = presets[index];
@@ -32,9 +35,13 @@ export default function ProductDetail() {
     <div className="product-detail">
       <div className="product-detail-gallery">
         <div className="product-detail-main">
-          <img key={view} src={view === 'photo' ? photo : model}
-            alt={view === 'photo' ? 'Игральные кубики' : '3D-визуализация выбранного варианта'}
-            width={1000} height={900} />
+          <button className="product-detail-photo-trigger" type="button"
+            onClick={() => setLightboxOpen(true)}
+            aria-label={'Увеличить изображение: ' + product.title}>
+            <img key={view} src={view === 'photo' ? photo : model}
+              alt={view === 'photo' ? 'Игральные кубики' : '3D-визуализация выбранного варианта'}
+              width={1000} height={900} />
+          </button>
         </div>
         <div className="product-detail-thumbs cluster" aria-label="Вид товара">
           <button type="button" aria-pressed={view === 'photo'} onClick={() => setView('photo')}>
@@ -64,5 +71,14 @@ export default function ProductDetail() {
         <Link className="detail-delivery" href={themeHref(pathname, '/production')}>Изготовление и доставка</Link>
       </div>
     </div>
+    <Lightbox open={lightboxOpen} close={() => setLightboxOpen(false)}
+      index={view === 'photo' ? 0 : 1}
+      slides={[
+        { src: photo, alt: 'Игральные кубики: ' + product.title },
+        { src: model, alt: '3D-визуализация: ' + product.title },
+      ]}
+      carousel={{ finite: true }}
+      labels={{ Close: 'Закрыть', Previous: 'Предыдущее изображение', Next: 'Следующее изображение' }}
+    />
   </section>;
 }
