@@ -9,7 +9,7 @@ test('approved Russian header and persistent empty cart with desktop caption',()
   for(const label of ['Кубики','Собери сам','О нас','Контакты'])assert.ok(s.includes("label: '"+label+"'"));
   assert.match(s,/className="logo-mark"/);
   assert.match(s,/<ShoppingBag className="icon" aria-hidden="true"\s*\/>/);
-  assert.ok(s.includes('<Link href={link("/cart")} className="cart-shortcut"'));
+  assert.ok(s.includes('<Link href={"/cart"} className="cart-shortcut"'));
   assert.ok(!s.includes('{count > 0 && <Link'), 'Cart link must render for zero quantity');
   assert.ok(s.includes('<span className="cart-shortcut-label">Корзина</span>'));
   assert.ok(s.includes('{count > 0 && <span className="cart-count"'));
@@ -48,7 +48,7 @@ test('builder, cart and production pages honor accepted copy decisions',()=>{
   const data=read('src/lib/catalog.ts');
   assert.match(builder,/>Собери сам<\/h1>/);
   assert.match(builder,/<h2>Количество граней<\/h2>/);
-  assert.match(builder,/href=\{themeHref\(pathname, '\/production'\)\}/);
+  assert.ok(builder.includes('href={\'/production\'}'));
   assert.match(cart,/Пока ничего нет/);
   assert.match(cart,/>Смотреть кубики<\/Link>/);
   assert.match(cart,/<Trash2[^>]*\/>.*<span>Удалить<\/span>/);
