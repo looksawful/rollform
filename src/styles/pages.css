@@ -13,6 +13,7 @@
     transition: transform 0.28s ease, opacity 0.28s ease;
   }
   .topbar.topbar-visible, .topbar:focus-within {
+    background: var(--color-background);
     transform: none;
     opacity: 1;
     pointer-events: auto;
