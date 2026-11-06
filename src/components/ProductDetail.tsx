@@ -56,7 +56,7 @@ export default function ProductDetail() {
         <p className="eyebrow">Кубики / В наличии</p>
         <h1 className="page-title">{product.title}</h1>
         <p>Форма {product.config.shape.toUpperCase()}. Цвет и шрифт можно изменить в конструкторе.</p>
-        <p>Готовые варианты можно забрать самостоятельно или получить курьерской доставкой в течение недели.</p>
+        <p>Готовые варианты доставляем по Москве и регионам в течение 3 дней. Самовывоз бесплатный.</p>
         <dl className="product-specs">
           <div><dt>Форма</dt><dd>{product.config.shape.toUpperCase()}</dd></div>
           <div><dt>Цвет</dt><dd>{shellColors.find(x => x.value === product.config.shell)?.name}</dd></div>

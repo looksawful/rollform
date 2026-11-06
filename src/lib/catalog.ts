@@ -18,14 +18,14 @@ export const initialConfig: DiceConfig = {
 };
 
 export const shellColors: { name: string; value: DiceConfig['shell'] }[] = [
-  { name: 'Цвет 1', value: '#000000' },
-  { name: 'Цвет 2', value: '#196641' },
-  { name: 'Цвет 3', value: '#A62D35' },
-  { name: 'Цвет 4', value: '#215BA8' },
+  { name: 'Чёрный', value: '#000000' },
+  { name: 'Зелёный', value: '#196641' },
+  { name: 'Красный', value: '#A62D35' },
+  { name: 'Синий', value: '#215BA8' },
 ];
 
 export const fontNames: Record<FontStyle, string> = {
-  grotesk: 'Шрифт 1', mono: 'Шрифт 2', serif: 'Шрифт 3',
+  grotesk: 'Inter', mono: 'Моноширинный', serif: 'Georgia',
 };
 
 export function configFromParams(params: Pick<URLSearchParams, 'get'>): DiceConfig {

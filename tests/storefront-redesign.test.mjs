@@ -63,9 +63,9 @@ test('stock and custom-production copy lives where customers choose their cube',
   const configurator = read('src/components/Configurator.tsx');
   const production = read('src/components/ProductionInfo.tsx');
   const pages = read('src/styles/pages.css');
-  const stock = 'Готовые варианты можно забрать самостоятельно или получить курьерской доставкой в течение недели.';
+  const stock = 'Готовые варианты доставляем по Москве и регионам в течение 3 дней. Самовывоз бесплатный.';
   const made = 'Изготовление начинается после согласования формы, цвета и шрифта.';
-  const pickup = 'Способ получения и дату согласуют перед оформлением заказа.';
+  const pickup = 'Доставка кубиков под заказ по Москве и регионам — до 5 дней. Самовывоз бесплатный.';
 
   const homeStock = home.split('className="wrapper catalog-heading prose"')[1]?.split('<ProductGallery')[0] || '';
   assert.ok(homeStock.includes('В наличии'));

@@ -342,6 +342,10 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           assert.equal(await evaluate(`document.querySelectorAll('.order-steps > li').length`), 4);
           assert.equal(await evaluate(`!!(document.querySelector('.bento-section').compareDocumentPosition(document.querySelector('#about')) & Node.DOCUMENT_POSITION_FOLLOWING)`), true);
           assert.equal(await evaluate(`document.querySelectorAll('.bento-card').length`), 5);
+          assert.equal(await evaluate(`document.querySelector('#benefits-title').textContent`), 'О кубиках');
+          assert.ok(await evaluate(`document.querySelector('.bento-grid').textContent.includes('Выбирайте из 4 цветов')`));
+          assert.ok(await evaluate(`document.querySelector('#delivery iframe')?.src.includes('openstreetmap.org')`), 'Homepage retains the actual map below contacts');
+          assert.ok(await evaluate(`!!(document.querySelector('#contacts').compareDocumentPosition(document.querySelector('#delivery')) & Node.DOCUMENT_POSITION_FOLLOWING)`));
           assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Home fits ${width}px`);
 
           await send('Page.navigate', { url: new URL(theme + 'configure/', base).href });

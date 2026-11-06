@@ -50,7 +50,7 @@ export default function Configurator() {
         <div className="production-note stack">
           <h2>Кубики на заказ</h2>
           <p>Изготовление начинается после согласования формы, цвета и шрифта.</p>
-          <p>Способ получения и дату согласуют перед оформлением заказа.</p>
+          <p>Доставка кубиков под заказ по Москве и регионам — до 5 дней. Самовывоз бесплатный.</p>
           <Link href={themeHref(pathname, '/production')}>Изготовление и доставка</Link>
         </div>
         <p className="configure-price">{formatPrice(priceForConfig(config))}</p>

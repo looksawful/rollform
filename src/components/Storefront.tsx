@@ -9,6 +9,7 @@ import ProductGallery from './ProductGallery';
 import ProductionInfo from './ProductionInfo';
 import ContactContent from './ContactContent';
 import BentoSection from './BentoSection';
+import DeliveryInfo from './DeliveryInfo';
 import { diceQuery, initialConfig, randomDiceConfig } from '@/lib/catalog';
 
 export default function Storefront() {
@@ -27,7 +28,7 @@ export default function Storefront() {
     <section className="section stack catalog-section" id="catalog">
       <div className="wrapper catalog-heading prose">
         <h2 className="section-title">В наличии</h2>
-        <p>Готовые варианты можно забрать самостоятельно или получить курьерской доставкой в течение недели.</p>
+        <p>Готовые варианты доставляем по Москве и регионам в течение 3 дней. Самовывоз бесплатный.</p>
       </div>
       <ProductGallery mode="reel" />
       <div className="wrapper catalog-footer">
@@ -70,5 +71,6 @@ export default function Storefront() {
       <h2 className="section-title">Контакты</h2>
       <ContactContent />
     </section>
+    <DeliveryInfo />
   </>;
 }

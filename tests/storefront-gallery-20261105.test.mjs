@@ -24,9 +24,9 @@ test('production remains a map route while stock and custom terms move to shoppi
   assert.match(production, /Как оформить заказ/);
   assert.match(source('src/components/DeliveryInfo.tsx'), /className="production-map"/);
   assert.doesNotMatch(production, /Кубики на заказ|Кубики в наличии|production-options/);
-  assert.match(home, /в течение недели/);
-  assert.match(catalog, /в течение недели/);
-  assert.match(detail, /в течение недели/);
+  assert.match(home, /в течение 3 дней/);
+  assert.match(catalog, /в течение 3 дней/);
+  assert.match(detail, /в течение 3 дней/);
   assert.match(config, /Кубики на заказ/);
   assert.match(config, /Изготовление начинается после согласования/);
   assert.ok(existsSync('src/app/production/page.tsx'));

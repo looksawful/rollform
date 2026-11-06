@@ -13,7 +13,7 @@ test('approved Russian header labels and icon-only cart',()=>{
   assert.doesNotMatch(s, /LegalDialogs|photoCredits|photo-credits/);
   assert.doesNotMatch(s,/<p>Текст<\/p>/);
 });
-test('Bento is shown with neutral placeholders before About',()=>{
+test('Bento describes the actual configurator options before About',()=>{
   const s=read('src/components/Storefront.tsx');
   const b=read('src/components/BentoSection.tsx');
   assert.match(s, /<BentoSection \/>[\s\S]*id="about"/);
@@ -46,8 +46,8 @@ test('builder, cart and production pages honor accepted copy decisions',()=>{
   assert.match(cart,/Пока ничего нет/);
   assert.match(cart,/>Смотреть кубики<\/Link>/);
   assert.match(cart,/<Trash2[^>]*\/>.*<span>Удалить<\/span>/);
-  assert.match(data,/name: 'Цвет 1'/);
-  assert.match(data,/grotesk: 'Шрифт 1'/);
+  assert.match(data,/name: 'Чёрный'/);
+  assert.match(data,/grotesk: 'Inter'/);
   assert.ok(existsSync('src/app/production/page.tsx'));
   assert.ok(!existsSync('src/app/dark/production/page.tsx'));
   assert.match(read('src/components/ProductionInfo.tsx'),/Как оформить заказ/);
@@ -84,7 +84,7 @@ test('in-stock delivery copy accompanies stock selection and product details', (
   const detail = read('src/components/ProductDetail.tsx');
   const production = read('src/components/ProductionInfo.tsx');
   for (const content of [home, catalog, detail]) {
-    assert.match(content, /Готовые варианты можно забрать самостоятельно или получить курьерской доставкой в течение недели/);
+    assert.match(content, /Готовые варианты доставляем по Москве и регионам в течение 3 дней\. Самовывоз бесплатный/);
   }
   assert.doesNotMatch(production, /в течение недели/);
 });
