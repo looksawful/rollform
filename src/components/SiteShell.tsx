@@ -12,7 +12,7 @@ const menuLinks = [
   { href: '/', label: 'Главная' },
   { href: '/catalog', label: 'Кубики' },
   { href: '/configure', label: 'Собери сам' },
-  { href: '/about', label: 'О нас' },
+  { href: '/#about', label: 'О нас' },
   { href: '/contacts', label: 'Контакты' },
 ];
 
@@ -117,7 +117,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
           <h2>Навигация</h2>
           <Link href={link("/catalog")}>Каталог</Link>
           <Link href={link("/configure")}>Конструктор</Link>
-          <Link href={link("/about")}>О нас</Link>
+          <Link href={link("/#about")}>О нас</Link>
           <Link href={link("/production")}>Изготовление и доставка</Link>
         </nav>
         <div className="stack">

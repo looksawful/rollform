@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 
 const read = file => readFileSync(file, 'utf8');
 
@@ -77,4 +77,16 @@ test('stock and custom-production copy lives where customers choose their cube',
   assert.doesNotMatch(production, /Кубики в наличии|Кубики на заказ|production-options|Готовые варианты можно забрать|Изготовление начинается после согласования|Способ получения и дату/);
   assert.doesNotMatch(pages, /\.production-options/);
   assert.match(read('src/components/DeliveryInfo.tsx'), /className="production-map"/);
+});
+
+test('About remains the existing home section and navigation uses its anchor', () => {
+
+  assert.equal(existsSync('src/app/about/page.tsx'), false);
+  assert.equal(existsSync('src/app/dark/about/page.tsx'), false);
+  const home = read('src/components/Storefront.tsx');
+  const shell = read('src/components/SiteShell.tsx');
+  assert.match(home, /id="about"/);
+  assert.match(home, /<BentoSection\s*\/>[\s\S]*id="about"/);
+  assert.match(shell, /href:\s*'\/#about',\s*label:\s*'О нас'/);
+  assert.match(shell, /href=\{link\("\/#about"\)\}>О нас<\/Link>/);
 });
