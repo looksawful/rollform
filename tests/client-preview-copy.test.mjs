@@ -23,15 +23,16 @@ test('Bento retained as a disconnected draft component',()=>{
   assert.doesNotMatch(s,/>Весь каталог<\/Link>/);
   assert.match(s,/<ContactContent\s*\/>/);
 });
-test('stock cards show photographic references, readable metadata, price placeholder and buy action',()=>{
+test('stock cards show a photo, a prominent price and a secondary add-to-cart action',()=>{
   const card=read('src/components/ProductCard.tsx');
   const catalog=read('src/app/catalog/page.tsx');
-  assert.match(card,/<h3><Link href=\{detailsUrl\}>\{product\.title\}<\/Link><\/h3>/);
-  assert.match(card,/className="product-description"/);
+  assert.match(card,/<h3>\{product\.title\}<\/h3>/);
   assert.match(card,/className="product-price"/);
-  assert.match(card,/product\.config\.shape\.toUpperCase\(\)/);
-  assert.match(card,/>Купить<\/button>/);
-  assert.doesNotMatch(card,/>Настроить<\/Link>|>Кнопка<\/Link>/);
+  assert.match(card,/className="product-open"/);
+  assert.match(card,/href=\{detailsUrl\}/);
+  assert.doesNotMatch(card,/className="product-description"|onPreview|product-zoom/);
+  assert.match(card,/className="button button-secondary"/);
+  assert.match(card,/>Добавить в корзину<\/button>/);
   assert.match(card,/photoPath\(index\)/);
   assert.match(catalog,/>Кубики в наличии<\/h1>/);
 });

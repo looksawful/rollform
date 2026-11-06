@@ -69,6 +69,16 @@
     --button-background: var(--color-background);
     --button-text: var(--color-text);
   }
+  .button-secondary { color: var(--color-text); background: transparent; }
+  .button-secondary:hover { background: var(--color-preview); }
+  .visually-hidden {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
   .button-fill { inline-size: 100%; }
 
   .field { --stack-space: var(--space-1); }
