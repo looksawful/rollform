@@ -81,17 +81,79 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
       features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
     });
     for (const theme of ['', 'dark/']) {
+      await t.test(`${theme || 'light/'} full-width manual reel`, async () => {
+        exceptions.length = 0;
+        await send('Page.navigate', { url: new URL(theme, base).href });
+        await until(`!!document.querySelector('.product-scroller .product') && document.readyState === 'complete'`);
+        await delay(800);
+        const geometry = await evaluate(`(() => {
+          const reel = document.querySelector('.product-scroller'), first = reel.firstElementChild;
+          const style = getComputedStyle(reel), rect = reel.getBoundingClientRect();
+          return { width: rect.width, viewport: document.documentElement.clientWidth, left: rect.left,
+            first: first.getBoundingClientRect().left, scrollbar: style.scrollbarWidth,
+            webkitScrollbar: getComputedStyle(reel, '::-webkit-scrollbar').display,
+            arrows: !!document.querySelector('.reel-controls'), mask: style.maskImage,
+            linkBelow: document.querySelector('#catalog .catalog-link').getBoundingClientRect().top >= rect.bottom };
+        })()`);
+        assert.ok(Math.abs(geometry.width - geometry.viewport) <= 1, 'Reel fills the viewport');
+        assert.ok(geometry.first >= 0 && geometry.first < geometry.viewport * 0.12, 'First card has no centering hole');
+        assert.equal(geometry.scrollbar, 'none');
+        assert.equal(geometry.webkitScrollbar, 'none');
+        assert.equal(geometry.arrows, false);
+        assert.notEqual(geometry.mask, 'none', 'Overflow has an edge fade');
+        assert.equal(geometry.linkBelow, true, 'Catalog link is below the reel');
+        await evaluate(`document.querySelector('.product-scroller').scrollIntoView({block:'center',behavior:'instant'})`);
+        await delay(150);
+        const point = await evaluate(`(() => { const r = document.querySelector('.product-scroller').getBoundingClientRect(); return {x:r.width*0.65,y:r.top+r.height*0.3}; })()`);
+        const url = await evaluate('location.href');
+        await send('Input.dispatchMouseEvent', { type: 'mousePressed', ...point, button: 'left', buttons: 1, clickCount: 1 });
+        for (let i=1; i<=10; i++) {
+          await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x-i*25, y: point.y, button: 'left', buttons: 1 });
+          await delay(16);
+        }
+        await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x-250, y: point.y, button: 'left', buttons: 0, clickCount: 1 });
+        await until(`document.querySelector('.product-scroller').scrollLeft > 100`);
+        assert.equal(await evaluate('location.href'), url, 'Dragging a product never opens it');
+        const beforeWheel = await evaluate(`document.querySelector('.product-scroller').scrollLeft`);
+        await send('Input.dispatchMouseEvent', { type: 'mouseWheel', ...point, deltaY: 240, deltaX: 0, modifiers: 8 });
+        await until(`document.querySelector('.product-scroller').scrollLeft > ${beforeWheel+50}`);
+        const scales = await evaluate(`Array.from(document.querySelectorAll('.product-scroller > .product')).map(card => {
+          const style = getComputedStyle(card); return Number(style.scale === 'none' ? new DOMMatrix(style.transform).a : style.scale);
+        })`);
+        assert.ok(Math.max(...scales) - Math.min(...scales) > 0.06, 'Center and side cards have different scales');
+        assert.equal(await evaluate(`!!document.querySelector('.pin-spacer')`), false, 'Vertical scrolling does not pin or drive the reel');
+        const chosenPosition = await evaluate(`document.querySelector('.product-scroller').scrollLeft`);
+        await send('Emulation.setEmulatedMedia', {
+          features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
+        });
+        await until(`Array.from(document.querySelectorAll('.product-scroller > .product')).every(card => ['none','1'].includes(getComputedStyle(card).scale))`);
+        assert.equal(await evaluate(`document.querySelector('.product-scroller').scrollLeft`), chosenPosition, 'Changing motion preference preserves the chosen card');
+        await send('Emulation.setEmulatedMedia', {
+          features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
+        });
+        await evaluate(`document.querySelector('.product-scroller').scrollTo({left:0,behavior:'instant'})`);
+        await delay(300);
+        const button = await evaluate(`(() => { const r = document.querySelector('.product-scroller button').getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; })()`);
+        await send('Input.dispatchMouseEvent', {type:'mousePressed',...button,button:'left',clickCount:1});
+        await send('Input.dispatchMouseEvent', {type:'mouseReleased',...button,button:'left',clickCount:1});
+        await until(`Number(document.querySelector('.cart-count')?.textContent) > 0`);
+        assert.equal(await evaluate('location.href'), url, 'Add-to-cart remains a separate button');
+        const card = await evaluate(`(() => { const r = document.querySelector('.product-scroller .product-open').getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/3}; })()`);
+        await send('Input.dispatchMouseEvent', {type:'mousePressed',...card,button:'left',clickCount:1});
+        await send('Input.dispatchMouseEvent', {type:'mouseReleased',...card,button:'left',clickCount:1});
+        await until(`location.pathname.endsWith('/product/') && !!document.querySelector('h1')`);
+        assert.deepEqual(exceptions, []);
+      });
       await t.test(theme ? 'dark' : 'light', async () => {
         exceptions.length = 0;
         const home = new URL(theme, base).href;
         await send('Page.navigate', { url: home });
-        // The pin must really exist; otherwise this test misses the original bug.
-        await until(`!!document.querySelector('.pin-spacer')`);
+        await until(`document.readyState === 'complete' && !!document.querySelector('.dice-canvas canvas')`);
         await evaluate(`(() => {
           const reel = document.querySelector('.product-scroller');
           scrollTo(0, scrollY + reel.getBoundingClientRect().top + reel.clientHeight / 2 - innerHeight / 2 + 100);
         })()`);
-        await until(`getComputedStyle(document.querySelector('#catalog')).position === 'fixed'`);
+        assert.equal(await evaluate(`!!document.querySelector('.pin-spacer')`), false, 'The former pin is removed');
         const destination = new URL('configure/', home).href;
         await evaluate(`document.querySelector('.desktop-nav a[href$="/configure/"]').click()`);
         await until(`location.href === ${JSON.stringify(destination)} && document.querySelector('h1')?.textContent === 'Собери сам'`);
@@ -105,7 +167,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         exceptions.length = 0;
         const home = new URL(theme, base).href;
         await send('Page.navigate', { url: home });
-        await until(`!!document.querySelector('.pin-spacer')`);
+        await until(`document.readyState === 'complete' && !!document.querySelector('.dice-canvas canvas')`);
         const title = '#production > .section-title';
         assert.equal(await evaluate(`getComputedStyle(document.querySelector('${title}')).opacity`), '1', 'Offscreen content starts visible');
         const firstEntry = await sampleEntry(title);

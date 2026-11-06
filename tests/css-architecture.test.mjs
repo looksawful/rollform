@@ -199,17 +199,6 @@ test('site CSS uses semantic theme roles, not raw colors or legacy ink-paper tok
 });
 
 
-test('horizontal product reel centers and gently scales cards as they scroll', () => {
-  const pages = read('src/styles/pages.css');
-  const gallery = read('src/components/ProductGallery.tsx');
-  assert.match(gallery, /product-scroller reel/);
-  assert.match(pages, /--reel-card-size:\s*clamp\(17rem,\s*30vw,\s*23rem\)/);
-  assert.match(pages, /padding-inline:\s*max\(0px,\s*calc\(\(100% - var\(--reel-card-size\)\) \/ 2\)\)/);
-  assert.match(pages, /scroll-snap-type:\s*x mandatory/);
-  assert.match(pages, /scroll-snap-align:\s*center/);
-  assert.doesNotMatch(pages, /animation-timeline: view\(inline\)|reel-center-focus/);
-  assert.match(gallery, /product-grid grid/);
-});
 
 test('centered Hero composition preserves approved copy and passive 3D motion', () => {
   const home = read('src/components/Storefront.tsx');

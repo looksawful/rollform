@@ -20,12 +20,14 @@ export default function Storefront() {
         <Link className="button button-black" href={themeHref(pathname, "/configure")}>Собрать кубик</Link>
       </div>
     </section>
-    <section className="wrapper section stack" id="catalog">
-      <div className="catalog-heading">
+    <section className="section stack catalog-section" id="catalog">
+      <div className="wrapper catalog-heading">
         <h2 className="section-title">В наличии</h2>
-        <Link className="catalog-link" href={themeHref(pathname, '/catalog')}>Весь каталог <span aria-hidden="true">↗</span></Link>
       </div>
       <ProductGallery mode="reel" />
+      <div className="wrapper catalog-footer">
+        <Link className="catalog-link" href={themeHref(pathname, '/catalog')}>Весь каталог <span aria-hidden="true">↗</span></Link>
+      </div>
     </section>
     <ProductionInfo onHome />
     <section className="wrapper section about-section" id="about">

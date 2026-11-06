@@ -74,24 +74,6 @@ test('nine licensed photographic examples are available without losing accurate 
   assert.doesNotMatch(source('src/components/SiteShell.tsx'), /photoCredits|Источники фотографий/);
 });
 
-test('homepage reel briefly previews cards then releases to native horizontal scrolling', () => {
-  const gallery = source('src/components/ProductGallery.tsx');
-  const css = source('src/styles/pages.css');
-  assert.match(gallery, /import\('gsap\/ScrollTrigger'\)/);
-  assert.match(gallery, /gsap\.registerPlugin\(ScrollTrigger\)/);
-  assert.match(gallery, /mode !== 'reel'/);
-  assert.match(gallery, /scroller\?\.closest\('#catalog'\)/);
-  assert.match(gallery, /scrollLeft:\s*\(\) => previewDistance\(\)/);
-  assert.match(gallery, /start:\s*'center center'/);
-  assert.match(gallery, /pin:\s*section/);
-  assert.match(gallery, /end:\s*\(\) => ['"]\+=['"] \+ Math\.max/);
-  assert.match(gallery, /scrub:\s*true/);
-  assert.match(gallery, /prefers-reduced-motion: no-preference/);
-  assert.match(gallery, /media\?\.revert\(\)/);
-  assert.match(css, /\.catalog-scrubbing \.product-scroller\s*\{\s*scroll-snap-type:\s*none/);
-  assert.doesNotMatch(gallery, /<Lightbox/);
-});
-
 test('new photo-first product layout keeps purchase honest and supplies a shared detail route', () => {
   const card = source('src/components/ProductCard.tsx');
   const detail = source('src/components/ProductDetail.tsx');
@@ -152,26 +134,11 @@ test('homepage and cart are free from prototype disclaimers', () => {
   assert.ok(!existsSync('src/components/LegalDialogs.tsx'));
 });
 
-test('vertical scrolling only previews the first three cards; the rest remain natively scrollable', () => {
-  const gallery = source('src/components/ProductGallery.tsx');
-  const css = source('src/styles/pages.css');
-  assert.match(gallery, /const previewDistance = \(\) =>/);
-  assert.match(gallery, /cards\[2\]\.offsetLeft - cards\[0\]\.offsetLeft/);
-  assert.match(gallery, /scrollLeft: \(\) => previewDistance\(\)/);
-  assert.match(gallery, /Math\.min\(previewDistance\(\), window\.innerHeight \* 0\.7\)/);
-  assert.match(gallery, /onEnter: markScrubbing/);
-  assert.match(gallery, /onLeave: unmarkScrubbing/);
-  assert.match(gallery, /section\.classList\.remove\('catalog-scrubbing'\)/);
-  assert.doesNotMatch(gallery, /scrollLeft: \(\) => distance\(\)/);
-  assert.match(css, /\.catalog-scrubbing \.product-scroller\s*\{\s*scroll-snap-type: none/);
-  assert.match(css, /\.product-scroller\s*\{[^}]*scroll-snap-type: x mandatory/);
-});
-
 test('homepage has an explicit catalog link and restored logo', () => {
   const home = source('src/components/Storefront.tsx');
   const shell = source('src/components/SiteShell.tsx');
   const css = source('src/styles/pages.css');
-  assert.match(home, /className="catalog-heading"/);
+  assert.match(home, /className="wrapper catalog-heading"/);
   assert.match(home, />Весь каталог/);
   assert.match(home, /themeHref\(pathname, '\/catalog'\)/);
   assert.match(shell, /className="logo"/);
@@ -190,35 +157,9 @@ test('neutral surface palette and translucent dividers are central CSS tokens', 
   assert.match(pages, /\.product\s*\{[^}]*box-shadow: var\(--shadow-card\)/);
 });
 
-test('manual carousel buttons scroll horizontally without capturing the page', () => {
-  const gallery = source('src/components/ProductGallery.tsx');
-  assert.match(gallery, /scroller\.scrollBy\(\{ left: direction/);
-  assert.match(gallery, /aria-label="Предыдущие карточки"/);
-  assert.match(gallery, /aria-label="Следующие карточки"/);
-  assert.match(gallery, /mode === 'reel' && <div className="reel-controls"/);
-});
-
-test('short pin respects pointer type and live reduced-motion preference without a stale trigger', () => {
-  const gallery = source('src/components/ProductGallery.tsx');
-  const pages = source('src/styles/pages.css');
-  assert.match(gallery, /gsap\.matchMedia\(\)/);
-  assert.match(gallery, /not \(pointer: coarse\)/);
-  assert.match(gallery, /prefers-reduced-motion: no-preference/);
-  assert.match(gallery, /min-width: 768px/);
-  assert.match(gallery, /media\?\.revert\(\)/);
-  assert.doesNotMatch(pages, /@keyframes reel-center-focus|animation-timeline: view\(inline\)/);
-});
-
 test('header reveal stops listening after the first downward scroll', () => {
   const shell = source('src/components/SiteShell.tsx');
   assert.match(shell, /if \(window\.scrollY > 24\) \{\s*setRevealed\(true\);\s*window\.removeEventListener\('scroll', reveal\);/);
-});
-
-test('desktop-to-touch or reduced-motion switch preserves manually chosen carousel position', () => {
-  const gallery = source('src/components/ProductGallery.tsx');
-  assert.match(gallery, /scroller\.addEventListener\('scroll', rememberPosition, \{ passive: true \}\)/);
-  assert.match(gallery, /scroller\.removeEventListener\('scroll', rememberPosition\)/);
-  assert.match(gallery, /scroller\.scrollLeft = lastScrollLeft/);
 });
 
 test('home shows manufacturing and collection after stock, separate from About Us', () => {
@@ -226,7 +167,7 @@ test('home shows manufacturing and collection after stock, separate from About U
   const production = source('src/components/ProductionInfo.tsx');
   const css = source('src/styles/pages.css');
   assert.match(home, /import ProductionInfo from/);
-  assert.match(home, /<ProductGallery mode="reel" \/>\s*<\/section>\s*<ProductionInfo onHome \/>\s*<section className="wrapper section about-section"/);
+  assert.match(home, /<ProductGallery mode="reel" \/>[\s\S]*?<\/section>\s*<ProductionInfo onHome \/>\s*<section className="wrapper section about-section"/);
   assert.doesNotMatch(home, /<p className="eyebrow">О проекте<\/p>/);
   assert.doesNotMatch(home, /<Link[^>]+\/production[^>]*>Изготовление и получение<\/Link>/);
   assert.match(production, /<h2 className="section-title">Изготовление и получение<\/h2>/);

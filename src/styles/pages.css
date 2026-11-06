@@ -134,29 +134,46 @@
   .product-grid { --grid-min: 17rem; align-items: stretch; }
   .product-scroller {
     --reel-card-size: clamp(17rem, 30vw, 23rem);
+    --reel-fade-size: clamp(1.25rem, 4vw, 4rem);
+    --reel-fade-start: 0px;
+    --reel-fade-end: var(--reel-fade-size);
     grid-auto-columns: var(--reel-card-size);
-    padding-inline: max(0px, calc((100% - var(--reel-card-size)) / 2));
-    padding-block: 0.35rem 1.25rem;
-    scroll-snap-type: x mandatory;
+    inline-size: 100%;
+    padding-inline: var(--gutter);
+    padding-block: 1rem;
+    scroll-padding-inline: var(--gutter);
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    cursor: grab;
+    -webkit-mask-image: linear-gradient(to right, transparent, var(--color-black) var(--reel-fade-start), var(--color-black) calc(100% - var(--reel-fade-end)), transparent);
+    mask-image: linear-gradient(to right, transparent, var(--color-black) var(--reel-fade-start), var(--color-black) calc(100% - var(--reel-fade-end)), transparent);
   }
-  .catalog-scrubbing .product-scroller { scroll-snap-type: none; }
-  .catalog-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); }
+  .product-scroller::-webkit-scrollbar { display: none; width: 0; height: 0; }
+  .product-scroller[data-can-scroll-start="true"] { --reel-fade-start: var(--reel-fade-size); }
+  .product-scroller[data-can-scroll-end="false"] { --reel-fade-end: 0px; }
+  .product-scroller.is-dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
+  .product-scroller a, .product-scroller img { -webkit-user-drag: none; }
+  .product-scroller .product-open { cursor: inherit; }
+  .catalog-section { min-inline-size: 0; }
+  .catalog-footer { display: flex; justify-content: flex-end; }
   .catalog-link { display: inline-flex; align-items: center; gap: 0.65rem; min-block-size: 2.75rem; font-weight: 650; text-decoration: underline; text-underline-offset: 0.25em; }
   .catalog-link:hover { text-decoration-thickness: 2px; }
-  .reel-controls { display: flex; justify-content: flex-end; gap: var(--space-1); }
-  .reel-controls button {
-    display: grid;
-    place-items: center;
-    inline-size: 2.75rem;
-    block-size: 2.75rem;
-    border: var(--border-default);
-    border-radius: var(--radius-full);
-    background: var(--color-surface);
-    color: var(--color-text);
-    cursor: pointer;
-  }
-  .reel-controls button:hover { background: var(--color-background); }
   .product-scroller > .product { scroll-snap-align: center; }
+  .product-scroller > .product:first-child { transform-origin: left center; }
+  .product-scroller > .product:last-child { transform-origin: right center; }
+  @supports (animation-timeline: view(inline)) {
+    @media (prefers-reduced-motion: no-preference) {
+      .product-scroller > .product {
+        animation: reel-center-focus linear both;
+        animation-timeline: view(inline);
+      }
+    }
+  }
+  @keyframes reel-center-focus {
+    from, to { scale: 0.72; }
+    50% { scale: 1; }
+  }
   .product {
     position: relative;
     --stack-space: 0.8rem;
