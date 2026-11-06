@@ -20,7 +20,7 @@ export default function Storefront() {
       <div className="hero-copy stack">
         <h1 id="hero-title">Заголовок</h1>
         <p>Здесь появится рассказ о кубиках и возможностях конструктора. Пока этот текст помогает оценить длину строк, отступы и композицию первого экрана рядом с 3D-моделью. Окончательное описание добавим после согласования содержания.</p>
-        <button type="button" className="button button-black" onClick={createRandomDice}><span>создать случайный кубик</span><Box className="icon" aria-hidden="true" /></button>
+        <button type="button" className="button button-black" onClick={createRandomDice}><span>Создать случайный кубик</span><Box className="icon" aria-hidden="true" /></button>
       </div>
     </section>
     <section className="section stack catalog-section" id="catalog">

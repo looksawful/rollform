@@ -105,7 +105,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
             };
           })()`);
           assert.ok(layout.contentWidth <= layout.viewport + 1, 'Hero never causes page overflow');
-          assert.equal(layout.label, 'создать случайный кубик');
+          assert.equal(layout.label, 'Создать случайный кубик');
           assert.equal(layout.tag, 'BUTTON');
           assert.equal(layout.icon, true);
           if (mobile) {

@@ -41,7 +41,7 @@ test('Hero creates a random dice, while menu remains a regular configurator link
   const hero = readFileSync('src/components/Storefront.tsx', 'utf8');
   const shell = readFileSync('src/components/SiteShell.tsx', 'utf8');
   const editor = readFileSync('src/components/Configurator.tsx', 'utf8');
-  assert.match(hero, />создать случайный кубик<\/span>/);
+  assert.match(hero, />Создать случайный кубик<\/span>/);
   assert.match(hero, /randomDiceConfig\(/);
   assert.match(hero, /<Box className="icon" aria-hidden="true"\s*\/>/);
   assert.match(shell, /href: '\/configure', label: 'Собери сам'/);
