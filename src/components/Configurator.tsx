@@ -1,10 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Box, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { themeHref } from '@/lib/themeRoutes';
 import DiceViewer from './DiceViewer';
 import { useCart } from './CartState';
 import { LAST_DICE_KEY, configFromParams, diceQuery, randomDiceConfig, readSavedDice, diceShapes, fontNames, fontStyles, shellColors } from '@/lib/catalog';
@@ -13,7 +12,6 @@ import { formatPrice, priceForConfig } from '@/lib/pricing';
 
 export default function Configurator() {
   const router = useRouter();
-  const pathname = usePathname();
   const params = useSearchParams();
   const query = params.toString();
   const config = configFromParams(params);
@@ -33,8 +31,8 @@ export default function Configurator() {
     next.set(key, value);
     window.history.replaceState(null, '', `?${next}`);
   };
-  const createRandomDice = () => router.replace(`${themeHref(pathname, '/configure')}?${diceQuery(randomDiceConfig(Math.random, config.shell))}`);
-  const addCustom = () => { if (add(config, { kind: 'preorder_custom' })) router.push(themeHref(pathname, '/cart')); };
+  const createRandomDice = () => router.replace(`${'/configure'}?${diceQuery(randomDiceConfig(Math.random, config.shell))}`);
+  const addCustom = () => { if (add(config, { kind: 'preorder_custom' })) router.push('/cart'); };
 
   return <section className="wrapper section page-section">
     <div className="page-heading"><h1 className="page-title">Собери сам</h1></div>
@@ -51,7 +49,7 @@ export default function Configurator() {
           <h2>Кубики на заказ</h2>
           <p>Изготовление начинается после согласования формы, цвета и шрифта.</p>
           <p>Доставка кубиков под заказ по Москве и регионам — до 5 дней. Самовывоз бесплатный.</p>
-          <Link href={themeHref(pathname, '/production')}>Изготовление и доставка</Link>
+          <Link href={'/production'}>Изготовление и доставка</Link>
         </div>
         <p className="configure-price">{formatPrice(priceForConfig(config))}</p>
         <button type="button" className="button button-black button-fill" onClick={addCustom}><span>В корзину</span><ShoppingBag className="icon" aria-hidden="true" /></button>
