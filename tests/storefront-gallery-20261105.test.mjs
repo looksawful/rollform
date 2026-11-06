@@ -84,8 +84,8 @@ test('homepage reel briefly previews cards then releases to native horizontal sc
   assert.match(gallery, /pin:\s*section/);
   assert.match(gallery, /end:\s*\(\) => ['"]\+=['"] \+ Math\.max/);
   assert.match(gallery, /scrub:\s*true/);
-  assert.match(gallery, /prefers-reduced-motion: reduce/);
-  assert.match(gallery, /animation\?\.scrollTrigger\?\.kill\(\)/);
+  assert.match(gallery, /prefers-reduced-motion: no-preference/);
+  assert.match(gallery, /media\?\.revert\(\)/);
   assert.match(css, /\.catalog-scrubbing \.product-scroller\s*\{\s*scroll-snap-type:\s*none/);
   assert.match(gallery, /<Lightbox/);
 });
@@ -192,4 +192,20 @@ test('manual carousel buttons scroll horizontally without capturing the page', (
   assert.match(gallery, /aria-label="Предыдущие карточки"/);
   assert.match(gallery, /aria-label="Следующие карточки"/);
   assert.match(gallery, /mode === 'reel' && <div className="reel-controls"/);
+});
+
+test('short pin respects pointer type and live reduced-motion preference without a stale trigger', () => {
+  const gallery = source('src/components/ProductGallery.tsx');
+  const pages = source('src/styles/pages.css');
+  assert.match(gallery, /gsap\.matchMedia\(\)/);
+  assert.match(gallery, /not \(pointer: coarse\)/);
+  assert.match(gallery, /prefers-reduced-motion: no-preference/);
+  assert.match(gallery, /min-width: 768px/);
+  assert.match(gallery, /media\?\.revert\(\)/);
+  assert.doesNotMatch(pages, /@keyframes reel-center-focus|animation-timeline: view\(inline\)/);
+});
+
+test('header reveal stops listening after the first downward scroll', () => {
+  const shell = source('src/components/SiteShell.tsx');
+  assert.match(shell, /if \(window\.scrollY > 24\) \{\s*setRevealed\(true\);\s*window\.removeEventListener\('scroll', reveal\);/);
 });

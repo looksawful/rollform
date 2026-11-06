@@ -203,10 +203,7 @@ test('horizontal product reel centers and gently scales cards as they scroll', (
   assert.match(pages, /padding-inline:\s*max\(0px,\s*calc\(\(100% - var\(--reel-card-size\)\) \/ 2\)\)/);
   assert.match(pages, /scroll-snap-type:\s*x mandatory/);
   assert.match(pages, /scroll-snap-align:\s*center/);
-  assert.match(pages, /@keyframes reel-center-focus/);
-  assert.match(pages, /35%, 65%\s*\{\s*opacity:\s*1;\s*scale:\s*1;/);
-  assert.match(pages, /animation-timeline:\s*view\(inline\)/);
-  assert.match(pages, /prefers-reduced-motion:\s*no-preference/);
+  assert.doesNotMatch(pages, /animation-timeline: view\(inline\)|reel-center-focus/);
   assert.match(gallery, /product-grid grid/);
 });
 

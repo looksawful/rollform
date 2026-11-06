@@ -34,7 +34,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const camera = new THREE.PerspectiveCamera(39, 1, 0.1, 100);
         camera.position.set(0, 0, continuous ? 10 : 6.6);
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, continuous ? 1.25 : 2));
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.5;
@@ -74,6 +74,9 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const loader = new GLTFLoader();
         const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
         let visible = true, lost = false, request = 0, lastFace = -1;
+        let scrollPauseUntil = 0, lastPaint = 0;
+        const frameInterval = continuous ? 33 : 0;
+        const onScroll = () => { scrollPauseUntil = performance.now() + 140; };
         let timeline: ReturnType<typeof gsap.timeline> | null = null;
 
         const clearShape = () => {
@@ -149,8 +152,12 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
 
         const duration = (name: string, fallback: number) =>
           cssTimeSeconds(getComputedStyle(host).getPropertyValue(name), fallback);
-        const render = () => {
-          if (!closed && !lost && visible && !document.hidden) renderer.render(scene, camera);
+        const render = (force = false) => {
+          const now = performance.now();
+          if (closed || lost || !visible || document.hidden ||
+            (continuous && !force && (now < scrollPauseUntil || now - lastPaint < frameInterval))) return;
+          lastPaint = now;
+          renderer.render(scene, camera);
         };
         const play = () => {
           timeline?.kill();
@@ -263,22 +270,23 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           if (lost) return;
           const w = Math.max(1, host.clientWidth), h = Math.max(1, host.clientHeight);
           renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
-          render();
+          render(true);
         };
         const observer = new ResizeObserver(resize);
         observer.observe(host);
         const visibility = new IntersectionObserver(([entry]) => {
-          visible = entry.isIntersecting;
+          visible = entry.intersectionRatio > 0.12;
           if (visible && !document.hidden && !motion.matches) timeline?.resume();
           else timeline?.pause();
-          if (visible) render();
-        });
+          if (visible) render(true);
+        }, { threshold: [0, 0.12] });
         visibility.observe(host);
         const onVisibility = () => {
           if (document.hidden) timeline?.pause();
           else if (visible && !motion.matches) timeline?.resume();
         };
         document.addEventListener('visibilitychange', onVisibility);
+        if (continuous) window.addEventListener('scroll', onScroll, { passive: true });
         resize();
 
         cleanup = () => {
@@ -288,6 +296,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           visibility.disconnect();
           motion.removeEventListener('change', onMotion);
           document.removeEventListener('visibilitychange', onVisibility);
+          if (continuous) window.removeEventListener('scroll', onScroll);
           canvas.removeEventListener('webglcontextlost', onLost);
           canvas.removeEventListener('webglcontextrestored', onRestored);
           if (viewerRef.current?.update === update) viewerRef.current = null;

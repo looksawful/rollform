@@ -156,18 +156,6 @@
   }
   .reel-controls button:hover { background: var(--color-background); }
   .product-scroller > .product { scroll-snap-align: center; }
-  @keyframes reel-center-focus {
-    0%, 100% { opacity: 1; scale: 0.965; }
-    35%, 65% { opacity: 1; scale: 1; }
-  }
-  @supports ((animation-timeline: view(inline)) and (animation-range: entry)) {
-    @media (prefers-reduced-motion: no-preference) {
-      .product-scroller > .product {
-        animation: reel-center-focus auto linear both;
-        animation-timeline: view(inline);
-      }
-    }
-  }
   .product {
     --stack-space: 0.8rem;
     min-inline-size: 0;

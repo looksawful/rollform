@@ -20,7 +20,12 @@ function SiteChrome({ children }: { children: ReactNode }) {
   const { count } = useCart();
   const [revealed, setRevealed] = useState(false);
   useEffect(() => {
-    const reveal = () => { if (window.scrollY > 24) setRevealed(true); };
+    const reveal = () => {
+      if (window.scrollY > 24) {
+        setRevealed(true);
+        window.removeEventListener('scroll', reveal);
+      }
+    };
     window.addEventListener('scroll', reveal, { passive: true });
     reveal();
     return () => window.removeEventListener('scroll', reveal);

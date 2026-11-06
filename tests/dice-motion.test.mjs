@@ -41,3 +41,13 @@ test('hero has a passive seamless loop, without click controls', () => {
 test('Hero camera is farther away while configurator camera stays unchanged', () => {
   assert.match(viewer, /camera\.position\.set\(0,\s*0,\s*continuous\s*\?\s*10\s*:\s*6\.6\)/);
 });
+
+test('continuous hero rendering stays cheap while scrolling and when barely visible', () => {
+  assert.match(viewer, /continuous \? 1\.25 : 2/);
+  assert.match(viewer, /scrollPauseUntil/);
+  assert.match(viewer, /window\.addEventListener\('scroll', onScroll, \{ passive: true \}\)/);
+  assert.match(viewer, /window\.removeEventListener\('scroll', onScroll\)/);
+  assert.match(viewer, /frameInterval = continuous \? 33 : 0/);
+  assert.match(viewer, /entry\.intersectionRatio > 0\.12/);
+  assert.match(viewer, /threshold: \[0, 0\.12\]/);
+});

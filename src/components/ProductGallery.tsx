@@ -18,50 +18,54 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (mode !== 'reel' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (mode !== 'reel') return;
     const scroller = scrollerRef.current;
     const section = scroller?.closest('#catalog');
     if (!scroller || !section) return;
 
     let cancelled = false;
-    let animation: { kill: () => void; scrollTrigger?: { kill: () => void } } | undefined;
+    let media: { revert: () => void } | undefined;
     void (async () => {
       const [{ gsap }, { ScrollTrigger }] = await Promise.all([
         import('gsap'), import('gsap/ScrollTrigger'),
       ]);
       if (cancelled) return;
       gsap.registerPlugin(ScrollTrigger);
-      const cards = scroller.querySelectorAll<HTMLElement>('.product');
-      const previewDistance = () => cards.length < 3 ? 0 : Math.max(0, Math.min(
-        scroller.scrollWidth - scroller.clientWidth,
-        cards[2].offsetLeft - cards[0].offsetLeft,
-      ));
-      if (!previewDistance()) return;
+      const mm = gsap.matchMedia();
+      media = mm;
+      mm.add('(min-width: 768px) and (prefers-reduced-motion: no-preference) and (not (pointer: coarse))', () => {
+        const cards = scroller.querySelectorAll<HTMLElement>('.product');
+        const previewDistance = () => cards.length < 3 ? 0 : Math.max(0, Math.min(
+          scroller.scrollWidth - scroller.clientWidth,
+          cards[2].offsetLeft - cards[0].offsetLeft,
+        ));
+        if (!previewDistance()) return;
 
-      const markScrubbing = () => section.classList.add('catalog-scrubbing');
-      const unmarkScrubbing = () => section.classList.remove('catalog-scrubbing');
-      animation = gsap.to(scroller, {
-        scrollLeft: () => previewDistance(),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: scroller,
-          pin: section,
-          start: 'center center',
-          end: () => '+=' + Math.max(1, Math.min(previewDistance(), window.innerHeight * 0.7)),
-          scrub: true,
-          invalidateOnRefresh: true,
-          anticipatePin: 1,
-          onEnter: markScrubbing,
-          onEnterBack: markScrubbing,
-          onLeave: unmarkScrubbing,
-          onLeaveBack: unmarkScrubbing,
-        },
+        const markScrubbing = () => section.classList.add('catalog-scrubbing');
+        const unmarkScrubbing = () => section.classList.remove('catalog-scrubbing');
+        gsap.to(scroller, {
+          scrollLeft: () => previewDistance(),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: scroller,
+            pin: section,
+            start: 'center center',
+            end: () => '+=' + Math.max(1, Math.min(previewDistance(), window.innerHeight * 0.7)),
+            scrub: true,
+            invalidateOnRefresh: true,
+            anticipatePin: 1,
+            onEnter: markScrubbing,
+            onEnterBack: markScrubbing,
+            onLeave: unmarkScrubbing,
+            onLeaveBack: unmarkScrubbing,
+          },
+        });
+        return unmarkScrubbing;
       });
     })();
     return () => {
       cancelled = true;
-      animation?.scrollTrigger?.kill();
-      animation?.kill();
+      media?.revert();
       section.classList.remove('catalog-scrubbing');
     };
   }, [mode]);
