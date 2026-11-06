@@ -47,3 +47,4 @@ export default function ContactContent() {
       {submitted && <p role="status">Форма проверена. Это прототип: сообщение не отправлено.</p>}
     </form>
   </div>;
+}
