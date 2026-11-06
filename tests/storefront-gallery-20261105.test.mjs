@@ -209,3 +209,10 @@ test('header reveal stops listening after the first downward scroll', () => {
   const shell = source('src/components/SiteShell.tsx');
   assert.match(shell, /if \(window\.scrollY > 24\) \{\s*setRevealed\(true\);\s*window\.removeEventListener\('scroll', reveal\);/);
 });
+
+test('desktop-to-touch or reduced-motion switch preserves manually chosen carousel position', () => {
+  const gallery = source('src/components/ProductGallery.tsx');
+  assert.match(gallery, /scroller\.addEventListener\('scroll', rememberPosition, \{ passive: true \}\)/);
+  assert.match(gallery, /scroller\.removeEventListener\('scroll', rememberPosition\)/);
+  assert.match(gallery, /scroller\.scrollLeft = lastScrollLeft/);
+});

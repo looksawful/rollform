@@ -41,6 +41,9 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
         ));
         if (!previewDistance()) return;
 
+        let lastScrollLeft = scroller.scrollLeft;
+        const rememberPosition = () => { lastScrollLeft = scroller.scrollLeft; };
+        scroller.addEventListener('scroll', rememberPosition, { passive: true });
         const markScrubbing = () => section.classList.add('catalog-scrubbing');
         const unmarkScrubbing = () => section.classList.remove('catalog-scrubbing');
         gsap.to(scroller, {
@@ -60,7 +63,11 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
             onLeaveBack: unmarkScrubbing,
           },
         });
-        return unmarkScrubbing;
+        return () => {
+          scroller.removeEventListener('scroll', rememberPosition);
+          unmarkScrubbing();
+          scroller.scrollLeft = lastScrollLeft;
+        };
       });
     })();
     return () => {
