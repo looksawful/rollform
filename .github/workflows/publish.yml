@@ -4,13 +4,18 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 concurrency:
-  group: rollform-pages
-  cancel-in-progress: true
+  group: pages
+  cancel-in-progress: false
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,7 +28,9 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /rollform
-      - uses: peaceiris/actions-gh-pages@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
+          path: ./out
+      - id: deployment
+        uses: actions/deploy-pages@v4
