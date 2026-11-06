@@ -14,16 +14,19 @@ test('About uses a single full-width panorama instead of a three-photo collage',
   assert.match(css, /\.about-panorama img\s*\{[^}]*aspect-ratio:/);
 });
 
-test('Production retains a photograph and shows an interactive Kremlin placeholder map', () => {
+test('Production displays one full-width interactive map without a photo or blocked tile requests', () => {
   const production = read('src/components/ProductionInfo.tsx');
-  assert.match(production, /photos\/process-example\.webp/);
+  const css = read('src/styles/pages.css');
+  assert.doesNotMatch(production, /production-photo|photos\/process-example\.webp|<img\b/);
   assert.match(production, /<iframe/);
   assert.match(production, /openstreetmap\.org\/export\/embed\.html/);
   assert.match(production, /marker=55\.752/);
   assert.match(production, /title="[^"]*Кремл/);
   assert.match(production, /Это не адрес самовывоза/);
-  const css = read('src/styles/pages.css');
-  assert.match(css, /\.production-visuals\s*\{[^}]*display:\s*grid/);
+  assert.doesNotMatch(production, /sandbox=|referrerPolicy="no-referrer"/);
+  assert.match(production, /referrerPolicy="strict-origin-when-cross-origin"/);
+  assert.doesNotMatch(css, /\.production-visuals|\.production-photo/);
+  assert.match(css, /\.production-map\s*\{[^}]*inline-size:\s*100%/);
   assert.match(css, /\.production-map iframe\s*\{[^}]*inline-size:\s*100%/);
 });
 
