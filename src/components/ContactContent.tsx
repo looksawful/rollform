@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Globe, Mail, Phone } from 'lucide-react';
+import { Camera, Mail, Phone, Send } from 'lucide-react';
 
 const channels = [
-  { title: 'Сайт', detail: 'kubiki.example', Icon: Globe },
+  { title: 'Telegram', detail: '@kubiki', Icon: Send },
+  { title: 'Instagram', detail: '@kubiki', Icon: Camera },
   { title: 'Электронная почта', detail: 'hello@kubiki.example', Icon: Mail },
   { title: 'Телефон', detail: '+7 (000) 000-00-00', Icon: Phone },
 ];
@@ -43,7 +44,7 @@ export default function ContactContent() {
       <label className="stack" htmlFor="contact-message">Сообщение
         <textarea id="contact-message" name="message" rows={4} required maxLength={1500} />
       </label>
-      <button className="button button-black" type="submit">Проверить форму</button>
+      <button className="button button-black" type="submit">Отправить сообщение</button>
       {submitted && <p role="status">Форма проверена. Это прототип: сообщение не отправлено.</p>}
     </form>
   </div>;

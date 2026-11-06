@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const read = file => readFileSync(file, 'utf8');
 
-test('About uses a single full-width panorama instead of a three-photo collage', () => {
+test('About uses one responsive split photo instead of a collage', () => {
   const home = read('src/components/Storefront.tsx');
   const about = home.split('id="about"')[1].split('id="faq"')[0];
   assert.equal((about.match(/<figure\b/g) || []).length, 1);
@@ -14,20 +14,20 @@ test('About uses a single full-width panorama instead of a three-photo collage',
   assert.match(css, /\.about-panorama img\s*\{[^}]*aspect-ratio:/);
 });
 
-test('Production displays one full-width interactive map without a photo or blocked tile requests', () => {
+test('Production displays a split interactive map without photo or blocked tile requests', () => {
   const production = read('src/components/ProductionInfo.tsx');
   const css = read('src/styles/pages.css');
   assert.doesNotMatch(production, /production-photo|photos\/process-example\.webp|<img\b/);
   assert.match(production, /<iframe/);
   assert.match(production, /openstreetmap\.org\/export\/embed\.html/);
   assert.match(production, /marker=55\.752/);
-  assert.match(production, /title="[^"]*Кремл/);
-  assert.match(production, /Это не адрес самовывоза/);
+  assert.match(production, /title="Интерактивная карта Москвы"/);
+  assert.doesNotMatch(production, /Это не адрес самовывоза/);
   assert.doesNotMatch(production, /sandbox=|referrerPolicy="no-referrer"/);
   assert.match(production, /referrerPolicy="strict-origin-when-cross-origin"/);
   assert.doesNotMatch(css, /\.production-visuals|\.production-photo/);
   assert.match(css, /\.production-map\s*\{[^}]*inline-size:\s*100%/);
-  assert.match(css, /\.production-map iframe\s*\{[^}]*inline-size:\s*100%/);
+  assert.match(css, /\.production-map-frame iframe\s*\{[^}]*inline-size:\s*100%/);
 });
 
 test('whole catalog cards open detail pages; add action is secondary and no photo lightbox appears', () => {

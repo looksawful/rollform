@@ -9,9 +9,10 @@ import { photoPath } from '@/lib/photoAssets';
 import { formatPrice, priceForPreset } from '@/lib/pricing';
 import type { Preset } from '@/lib/catalog';
 
-export default function ProductCard({ product, index }: {
+export default function ProductCard({ product, index, duplicate = false }: {
   product: Preset;
   index: number;
+  duplicate?: boolean;
 }) {
   const pathname = usePathname();
   const { add } = useCart();
@@ -35,9 +36,11 @@ export default function ProductCard({ product, index }: {
       <h3>{product.title}</h3>
       <p className="product-price">{formatPrice(priceForPreset(product.id))}</p>
     </div>
-    <Link className="product-open" href={detailsUrl} aria-label={'Открыть товар: ' + product.title} />
+    <Link className="product-open" href={detailsUrl} tabIndex={duplicate ? -1 : undefined}
+      aria-label={'Открыть товар: ' + product.title} />
     <div className="product-actions">
       <button type="button" className="button button-secondary" onClick={addToCart}
+        tabIndex={duplicate ? -1 : undefined}
         aria-label={'Добавить в корзину: ' + product.title}>Добавить в корзину</button>
       <span className="visually-hidden" role="status">{added ? 'Товар добавлен в корзину' : ''}</span>
     </div>

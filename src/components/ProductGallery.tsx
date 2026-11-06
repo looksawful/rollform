@@ -1,37 +1,109 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { presets } from '@/lib/catalog';
 import ProductCard from './ProductCard';
 
 export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const [looping, setLooping] = useState(false);
+
+  useEffect(() => {
+    if (mode !== 'reel') return;
+    const preference = matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => setLooping(!preference.matches);
+    sync();
+    preference.addEventListener('change', sync);
+    return () => preference.removeEventListener('change', sync);
+  }, [mode]);
 
   useLayoutEffect(() => {
     if (mode !== 'reel') return;
     const scroller = scrollerRef.current;
     if (!scroller) return;
     const cards = Array.from(scroller.querySelectorAll<HTMLElement>('.product'));
-    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
     const nativeTimeline = CSS.supports('animation-timeline: view(inline)');
     let frame = 0;
+    let autoFrame = 0;
+    let lastTime = 0;
+    let cycleWidth = 0;
+    let visible = false;
+    let userPauseUntil = 0;
     let drag: { pointer: number; x: number; left: number; moved: boolean } | undefined;
     let suppressClick = false;
     let clickReset: ReturnType<typeof setTimeout> | undefined;
+
+    // Each of the three equal copies has the same width and gap.
+    // Keep the viewport in the middle copy; wrapping by one copy is imperceptible.
+    const measure = () => {
+      const first = scroller.querySelector<HTMLElement>('.product-strip[data-copy="0"] .product');
+      const middle = scroller.querySelector<HTMLElement>('.product-strip[data-copy="1"] .product');
+      return first && middle ? middle.offsetLeft - first.offsetLeft : 0;
+    };
+    const wrap = () => {
+      if (!looping || cycleWidth <= 0) return;
+      const previous = scroller.scrollLeft;
+      const next = cycleWidth + (((previous - cycleWidth) % cycleWidth) + cycleWidth) % cycleWidth;
+      if (Math.abs(previous - next) < 0.5) return;
+      scroller.scrollLeft = next;
+      if (drag) drag.left += next - previous;
+    };
     const update = () => {
       frame = 0;
+      wrap();
       const remaining = scroller.scrollWidth - scroller.clientWidth - scroller.scrollLeft;
-      scroller.dataset.canScrollStart = String(scroller.scrollLeft > 1);
-      scroller.dataset.canScrollEnd = String(remaining > 1);
-      // Match the CSS view-timeline effect in browsers without scroll animations.
-      if (!nativeTimeline) for (const card of cards) {
-        const center = card.offsetLeft - scroller.offsetLeft + card.offsetWidth / 2 - scroller.scrollLeft;
-        const distance = Math.min(1, Math.abs(center - scroller.clientWidth / 2) / ((scroller.clientWidth + card.offsetWidth) / 2));
-        card.style.scale = reducedMotion.matches ? '1' : String(1 - distance * 0.28);
+      scroller.dataset.canScrollStart = String(looping || scroller.scrollLeft > 1);
+      scroller.dataset.canScrollEnd = String(looping || remaining > 1);
+      if (!nativeTimeline) {
+        const viewportCenter = scroller.getBoundingClientRect().left + scroller.clientWidth / 2;
+        const positions = cards.map(card => {
+          const box = card.getBoundingClientRect();
+          return { card, distance: Math.min(1, Math.abs(box.left + box.width / 2 - viewportCenter) /
+            ((scroller.clientWidth + box.width) / 2)) };
+        });
+        for (const { card, distance } of positions) {
+          card.style.scale = looping ? String(1 - distance * 0.28) : '1';
+        }
       }
     };
     const scheduleUpdate = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const resize = new ResizeObserver(() => {
+      if (looping) {
+        const progress = cycleWidth > 0 ? (scroller.scrollLeft - cycleWidth) / cycleWidth : 0;
+        const next = measure();
+        if (next > 0) {
+          cycleWidth = next;
+          scroller.scrollLeft = cycleWidth * (1 + (((progress % 1) + 1) % 1));
+        }
+      }
+      scheduleUpdate();
+    });
+    resize.observe(scroller);
+
+    const animate = (time: number) => {
+      const delta = lastTime ? Math.min(64, time - lastTime) : 0;
+      lastTime = time;
+      if (looping && visible && !document.hidden && !drag &&
+        time >= userPauseUntil && !scroller.querySelector('.product:hover') &&
+        !scroller.contains(document.activeElement)) {
+        scroller.scrollLeft += delta * 0.03;
+      }
+      autoFrame = requestAnimationFrame(animate);
+    };
+    let observer: IntersectionObserver | undefined;
+    if (looping) {
+      cycleWidth = measure();
+      if (cycleWidth > 0) scroller.scrollLeft = cycleWidth;
+      observer = new IntersectionObserver(entries => {
+        visible = entries.some(entry => entry.isIntersecting);
+        lastTime = 0;
+      }, { rootMargin: '160px' });
+      observer.observe(scroller);
+      autoFrame = requestAnimationFrame(animate);
+    }
+
     const down = (event: PointerEvent) => {
+      userPauseUntil = performance.now() + 1600;
       drag = undefined;
       if (event.pointerType !== 'mouse' || event.button !== 0 ||
         (event.target as Element).closest('button, input, select, textarea')) return;
@@ -51,6 +123,7 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
       scroller.scrollLeft = drag.left - distance;
     };
     const finish = (event: PointerEvent) => {
+      userPauseUntil = performance.now() + 1600;
       if (!drag || event.pointerId !== drag.pointer) return;
       const moved = drag.moved;
       drag = undefined;
@@ -69,15 +142,19 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
       suppressClick = false;
     };
     const wheel = (event: WheelEvent) => {
-      if (!event.shiftKey || event.ctrlKey || scroller.scrollWidth <= scroller.clientWidth) return;
+      if (event.ctrlKey || scroller.scrollWidth <= scroller.clientWidth) return;
+      if (!event.shiftKey) {
+        // Let trackpads scroll horizontally, but do not fight them with auto-motion.
+        if (Math.abs(event.deltaX) > 0) userPauseUntil = performance.now() + 1600;
+        return;
+      }
       event.preventDefault();
+      userPauseUntil = performance.now() + 1600;
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? scroller.clientWidth : 1;
       const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
       scroller.scrollLeft += delta * unit;
     };
     const preventNativeDrag = (event: DragEvent) => event.preventDefault();
-    const resize = new ResizeObserver(scheduleUpdate);
-    resize.observe(scroller);
     scroller.addEventListener('scroll', scheduleUpdate, { passive: true });
     scroller.addEventListener('pointerdown', down);
     scroller.addEventListener('pointermove', move);
@@ -87,11 +164,13 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
     scroller.addEventListener('click', click, true);
     scroller.addEventListener('dragstart', preventNativeDrag);
     scroller.addEventListener('wheel', wheel, { passive: false });
-    reducedMotion.addEventListener('change', scheduleUpdate);
     update();
+
     return () => {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(autoFrame);
       clearTimeout(clickReset);
+      observer?.disconnect();
       resize.disconnect();
       scroller.removeEventListener('scroll', scheduleUpdate);
       scroller.removeEventListener('pointerdown', down);
@@ -102,18 +181,21 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
       scroller.removeEventListener('click', click, true);
       scroller.removeEventListener('dragstart', preventNativeDrag);
       scroller.removeEventListener('wheel', wheel);
-      reducedMotion.removeEventListener('change', scheduleUpdate);
       scroller.classList.remove('is-dragging');
       if (!nativeTimeline) cards.forEach(card => card.style.removeProperty('scale'));
     };
-  }, [mode]);
+  }, [mode, looping]);
 
   return (
     <div ref={scrollerRef} className={mode === 'reel' ? 'product-scroller reel' : 'product-grid grid'}
       {...(mode === 'reel' ? { role: 'region', 'aria-label': 'В наличии', tabIndex: 0,
+        'data-looping': looping ? 'true' : 'false',
         'data-can-scroll-start': 'false', 'data-can-scroll-end': 'true' } : {})}>
-      {presets.map((product, index) =>
-        <ProductCard key={product.id} product={product} index={index} />)}
+      {(mode === 'reel' && looping ? [0, 1, 2] : [1]).map(copy =>
+        <div className="product-strip" data-copy={copy} key={copy} aria-hidden={copy !== 1 || undefined}>
+          {presets.map((product, index) =>
+            <ProductCard key={product.id} product={product} index={index} duplicate={copy !== 1} />)}
+        </div>)}
     </div>
   );
 }

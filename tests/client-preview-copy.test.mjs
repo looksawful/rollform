@@ -57,7 +57,7 @@ test('prototype contact details are fictitious, without mail, phone or Telegram 
   const shell = read('src/components/SiteShell.tsx');
   const home = read('src/components/Storefront.tsx');
   const page = read('src/app/contacts/page.tsx');
-  for (const value of ['kubiki.example', 'hello@kubiki.example', '+7 (000) 000-00-00']) {
+  for (const value of ['@kubiki', 'hello@kubiki.example', '+7 (000) 000-00-00']) {
     assert.ok(ui.includes(value), value);
   }
   assert.match(shell, /hello@kubiki\.example/);
@@ -92,7 +92,10 @@ test('in-stock delivery copy accompanies stock selection and product details', (
 test('contact icons remain semantic but demo details are not links', () => {
   const contacts = read('src/components/ContactContent.tsx');
   const css = read('src/styles/pages.css');
-  assert.match(contacts, /import \{ Globe, Mail, Phone \} from 'lucide-react'/);
+  assert.match(contacts, /import \{ Camera, Mail, Phone, Send \} from 'lucide-react'/);
+  assert.doesNotMatch(contacts, /title: 'Сайт'/);
+  assert.match(contacts, /title: 'Telegram'/);
+  assert.match(contacts, /title: 'Instagram'/);
   assert.match(contacts, /className="contact-method"/);
   assert.match(css, /\.contact-method > \.cluster/);
   assert.doesNotMatch(contacts, /href:|<a |mailto:|tel:/);
