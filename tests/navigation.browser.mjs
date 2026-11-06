@@ -99,11 +99,15 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
               button: rect('.hero-copy .button'),
               viewport: document.documentElement.clientWidth,
               contentWidth: document.documentElement.scrollWidth,
-              destination: document.querySelector('.hero-copy .button').href,
+              label: document.querySelector('.hero-copy .button').textContent.trim(),
+              tag: document.querySelector('.hero-copy .button').tagName,
+              icon: !!document.querySelector('.hero-copy .button svg'),
             };
           })()`);
           assert.ok(layout.contentWidth <= layout.viewport + 1, 'Hero never causes page overflow');
-          assert.ok(layout.destination.endsWith('/configure/'), 'Hero CTA opens the configurator');
+          assert.equal(layout.label, 'создать случайный кубик');
+          assert.equal(layout.tag, 'BUTTON');
+          assert.equal(layout.icon, true);
           if (mobile) {
             assert.ok(Math.abs(layout.button.width - layout.copy.width) < 2,
               'Mobile primary CTA fills the content width');
@@ -123,7 +127,8 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
             await send('Input.dispatchMouseEvent', {type:'mouseReleased', ...target,
               button:'left', buttons:0, clickCount:1});
             await until(`location.pathname.endsWith('/configure/') &&
-              document.querySelector('h1')?.textContent === 'Собери сам'`);
+              document.querySelector('h1')?.textContent === 'Собери сам' &&
+              ['shape','shell','font'].every(key => new URLSearchParams(location.search).has(key))`);
           }
         }
       });
@@ -131,6 +136,26 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
     await send('Emulation.setDeviceMetricsOverride', {
       width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false,
     });
+    for (const theme of ['', 'dark/']) {
+      await t.test(`${theme || 'light/'} Hero random + menu restores last dice`, async () => {
+        const home = new URL(theme, base).href;
+        await send('Page.navigate', { url: home });
+        await until(`document.readyState === 'complete' && !!document.querySelector('.hero-copy .button')`);
+        await evaluate(`localStorage.removeItem('rollform:last-config:v1')`);
+        await evaluate(`document.querySelector('.hero-copy .button').click()`);
+        await until(`location.pathname.endsWith('/configure/') &&
+          ['shape', 'shell', 'font'].every(k => new URLSearchParams(location.search).has(k))`);
+        const created = await evaluate('location.search');
+        assert.equal(await evaluate(`document.querySelectorAll('.pill-list [aria-pressed="true"]').length`), 3);
+        await send('Page.navigate', { url: home });
+        await until(`document.readyState === 'complete' && !!document.querySelector('.desktop-nav a[href$="/configure/"]')`);
+        await evaluate(`document.querySelector('.desktop-nav a[href$="/configure/"]').click()`);
+        await until(`location.pathname.endsWith('/configure/') && location.search === ${JSON.stringify(created)}`);
+        assert.equal(await evaluate('location.search'), created, 'Menu restores, never rerolls');
+        await send('Page.reload');
+        await until(`document.readyState === 'complete' && location.search === ${JSON.stringify(created)}`);
+      });
+    }
     await t.test('all published navigation URLs respond without errors', async () => {
       for (const theme of ['', 'dark/']) {
         await send('Page.navigate', { url: new URL(theme, base).href });

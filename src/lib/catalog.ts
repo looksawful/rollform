@@ -40,6 +40,29 @@ export function configFromParams(params: Pick<URLSearchParams, 'get'>): DiceConf
   };
 }
 
+export const LAST_DICE_KEY = 'rollform:last-config:v1';
+
+export function diceQuery(config: DiceConfig): string {
+  return new URLSearchParams({
+    shape: config.shape, shell: config.shell, font: config.font,
+  }).toString();
+}
+
+export function readSavedDice(raw: string | null): DiceConfig | null {
+  if (!raw) return null;
+  const config = configFromParams(new URLSearchParams(raw));
+  return diceQuery(config) === raw ? config : null;
+}
+
+export function randomDiceConfig(random: () => number = Math.random): DiceConfig {
+  const pick = <T,>(values: readonly T[]): T => values[Math.floor(random() * values.length)];
+  return {
+    shape: pick(diceShapes),
+    shell: pick(shellColors).value,
+    font: pick(fontStyles),
+  };
+}
+
 // Placeholder presets only. No confirmed stock, price, lead time or production claims.
 const shapes: DiceShape[] = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd%', 'd20', 'd6'];
 export const presets: Preset[] = shapes.map((shape, index) => ({

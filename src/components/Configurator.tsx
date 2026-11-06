@@ -1,12 +1,13 @@
 'use client';
 
+import { useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { themeHref } from '@/lib/themeRoutes';
 import DiceViewer from './DiceViewer';
 import { useCart } from './CartState';
-import { configFromParams, diceShapes, fontNames, fontStyles, shellColors } from '@/lib/catalog';
+import { LAST_DICE_KEY, configFromParams, diceQuery, readSavedDice, diceShapes, fontNames, fontStyles, shellColors } from '@/lib/catalog';
 import type { DiceConfig } from '@/lib/catalog';
 import { formatPrice, priceForConfig } from '@/lib/pricing';
 
@@ -14,7 +15,18 @@ export default function Configurator() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const query = params.toString();
   const config = configFromParams(params);
+  useEffect(() => {
+    try {
+      if (!query) {
+        const saved = readSavedDice(localStorage.getItem(LAST_DICE_KEY));
+        if (saved) window.history.replaceState(null, '', `?${diceQuery(saved)}`);
+      } else {
+        localStorage.setItem(LAST_DICE_KEY, diceQuery(configFromParams(new URLSearchParams(query))));
+      }
+    } catch { /* Storage may be unavailable; default and URL links still work. */ }
+  }, [query]);
   const { add } = useCart();
   const change = <K extends keyof DiceConfig>(key: K, value: DiceConfig[K]) => {
     const next = new URLSearchParams(window.location.search);

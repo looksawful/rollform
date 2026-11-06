@@ -113,7 +113,7 @@ test('copy stays generic while contact form is clearly marked as non-sending', (
     read('src/app/contacts/page.tsx');
   assert.match(home, />Заголовок<\/h1>/);
   assert.match(home, /Здесь появится рассказ о кубиках и возможностях конструктора/);
-  assert.match(home, />Собрать кубик<\/Link>/);
+  assert.match(home, />создать случайный кубик<\/span>/);
   assert.match(builder, /<span>В корзину<\/span><ShoppingBag/);
   assert.doesNotMatch(cart, /makeOrderText|clipboard|textarea|order-draft/);
   assert.doesNotMatch(content, /реальная оплата|оплата прошла|успешно отправлено/i);
@@ -207,7 +207,7 @@ test('centered Hero composition preserves approved copy and passive 3D motion', 
   assert.match(home, /<DiceViewer config=\{initialConfig\} continuous \/>/);
   assert.match(home, />Заголовок<\/h1>/);
   assert.match(home, /Здесь появится рассказ о кубиках и возможностях конструктора/);
-  assert.match(home, />Собрать кубик<\/Link>/);
+  assert.match(home, />создать случайный кубик<\/span>/);
   assert.match(css, /\.hero-centered \.hero-object\s*\{[^}]*position:\s*absolute;/);
   assert.match(css, /\.hero-centered \.hero-copy\s*\{[^}]*align-items:\s*center;/);
   assert.match(css, /\.hero-centered h1\s*\{[^}]*text-align:\s*center;/);
