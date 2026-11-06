@@ -51,6 +51,7 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 test('page motion and navigation', { timeout: 180000 }, async t => {
   const base = process.env.ROLLFORM_TEST_URL || await localBase(t);
+  const ciSmoke = process.env.GITHUB_ACTIONS === 'true';
   const profile = mkdtempSync(join(tmpdir(), 'rollform-navigation-'));
   const browser = spawn(executable, [
     '--headless=new', '--remote-debugging-port=0', '--user-data-dir=' + profile,
@@ -115,7 +116,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
       features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
     });
     // Protect the responsive Hero and real, directly loadable links.
-    for (const [width, mobile] of [[320, true], [390, true], [430, true], [768, true], [900, false], [1024, false], [1440, false]]) {
+    for (const [width, mobile] of (ciSmoke ? [[320, true], [390, true], [1440, false]] : [[320, true], [390, true], [430, true], [768, true], [900, false], [1024, false], [1440, false]])) {
       await t.test(`Hero at ${width}px`, async () => {
         await send('Emulation.setDeviceMetricsOverride', {
           width, height: 900, deviceScaleFactor: 1, mobile,
@@ -206,6 +207,8 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         }
       }
     });
+    // CI covers smoke navigation; GPU/timing-sensitive motion remains in the full local suite.
+    if (ciSmoke) return;
     for (const theme of ['']) {
       await t.test('light-only review, catalog count, random color and 3D interaction', async () => {
         await send('Emulation.setDeviceMetricsOverride', {width:1440,height:1100,deviceScaleFactor:1,mobile:false});
