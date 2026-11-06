@@ -1,7 +1,5 @@
 /* Component appearances and states. Layout algorithms live in patterns.css. */
 @layer components {
-  .topbar { border-block-end: var(--border-default); }
-
   .topbar-inner {
     --cluster-justify: space-between;
     --cluster-gap: 2rem;

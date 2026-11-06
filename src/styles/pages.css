@@ -5,7 +5,8 @@
     position: fixed;
     inset: 0 0 auto;
     z-index: 60;
-    background: var(--color-surface);
+    background: transparent;
+    border: 0;
     transform: translateY(-110%);
     opacity: 0;
     pointer-events: none;

@@ -191,7 +191,10 @@ test('site CSS uses semantic theme roles, not raw colors or legacy ink-paper tok
   assert.match(read('src/styles/components.css'), /--button-text:\s*var\(--color-on-action\)/);
   assert.match(read('src/styles/sections.css'), /background:\s*var\(--color-preview\)/);
   assert.match(read('src/styles/base.css'), /outline:\s*2px solid var\(--color-focus\)/);
-  assert.match(read('src/styles/pages.css'), /\.topbar\s*\{[^}]*background:\s*var\(--color-surface\)/);
+  const topbarStyles = read('src/styles/pages.css');
+  assert.match(topbarStyles, /\\.topbar\\s*\\{[^}]*background:\\s*transparent;/);
+  assert.match(topbarStyles, /\\.topbar\\s*\\{[^}]*border:\\s*0;/);
+  assert.doesNotMatch(read('src/styles/components.css'), /\\.topbar\\s*\\{[^}]*border/);
 });
 
 
