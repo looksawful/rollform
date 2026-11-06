@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import { themeHref } from '../src/lib/themeRoutes.ts';
 const read = path => readFileSync(path, 'utf8');
 
 test('one route for each screen, no separate dark pages', () => {
@@ -10,11 +9,13 @@ test('one route for each screen, no separate dark pages', () => {
     assert.ok(!existsSync('src/app/dark/' + path), 'no dark ' + path);
   }
 });
-test('links do not depend on the selected theme', () => {
-  for (const href of ['/', '/#about', '/catalog', '/configure', '/cart', '/contacts', '/production', '/product?item=demo-1']) {
-    assert.equal(themeHref('/catalog/', href), href);
-    assert.equal(themeHref('/dark/catalog/', href), href);
+test('links use canonical paths without theme-dependent routing', () => {
+  for (const file of ['SiteShell', 'Storefront', 'Configurator', 'ProductCard', 'ProductDetail', 'CartView', 'ProductionInfo']) {
+    const source = read('src/components/' + file + '.tsx');
+    assert.doesNotMatch(source, /themeHref|useThemeRoute/, file);
   }
+  assert.match(read('src/components/SiteShell.tsx'), /href=\{href\}/);
+  assert.match(read('src/components/CartView.tsx'), /href="\\/catalog"/);
 });
 test('client review release is fixed to light while shared theme CSS is retained', () => {
   const shell = read('src/components/SiteShell.tsx');
