@@ -129,7 +129,7 @@ test('approved vector mark replaces the brand placeholder', () => {
   assert.match(layout, /title: 'ROLLFORM \| Кубики'/);
 });
 
-test('header reveals after scroll and only shows cart when items exist', () => {
+test('header reveals after scroll and always shows cart, with conditional count', () => {
   const shell = read('src/components/SiteShell.tsx');
   const css = read('src/styles/pages.css');
   assert.match(shell, /<details className="mobile-menu"/);

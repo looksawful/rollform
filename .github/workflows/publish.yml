@@ -28,6 +28,26 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /rollform
+      # GitHub Pages caches HTML for 600s, but old hashed assets vanish after deployment.
+      # Keep recent assets so previously cached HTML can still hydrate.
+      - name: Restore previously deployed Next.js assets
+        uses: actions/cache/restore@v4
+        with:
+          path: .pages-chunks
+          key: rollform-static-${{ github.sha }}
+          restore-keys: |
+            rollform-static-
+      - name: Retain assets referenced by cached HTML
+        run: |
+          mkdir -p .pages-chunks
+          cp -a out/_next/static/. .pages-chunks/
+          find .pages-chunks -type f -mmin +120 -delete
+          cp -a .pages-chunks/. out/_next/static/
+      - name: Cache this release's asset set
+        uses: actions/cache/save@v4
+        with:
+          path: .pages-chunks
+          key: rollform-static-${{ github.sha }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

@@ -52,3 +52,14 @@ test('add-to-cart cards have a plus, a live quantity, and reduced-motion-safe in
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(css, /:active/);
 });
+
+test('Pages deployment retains recent hashed JS and CSS while HTML remains cached', () => {
+  const workflow = read('.github/workflows/publish.yml');
+  assert.match(workflow, /actions\/cache\/restore@v4/);
+  assert.match(workflow, /actions\/cache\/save@v4/);
+  assert.ok(workflow.includes('cp -a out/_next/static/. .pages-chunks/'));
+  assert.ok(workflow.includes('cp -a .pages-chunks/. out/_next/static/'));
+  assert.ok(workflow.includes('find .pages-chunks -type f -mmin +120 -delete'));
+  assert.ok(workflow.indexOf('npm run build') < workflow.indexOf('actions/cache/restore@v4'));
+  assert.ok(workflow.indexOf('actions/cache/save@v4') < workflow.indexOf('actions/upload-pages-artifact@v4'));
+});
