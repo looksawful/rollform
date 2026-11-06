@@ -15,7 +15,7 @@ export default function Storefront() {
       <div className="hero-object"><DiceViewer config={initialConfig} continuous /></div>
       <div className="hero-copy stack">
         <h1 id="hero-title">Заголовок</h1>
-        <p>Внимание! Этот текст является рыбой!</p>
+        <p>Здесь появится рассказ о кубиках и возможностях конструктора. Пока этот текст помогает оценить длину строк, отступы и композицию первого экрана рядом с 3D-моделью. Окончательное описание добавим после согласования содержания.</p>
         <Link className="button button-black" href={themeHref(pathname, "/configure")}>Собрать кубик</Link>
       </div>
     </section>
@@ -31,7 +31,7 @@ export default function Storefront() {
         <div className="editorial-copy stack">
           <p className="eyebrow">О проекте</p>
           <h2 className="section-title">О нас</h2>
-          <p>Внимание! Этот текст является рыбой!</p>
+          <p>В этом разделе будет история проекта: как появилась идея и что определяет характер коллекции. Пока мы используем временный текст, чтобы проверить ритм длинного абзаца и сочетание с фотографиями. После утверждения содержания он будет заменён полноценным описанием.</p>
           <Link href={themeHref(pathname, '/production')} className="text-link">Изготовление и получение</Link>
         </div>
         <figure className="editorial-photo">
@@ -66,7 +66,7 @@ export default function Storefront() {
           'Как связаться с вами?',
         ].map(question => <details key={question}>
           <summary>{question}</summary>
-          <p>Внимание! Этот текст является рыбой!</p>
+          <p>Подробная информация по этому вопросу появится после согласования содержания. Этот временный абзац помогает проверить читаемость текста и поведение раскрывающегося блока на разных экранах. Окончательные условия и формулировки добавим перед выпуском сайта.</p>
         </details>)}
       </div>
     </section>

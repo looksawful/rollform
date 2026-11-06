@@ -73,7 +73,8 @@ function SiteChrome({ children }: { children: ReactNode }) {
         <div className="stack">
           <h2>Контакты</h2>
           <Link href={link("/contacts")}>Связаться</Link>
-          <a href="mailto:i@lookawful.ru">i@lookawful.ru</a>
+          <span>hello@kubiki.example</span>
+          <span>+7 (000) 000-00-00</span>
         </div>
       </div>
     </footer>
