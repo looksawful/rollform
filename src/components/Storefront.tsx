@@ -26,6 +26,7 @@ export default function Storefront() {
     <section className="section stack catalog-section" id="catalog">
       <div className="wrapper catalog-heading">
         <h2 className="section-title">В наличии</h2>
+        <p>Готовые варианты можно забрать самостоятельно или получить курьерской доставкой в течение недели.</p>
       </div>
       <ProductGallery mode="reel" />
       <div className="wrapper catalog-footer">

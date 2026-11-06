@@ -15,15 +15,20 @@ test('one FAQ on the existing homepage, with accessible native disclosures', () 
   assert.doesNotMatch(home, /BentoSection/);
 });
 
-test('production and receiving conditions share the existing route', () => {
+test('production remains a map route while stock and custom terms move to shopping pages', () => {
   const production = source('src/components/ProductionInfo.tsx');
+  const home = source('src/components/Storefront.tsx');
+  const catalog = source('src/app/catalog/page.tsx');
+  const detail = source('src/components/ProductDetail.tsx');
+  const config = source('src/components/Configurator.tsx');
   assert.match(production, /Изготовление и доставка/);
-  assert.match(production, /Кубики на заказ/);
-  assert.match(production, /Кубики в наличии/);
-  assert.match(production, /самовывоз|самостоятельно/);
-  assert.match(production, /курьерск/);
-  assert.match(production, /в течение недели/);
-  assert.doesNotMatch(production, /срок.*уточняется/i);
+  assert.match(production, /className="production-map"/);
+  assert.doesNotMatch(production, /Кубики на заказ|Кубики в наличии|production-options/);
+  assert.match(home, /в течение недели/);
+  assert.match(catalog, /в течение недели/);
+  assert.match(detail, /в течение недели/);
+  assert.match(config, /Кубики на заказ/);
+  assert.match(config, /Изготовление начинается после согласования/);
   assert.ok(existsSync('src/app/production/page.tsx'));
   assert.ok(existsSync('src/app/dark/production/page.tsx'));
 });
@@ -172,5 +177,5 @@ test('home shows manufacturing and collection after stock, separate from About U
   assert.doesNotMatch(home, /<Link[^>]+\/production[^>]*>Изготовление и получение<\/Link>/);
   assert.match(production, /<h2 className="section-title">Изготовление и получение<\/h2>/);
   assert.match(production, /<h1 className="page-title">Изготовление и доставка<\/h1>/);
-  assert.match(css, /\.production-options h2\s*\{/);
+  assert.doesNotMatch(css, /\.production-options/);
 });

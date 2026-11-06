@@ -19,16 +19,5 @@ export default function ProductionInfo({ onHome = false }: { onHome?: boolean })
           target="_blank" rel="noopener noreferrer">Открыть карту</a>
       </div>
     </div>
-    <div className="production-options stack">
-      <section className="stack">
-        <h2>Кубики в наличии</h2>
-        <p>Готовые варианты можно забрать самостоятельно или получить курьерской доставкой в течение недели.</p>
-      </section>
-      <section className="stack">
-        <h2>Кубики на заказ</h2>
-        <p>Изготовление начинается после согласования формы, цвета и шрифта.</p>
-        <p>Способ получения и дату согласуют перед оформлением заказа.</p>
-      </section>
-    </div>
   </section>;
 }

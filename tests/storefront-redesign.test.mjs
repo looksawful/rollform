@@ -55,3 +55,26 @@ test('product detail photo opens a lightbox while shape, color and font stay vis
     assert.match(detail, new RegExp('<dt>' + label + '</dt>'));
   }
 });
+
+test('stock and custom-production copy lives where customers choose their cube', () => {
+  const home = read('src/components/Storefront.tsx');
+  const catalog = read('src/app/catalog/page.tsx');
+  const detail = read('src/components/ProductDetail.tsx');
+  const configurator = read('src/components/Configurator.tsx');
+  const production = read('src/components/ProductionInfo.tsx');
+  const pages = read('src/styles/pages.css');
+  const stock = 'Готовые варианты можно забрать самостоятельно или получить курьерской доставкой в течение недели.';
+  const made = 'Изготовление начинается после согласования формы, цвета и шрифта.';
+  const pickup = 'Способ получения и дату согласуют перед оформлением заказа.';
+
+  const homeStock = home.split('className="wrapper catalog-heading"')[1]?.split('<ProductGallery')[0] || '';
+  assert.ok(homeStock.includes('В наличии'));
+  assert.ok(homeStock.includes(stock), 'stock description beside the homepage stock heading');
+  assert.ok(catalog.includes(stock), 'stock description in catalog introduction');
+  assert.ok(detail.includes(stock), 'stock description on product detail');
+  assert.match(configurator, /<h2>Кубики на заказ<\/h2>/);
+  assert.ok(configurator.includes(made) && configurator.includes(pickup), 'production terms beside configurator controls');
+  assert.doesNotMatch(production, /Кубики в наличии|Кубики на заказ|production-options|Готовые варианты можно забрать|Изготовление начинается после согласования|Способ получения и дату/);
+  assert.doesNotMatch(pages, /\.production-options/);
+  assert.match(production, /className="production-map"/);
+});

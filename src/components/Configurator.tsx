@@ -44,7 +44,9 @@ export default function Configurator() {
         <div className="field stack"><h2>Цвет</h2><div className="pill-list cluster">{shellColors.map(color => <button key={color.value} type="button" aria-pressed={config.shell === color.value} className={config.shell === color.value ? 'is-active' : ''} onClick={() => change('shell', color.value)}><span className="swatch" style={{ background: color.value }}/> {color.name}</button>)}</div></div>
         <div className="field stack"><h2>Шрифт</h2><div className="pill-list cluster">{fontStyles.map(font => <button key={font} type="button" aria-pressed={config.font === font} className={config.font === font ? 'is-active' : ''} onClick={() => change('font', font)}>{fontNames[font]}</button>)}</div></div>
         <div className="production-note stack">
-          <p>Кубики по вашим параметрам изготавливаются на заказ.</p>
+          <h2>Кубики на заказ</h2>
+          <p>Изготовление начинается после согласования формы, цвета и шрифта.</p>
+          <p>Способ получения и дату согласуют перед оформлением заказа.</p>
           <Link href={themeHref(pathname, '/production')}>Изготовление и доставка</Link>
         </div>
         <p className="configure-price">{formatPrice(priceForConfig(config))}</p>

@@ -53,9 +53,10 @@ export default function ProductDetail() {
         </div>
       </div>
       <div className="product-detail-content stack">
-        <p className="eyebrow">Кубики / Вариант на заказ</p>
+        <p className="eyebrow">Кубики / В наличии</p>
         <h1 className="page-title">{product.title}</h1>
         <p>Форма {product.config.shape.toUpperCase()}. Цвет и шрифт можно изменить в конструкторе.</p>
+        <p>Готовые варианты можно забрать самостоятельно или получить курьерской доставкой в течение недели.</p>
         <dl className="product-specs">
           <div><dt>Форма</dt><dd>{product.config.shape.toUpperCase()}</dd></div>
           <div><dt>Цвет</dt><dd>{shellColors.find(x => x.value === product.config.shell)?.name}</dd></div>

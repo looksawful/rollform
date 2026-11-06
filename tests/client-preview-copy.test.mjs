@@ -78,11 +78,15 @@ test('there is no bogus cookie consent or draft legal agreement', () => {
   assert.ok(!existsSync('src/components/LegalDialogs.tsx'));
 });
 
-test('in-stock delivery copy matches the agreed week timeframe, not an unspecified period', () => {
+test('in-stock delivery copy accompanies stock selection and product details', () => {
+  const home = read('src/components/Storefront.tsx');
   const catalog = read('src/app/catalog/page.tsx');
+  const detail = read('src/components/ProductDetail.tsx');
   const production = read('src/components/ProductionInfo.tsx');
-  assert.match(catalog, /в течение недели/);
-  assert.match(production, /в течение недели/);
+  for (const content of [home, catalog, detail]) {
+    assert.match(content, /Готовые варианты можно забрать самостоятельно или получить курьерской доставкой в течение недели/);
+  }
+  assert.doesNotMatch(production, /в течение недели/);
 });
 
 test('contact icons remain semantic but demo details are not links', () => {
