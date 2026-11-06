@@ -119,10 +119,11 @@ test('copy stays generic while contact form is clearly marked as non-sending', (
   assert.doesNotMatch(content, /реальная оплата|оплата прошла|успешно отправлено/i);
 });
 
-test('brand placeholder is not a fabricated brand name', () => {
+test('approved vector mark replaces the brand placeholder', () => {
   const shell = read('src/components/SiteShell.tsx');
   const layout = read('src/app/layout.tsx');
-  assert.match(shell, />Лого<\/Link>/);
+  assert.match(shell, /className="logo-mark"/);
+  assert.doesNotMatch(shell, />Лого<\/Link>/);
   assert.match(shell, /aria-label="На главную"/);
   assert.match(layout, /ROLLFORM/);
   assert.match(layout, /title: 'ROLLFORM \| Кубики'/);

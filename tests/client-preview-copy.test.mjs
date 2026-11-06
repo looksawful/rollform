@@ -7,7 +7,7 @@ const read = f => readFileSync(path.resolve(process.cwd(),f),'utf8');
 test('approved Russian header labels and icon-only cart',()=>{
   const s=read('src/components/SiteShell.tsx');
   for(const label of ['Кубики','Собери сам','О нас','Контакты'])assert.ok(s.includes("label: '"+label+"'"));
-  assert.match(s,/>Лого<\/Link>/);
+  assert.match(s,/className="logo-mark"/);
   assert.match(s,/<ShoppingBag className="icon" aria-hidden="true"\s*\/>/);
   assert.doesNotMatch(s,/cart-shortcut-label/);
   assert.doesNotMatch(s, /LegalDialogs|photoCredits|photo-credits/);
