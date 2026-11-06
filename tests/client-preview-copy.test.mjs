@@ -4,12 +4,18 @@ import {existsSync,readFileSync} from 'node:fs';
 import path from 'node:path';
 const read = f => readFileSync(path.resolve(process.cwd(),f),'utf8');
 
-test('approved Russian header labels and icon-only cart',()=>{
+test('approved Russian header and persistent empty cart with desktop caption',()=>{
   const s=read('src/components/SiteShell.tsx');
   for(const label of ['Кубики','Собери сам','О нас','Контакты'])assert.ok(s.includes("label: '"+label+"'"));
   assert.match(s,/className="logo-mark"/);
   assert.match(s,/<ShoppingBag className="icon" aria-hidden="true"\s*\/>/);
-  assert.doesNotMatch(s,/cart-shortcut-label/);
+  assert.match(s, /<Link href=\\{link\\("\\/cart"\\)\\} className="cart-shortcut"/);
+  assert.doesNotMatch(s, /\\{count\\s*>\\s*0\\s*&&\\s*<Link[^>]*className="cart-shortcut"/);
+  assert.match(s, /<span className="cart-shortcut-label">Корзина<\\/span>/);
+  assert.match(s, /\\{count > 0 && <span className="cart-count"/);
+  const css = read('src/styles/pages.css');
+  assert.match(css, /\\.cart-shortcut \\{[^}]*font-size: var\\(--fs-small\\)/);
+  assert.match(css, /\\.cart-shortcut-label \\{ display: none; \\}/);
   assert.doesNotMatch(s, /LegalDialogs|photoCredits|photo-credits/);
   assert.doesNotMatch(s,/<p>Текст<\/p>/);
 });

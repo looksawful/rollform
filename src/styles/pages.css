@@ -54,6 +54,9 @@
     min-block-size: 2.75rem;
     text-decoration: none;
     white-space: nowrap;
+    font-size: var(--fs-small);
+    line-height: var(--lh-small);
+    font-weight: 600;
   }
   .cart-count { font-size: var(--fs-small); line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
   .mobile-menu { display: none; position: relative; }

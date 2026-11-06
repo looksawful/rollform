@@ -102,11 +102,12 @@ function SiteChrome({ children }: { children: ReactNode }) {
               e.currentTarget.closest('details')?.removeAttribute('open');
             }}>{navigation}</nav>
           </details>
-          {count > 0 && <Link href={link("/cart")} className="cart-shortcut" aria-label={'Корзина, товаров: ' + count}
+          <Link href={link("/cart")} className="cart-shortcut" aria-label={'Корзина, товаров: ' + count}
             aria-current={path === link('/cart') ? 'page' : undefined}>
             <ShoppingBag className="icon" aria-hidden="true" />
-            <span className="cart-count" aria-hidden="true">{count}</span>
-          </Link>}
+            <span className="cart-shortcut-label">Корзина</span>
+            {count > 0 && <span className="cart-count" aria-hidden="true">{count}</span>}
+          </Link>
         </div>
       </div>
     </header>
