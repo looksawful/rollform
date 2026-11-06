@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import 'yet-another-react-lightbox/styles.css';
@@ -17,7 +17,8 @@ export default function ProductGallery({ mode }: { mode: 'grid' | 'reel' }) {
   const [active, setActive] = useState<number | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  // Revert ScrollTrigger's pin wrapper before React removes the section on navigation.
+  useLayoutEffect(() => {
     if (mode !== 'reel') return;
     const scroller = scrollerRef.current;
     const section = scroller?.closest('#catalog');
