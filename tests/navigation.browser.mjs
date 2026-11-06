@@ -203,7 +203,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           await evaluate(`document.querySelector('.random-dice-button').click()`);
           await until(`document.querySelectorAll('.field')[1].querySelector('[aria-pressed="true"]').textContent !== ${JSON.stringify(color)}`);
         }
-        for (const path of ['configure/','product/?item=demo-1','']) {
+        for (const path of ['configure/','product/?item=demo-1']) {
           await send('Page.navigate',{url:new URL(path,base).href});
           if (path.startsWith('product')) {
             await until(`!!document.querySelector('.product-detail-thumbs button:last-child')`);
@@ -241,6 +241,52 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         assert.ok(await evaluate('scrollY>100'),'Mobile Hero allows initial page swipe');
         await send('Emulation.setTouchEmulationEnabled',{enabled:false});
         await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
+        assert.deepEqual(exceptions,[]);
+      });
+      await t.test('passive Hero, desktop snap and scroll cube adapt to content and viewport', async () => {
+        await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
+        await send('Page.navigate',{url:new URL('',base).href});
+        await until(`document.querySelector('.dice-canvas')?.dataset.motion === 'rolling' && !!document.querySelector('.scroll-progress svg')?.style.transform`);
+        await evaluate(`scrollTo(0,0)`);
+        await delay(400);
+        const hero = await evaluate(`(() => { const h=document.querySelector('.hero-object'); const r=h.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2,clip:{x:r.left,y:r.top,width:r.width,height:r.height,scale:1}}; })()`);
+        await send('Input.dispatchMouseEvent',{type:'mousePressed',x:hero.x,y:hero.y,button:'left',buttons:1,clickCount:1});
+        await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:hero.x,y:hero.y,button:'left',buttons:0,clickCount:1});
+        assert.equal(await evaluate(`document.querySelector('.dice-canvas').dataset.motion`),'rolling','Hero click never takes over the animation');
+        assert.equal(await evaluate(`document.querySelector('.dice-canvas').tabIndex`),-1,'Passive model is not keyboard focusable');
+        assert.equal(await evaluate(`getComputedStyle(document.querySelector('.hero-object')).pointerEvents`),'none');
+        const frame=(await send('Page.captureScreenshot',{format:'png',clip:hero.clip})).data;
+        await delay(450);
+        assert.notEqual((await send('Page.captureScreenshot',{format:'png',clip:hero.clip})).data,frame,'Hero keeps rotating after a click');
+        assert.match(await evaluate(`getComputedStyle(document.documentElement).scrollSnapType`),/^y(?: proximity)?$/);
+        const cube = () => evaluate(`(() => {const s=document.querySelector('.scroll-progress svg');const m=new DOMMatrix(getComputedStyle(s).transform);return {x:m.e,a:m.a,b:m.b,travel:s.parentElement.clientWidth-s.clientWidth};})()`);
+        const start=await cube();
+        assert.ok(start.x < 2,'Cube starts at the left edge');
+        await evaluate(`scrollTo(0,(document.documentElement.scrollHeight-innerHeight)*0.2)`);
+        await delay(650);
+        const middle=await cube();
+        assert.ok(middle.x>start.x+20 && middle.x<middle.travel-20,'Cube advances with page progress');
+        assert.ok(Math.abs(middle.a-1)>0.05 || Math.abs(middle.b)>0.05,'SVG cube rotates with progress');
+        const height=await evaluate('document.documentElement.scrollHeight');
+        await evaluate(`document.querySelectorAll('#faq details').forEach(d=>d.open=true)`);
+        await delay(250);
+        assert.ok(await evaluate(`document.documentElement.scrollHeight > ${height}`),'Expanded FAQ changes document height');
+        await evaluate(`scrollTo(0,document.documentElement.scrollHeight)`);
+        await delay(650);
+        const end=await cube();
+        assert.ok(Math.abs(end.x-end.travel)<3,'Indicator recalculates after content expands and reaches the right edge');
+        await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+        await until(`getComputedStyle(document.querySelector('.scroll-progress')).display === 'none'`);
+        assert.equal(await evaluate(`getComputedStyle(document.documentElement).scrollSnapType`),'none','Mobile keeps native free scrolling');
+        await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+        await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
+        assert.equal(await evaluate(`getComputedStyle(document.querySelector('.scroll-progress')).display`),'none');
+        assert.equal(await evaluate(`getComputedStyle(document.documentElement).scrollSnapType`),'none','Reduced motion disables snapping');
+        await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+        await send('Page.navigate',{url:new URL('catalog/',base).href});
+        await until(`!!document.querySelector('.product-grid')`);
+        assert.equal(await evaluate(`!!document.querySelector('.scroll-progress')`),false);
+        assert.equal(await evaluate(`getComputedStyle(document.documentElement).scrollSnapType`),'none','Snapping is scoped to the homepage');
         assert.deepEqual(exceptions,[]);
       });
       await t.test(`${theme || 'light/'} seamless automatic reel and manual controls`, async () => {
@@ -427,7 +473,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         const home = new URL(theme, base).href;
         await send('Page.navigate', { url: home });
         await until(`document.readyState === 'complete' && !!document.querySelector('.dice-canvas canvas')`);
-        const title = '#production .section-title';
+        const title = '#production .production-intro';
         assert.equal(await evaluate(`getComputedStyle(document.querySelector('${title}')).opacity`), '1', 'Offscreen content starts visible');
         const firstEntry = await sampleEntry(title);
         assert.ok(firstEntry.some(opacity => opacity < 0.99), 'Copy reveals on its first entry');
@@ -442,7 +488,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         await send('Emulation.setEmulatedMedia', {
           features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
         });
-        await until(`['#production .section-title', '#faq .section-title'].every(selector => {
+        await until(`['#production .production-intro', '#faq .section-title'].every(selector => {
           const element = document.querySelector(selector);
           return getComputedStyle(element).opacity === '1' && !element.style.transform && !element.style.opacity;
         })`);

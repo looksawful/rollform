@@ -1,6 +1,24 @@
 @layer components {
   .site { min-block-size: 100svh; display: flex; flex-direction: column; background: var(--color-background); color: var(--color-text); }
   .site main { flex: 1; }
+  .scroll-progress { display: none; }
+  @media (width >= 64rem) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    html:has(.hero) { scroll-snap-type: y proximity; scroll-padding-block-start: 5.5rem; }
+    .site main > :is(.hero, .section) { scroll-snap-align: start; scroll-margin-block-start: 0; }
+    .site:has(.hero) .footer { scroll-snap-align: end; }
+    .scroll-progress {
+      display: block;
+      position: fixed;
+      inset-inline: var(--gutter);
+      inset-block-end: 0.75rem;
+      block-size: 3rem;
+      z-index: 50;
+      color: var(--color-text);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .scroll-progress svg { display: block; overflow: visible; }
+  }
   .topbar {
     position: fixed;
     inset: 0 0 auto;

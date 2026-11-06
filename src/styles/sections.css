@@ -86,7 +86,7 @@
     border-radius: 0;
     background: transparent;
     opacity: 1;
-    pointer-events: auto;
+    pointer-events: none;
   }
   .hero-centered .dice-canvas { transform: scale(1.08); }
   .hero-centered .hero-copy {

@@ -56,24 +56,25 @@ function SiteChrome({ children }: { children: ReactNode }) {
       media = mm;
       mm.add('(prefers-reduced-motion: no-preference)', context => {
         const candidates = Array.from(main.querySelectorAll<HTMLElement>(
-          '.section-title, .editorial-copy, .editorial-photo, .production-intro > .stack, .production-options > section, .contact-options',
-        )).filter(element => !element.closest('.hero, #catalog, .product-scroller, .product'));
+          '.section-title, .page-heading, .catalog-heading, .catalog-footer, .editorial-copy, .editorial-photo, .production-intro, .order-step, .bento-card, .faq-list > details, .contact-method, .contact-form, .production-copy > .prose, .production-map',
+        )).filter(element => !element.closest('.hero, .product-scroller, .product'));
         // Reveal a copy group once, without also animating its nested heading.
         const targets = candidates.filter(element => !candidates.some(parent => parent !== element && parent.contains(element)));
         const observer = new IntersectionObserver(entries => {
+          let index = 0;
           for (const { target, isIntersecting } of entries) {
             if (!isIntersecting || seen.has(target)) continue;
             seen.add(target);
             observer.unobserve(target);
             context.add(() => {
               const isMedia = target.matches('.editorial-photo');
-              gsap.fromTo(target, { opacity: 0, y: isMedia ? 0 : 6, scale: isMedia ? 0.99 : 1 }, {
-                opacity: 1, y: 0, scale: 1, duration: isMedia ? 0.62 : 0.48,
-                ease: 'power2.out', clearProps: 'opacity,transform',
+              gsap.fromTo(target, { opacity: 0, y: 20, scale: isMedia ? 0.98 : 1 }, {
+                opacity: 1, y: 0, scale: 1, duration: 0.8, delay: Math.min(index++ * 0.07, 0.21),
+                ease: 'power3.out', clearProps: 'opacity,transform',
               });
             });
           }
-        }, { rootMargin: '0px 0px -8% 0px' });
+        }, { rootMargin: '0px 0px -6% 0px' });
         for (const target of targets) {
           // Keep SSR, restored scroll positions and the initial viewport visible.
           // Offscreen content stays visible too until its observer callback runs.

@@ -45,13 +45,15 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         canvas.setAttribute('aria-hidden', 'true');
         canvas.style.cssText = 'display:block;width:100%;height:100%;touch-action:none';
         host.append(canvas);
-        const controls = new OrbitControls(camera, canvas);
-        controls.enablePan = false;
-        controls.enableDamping = false;
-        controls.minDistance = continuous ? 8.3 : 5.2;
-        controls.maxDistance = continuous ? 12 : 8.2;
-        controls.zoomSpeed = 0.6;
-        controls.enabled = false;
+        const controls = continuous ? null : new OrbitControls(camera, canvas);
+        if (controls) {
+          controls.enablePan = false;
+          controls.enableDamping = false;
+          controls.minDistance = 5.2;
+          controls.maxDistance = 8.2;
+          controls.zoomSpeed = 0.6;
+          controls.enabled = false;
+        }
         canvas.style.touchAction = 'pan-y';
 
         const environment = new RoomEnvironment();
@@ -84,9 +86,8 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const loader = new GLTFLoader();
         const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
         let visible = true, lost = false, request = 0, lastFace = -1;
-        let scrollPauseUntil = 0, lastPaint = 0;
+        let lastPaint = 0;
         const frameInterval = continuous ? 33 : 0;
-        const onScroll = () => { scrollPauseUntil = performance.now() + 140; };
         let timeline: ReturnType<typeof gsap.timeline> | null = null;
         let interacted = false;
 
@@ -166,7 +167,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const render = (force = false) => {
           const now = performance.now();
           if (closed || lost || !visible || document.hidden ||
-            (continuous && !force && (now < scrollPauseUntil || now - lastPaint < frameInterval))) return;
+            (continuous && !force && now - lastPaint < frameInterval)) return;
           lastPaint = now;
           renderer.render(scene, camera);
         };
@@ -246,6 +247,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           } else if (!visible || document.hidden) timeline.pause();
         };
         const stopAuto = () => {
+          if (!controls) return;
           controls.enabled = true;
           canvas.style.touchAction = 'none';
           if (interacted) return;
@@ -257,9 +259,12 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         };
         const activate = (event: PointerEvent) => { if (event.pointerType === 'mouse') stopAuto(); };
         const tap = () => stopAuto();
-        canvas.addEventListener('pointerdown', activate, true);
-        canvas.addEventListener('click', tap);
+        if (controls) {
+          canvas.addEventListener('pointerdown', activate, true);
+          canvas.addEventListener('click', tap);
+        }
         const onKeyDown = (event: KeyboardEvent) => {
+          if (!controls) return;
           const step = 0.15;
           if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
           event.preventDefault();
@@ -270,9 +275,9 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           if (event.key === 'ArrowDown') dice.rotation.x += step;
           render(true);
         };
-        controls.addEventListener('start', stopAuto);
-        controls.addEventListener('change', () => render(true));
-        host.addEventListener('keydown', onKeyDown);
+        controls?.addEventListener('start', stopAuto);
+        controls?.addEventListener('change', () => render(true));
+        if (controls) host.addEventListener('keydown', onKeyDown);
         const update = (next: DiceConfig) => {
           surface.color.set(next.shell === '#000000' ? '#191919' : next.shell);
           if (next.shape !== renderedShape || next.font !== renderedFont) void buildShape(next);
@@ -326,13 +331,12 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           else if (visible && !motion.matches) timeline?.resume();
         };
         document.addEventListener('visibilitychange', onVisibility);
-        if (continuous) window.addEventListener('scroll', onScroll, { passive: true });
         resize();
 
         cleanup = () => {
           request++;
           timeline?.kill();
-          controls.dispose();
+          controls?.dispose();
           canvas.removeEventListener('pointerdown', activate, true);
           canvas.removeEventListener('click', tap);
           host.removeEventListener('keydown', onKeyDown);
@@ -340,7 +344,6 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           visibility.disconnect();
           motion.removeEventListener('change', onMotion);
           document.removeEventListener('visibilitychange', onVisibility);
-          if (continuous) window.removeEventListener('scroll', onScroll);
           canvas.removeEventListener('webglcontextlost', onLost);
           canvas.removeEventListener('webglcontextrestored', onRestored);
           if (viewerRef.current?.update === update) viewerRef.current = null;
@@ -359,8 +362,8 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
     return () => { closed = true; cleanup?.(); };
   }, []);
 
-  return <div ref={hostRef} className="dice-canvas" role="group" tabIndex={0} data-motion="paused"
-    aria-label={'3D-модель ' + config.shape.toUpperCase() + '. Вращение перетаскиванием или стрелками, масштаб колёсиком.'}>
+  return <div ref={hostRef} className="dice-canvas" role={continuous ? 'img' : 'group'} tabIndex={continuous ? undefined : 0} data-motion="paused"
+    aria-label={'3D-модель ' + config.shape.toUpperCase() + (continuous ? '' : '. Вращение перетаскиванием или стрелками, масштаб колёсиком.')}>
     {!continuous && <span className="dice-preview-badge" aria-hidden="true">
       <Orbit className="icon" />3D-превью
     </span>}

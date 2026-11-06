@@ -10,6 +10,7 @@ import ProductionInfo from './ProductionInfo';
 import ContactContent from './ContactContent';
 import BentoSection from './BentoSection';
 import DeliveryInfo from './DeliveryInfo';
+import ScrollProgress from './ScrollProgress';
 import { diceQuery, initialConfig, randomDiceConfig } from '@/lib/catalog';
 
 export default function Storefront() {
@@ -72,5 +73,6 @@ export default function Storefront() {
       <ContactContent />
     </section>
     <DeliveryInfo />
+    <ScrollProgress />
   </>;
 }
