@@ -6,6 +6,23 @@
     min-block-size: var(--header-height);
   }
 
+  @media (width > 56rem) {
+    .topbar-inner {
+      inline-size: 100%;
+      padding-inline: clamp(1rem, 2vw, 2rem);
+    }
+    .topbar-inner > .logo,
+    .topbar-inner > .header-actions {
+      flex: 1 1 0;
+      min-inline-size: 0;
+    }
+    .topbar-inner > .header-actions { justify-content: flex-end; }
+    .topbar-inner > .desktop-nav {
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+  }
+
   .logo {
     display: inline-flex;
     align-items: center;
