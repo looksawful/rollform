@@ -1,0 +1,40 @@
+.ml { width: min(1480px, 100%); margin: 0 auto; padding-block: clamp(64px, 7vw, 110px); padding-inline: clamp(16px, 4vw, 56px); color: #17191b; font-family: Inter, Arial, sans-serif; }
+.ml button { font: inherit; cursor: pointer; }
+.ml-heading { display: grid; gap: 12px; margin-bottom: clamp(22px, 3vw, 44px); }
+.ml-eyebrow { font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: #697075; font-weight: 700; }
+.ml-heading h1 { font-size: clamp(33px, 5.2vw, 68px); letter-spacing: -.055em; line-height: 1; font-weight: 650; }
+.ml-heading p { max-width: 68ch; color: #697075; font-size: clamp(13px, 1.1vw, 16px); line-height: 1.6; }
+.ml-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, .86fr); gap: clamp(22px, 3vw, 48px); align-items: start; }
+.ml-left { min-width: 0; position: sticky; top: 30px; }
+.ml-stage { position: relative; min-height: 460px; height: min(65vh, 690px); background: #e8e9e7; border: 1px solid #dce0df; border-radius: 18px; overflow: hidden; isolation: isolate; }
+.ml-stage canvas { display: block; }
+.ml-stage-hint { position: absolute; z-index: 2; bottom: 16px; left: 16px; padding: 9px 12px; font-size: 11px; color: #33383b; background: #fffdf7de; border-radius: 8px; pointer-events: none; max-width: calc(100% - 32px); }
+.ml-stage-error { position: absolute; inset: 45% 12px auto; color: #5b1e1e; font-size: 14px; text-align: center; z-index: 3; }
+.ml-pager { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 12px; }
+.ml-pager button { background: transparent; color: #141414; border: 1px solid #cfd3d3; border-radius: 999px; min-height: 43px; padding: 8px 17px; transition: background .15s; }
+.ml-pager button:hover { background: #e4e6e5; }
+.ml-pager span { color: #777; font-size: 12px; white-space: nowrap; }
+.ml-pager strong { color: #17191b; font-weight: 700; }
+.ml-pager .ml-copy { margin-left: auto; font-size: 12px; }
+.ml-controls { display: grid; gap: 28px; }
+.ml-set { display: grid; gap: 12px; padding-bottom: 22px; border-bottom: 1px solid #dddede; }
+.ml-set h2 { color: #464c50; font-size: 12px; font-weight: 750; letter-spacing: .035em; }
+.ml-options { display: flex; gap: 7px; flex-wrap: wrap; }
+.ml .ml-option, .ml .ml-finish { background: #fff; color: #2a2d2f; border: 1px solid #d6d9d8; border-radius: 999px; padding: 10px 15px; font-size: 12px; font-weight: 600; min-height: 40px; transition: background .16s, color .16s, border-color .16s; }
+.ml .ml-option[aria-pressed="true"], .ml .ml-finish[aria-pressed="true"] { color: #fff; background: #191b1d; border-color: #191b1d; }
+.ml .ml-option:hover:not([aria-pressed="true"]), .ml .ml-finish:hover:not([aria-pressed="true"]) { background: #ecefef; }
+.ml-color { display: inline-flex; align-items: center; gap: 8px; }
+.ml-swatch { width: 15px; height: 15px; display: inline-block; border-radius: 50%; border: 1px solid #fff5; box-shadow: 0 0 0 1px #0002; }
+.ml-finishes { display: flex; flex-wrap: wrap; gap: 7px; }
+.ml-finish-note { font-size: 13px; line-height: 1.6; color: #666e72; max-width: 46ch; min-height: 40px; }
+.ml-source { color: #2b5477; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.ml-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 12px; }
+.ml-meta > div { display: grid; gap: 4px; }
+.ml-meta span { font-size: 11px; color: #8b9396; }
+.ml-meta strong { color: #1b1c1e; font-size: 12px; font-weight: 700; }
+.ml-disclaimer { margin-top: 28px; border-top: 1px solid #dce0df; padding-top: 16px; font-size: 11px; line-height: 1.65; color: #777e80; max-width: 100ch; }
+.ml button:disabled { opacity: .36; cursor: not-allowed; }
+.ml button:focus-visible, .ml a:focus-visible { outline: 3px solid #4488bd; outline-offset: 3px; }
+@media (max-width: 880px) { .ml-layout { grid-template-columns: 1fr; } .ml-left { position: static; } .ml-stage { height: clamp(330px, 60vh, 520px); min-height: 330px; } .ml-controls { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; } }
+@media (max-width: 600px) { .ml { padding-inline: 16px; padding-top: 70px; } .ml-heading h1 { font-size: clamp(32px, 10vw, 50px); } .ml-controls { grid-template-columns: 1fr; gap: 16px; } .ml-set { padding-bottom: 16px; } .ml-stage { height: min(95vw, 460px); min-height: 320px; border-radius: 12px; } .ml-stage-hint { font-size: 10px; } .ml-pager .ml-copy { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { .ml .ml-option, .ml .ml-finish, .ml-pager button { transition: none; } }
