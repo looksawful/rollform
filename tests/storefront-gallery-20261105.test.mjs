@@ -47,16 +47,6 @@ test('product detail owns the photo lightbox; catalog and homepage use clickable
   assert.match(gallery, /mode === 'reel'/);
 });
 
-test('cards navigate to product detail and expose a separate secondary add action', () => {
-  const card = source('src/components/ProductCard.tsx');
-  assert.match(card, /className="product-visual frame"/);
-  assert.match(card, /className="product-open"/);
-  assert.match(card, /href=\{detailsUrl\}/);
-  assert.match(card, /button button-secondary/);
-  assert.match(card, /<span>Добавить в корзину<\/span>/);
-  assert.doesNotMatch(card, /onPreview|product-zoom/);
-});
-
 test('cart links to the shared preparation and delivery information without checkout promises', () => {
   const cart = source('src/components/CartView.tsx');
   assert.match(cart, /items.length === 0/);

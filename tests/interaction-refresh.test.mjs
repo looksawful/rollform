@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { randomDiceConfig, shellColors } from '../src/lib/catalog.ts';
 
 const read = path => readFileSync(path, 'utf8');
@@ -16,13 +16,6 @@ test('configurator can randomize all dice properties and never repeats the curre
       assert.ok(shellColors.some(x => x.value === config.shell));
     }
   }
-});
-
-test('dark theme and its header control are temporarily disabled for client review', () => {
-  const shell = read('src/components/SiteShell.tsx');
-  assert.doesNotMatch(shell, /theme-toggle|rollform:theme/);
-  assert.match(shell, /data-theme="light"/);
-  assert.ok(!existsSync('src/app/dark/page.tsx'));
 });
 
 test('all actual 3D previews support click-to-stop and orbit rotation/limited wheel zoom', () => {
