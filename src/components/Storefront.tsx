@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Box } from 'lucide-react';
 import DiceViewer from './DiceViewer';
@@ -10,14 +11,17 @@ import ContactContent from './ContactContent';
 import BentoSection from './BentoSection';
 import DeliveryInfo from './DeliveryInfo';
 import ScrollProgress from './ScrollProgress';
-import { diceQuery, initialConfig, randomDiceConfig } from '@/lib/catalog';
+import { diceQuery, randomDiceConfig } from '@/lib/catalog';
+import type { DiceConfig } from '@/lib/catalog';
 
 export default function Storefront() {
   const router = useRouter();
+  const [heroConfig, setHeroConfig] = useState<DiceConfig | null>(null);
+  useEffect(() => { setHeroConfig({ ...randomDiceConfig(), shell: '#000000' }); }, []);
   const createRandomDice = () => router.push(`/configure?${diceQuery(randomDiceConfig())}`);
   return <>
     <section className="wrapper hero hero-centered" aria-labelledby="hero-title">
-      <div className="hero-object"><DiceViewer config={initialConfig} continuous /></div>
+      <div className="hero-object">{heroConfig && <DiceViewer config={heroConfig} continuous />}</div>
       <div className="hero-copy stack">
         <h1 id="hero-title">Заголовок</h1>
         <p>Здесь появится рассказ о кубиках и возможностях конструктора. Пока этот текст помогает оценить длину строк, отступы и композицию первого экрана рядом с 3D-моделью. Окончательное описание добавим после согласования содержания.</p>

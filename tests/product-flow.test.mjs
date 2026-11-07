@@ -19,7 +19,7 @@ test('every offered font is accepted by URL and cart validation', () => {
 
 test('config URL restores valid choices and ignores malformed values', () => {
   const selected = configFromParams(new URLSearchParams('shape=d10&shell=%23A62D35&font=mono'));
-  assert.deepEqual(selected, { shape: 'd10', shell: '#A62D35', font: 'mono' });
+  assert.deepEqual(selected, { shape: 'd10', shell: '#A62D35', font: 'simply-mono' });
   assert.deepEqual(configFromParams(new URLSearchParams('shape=invalid&shell=red&font=bad')), initialConfig);
   assert.deepEqual(configFromParams(new URLSearchParams()), initialConfig);
 });
@@ -88,4 +88,14 @@ test('repeated adds never exceed the persisted cart limit', () => {
     assert.equal(next[0].quantity, 99);
     assert.deepEqual(readCart(JSON.stringify(next)), next);
   }
+});
+
+test('legacy cart fonts migrate without losing quantities or line IDs', () => {
+  const [line] = readCart(JSON.stringify([{
+    id: 'old-font', quantity: 3, origin: { kind: 'preorder_custom' },
+    config: { ...initialConfig, font: 'serif' },
+  }]));
+  assert.equal(line.id, 'old-font');
+  assert.equal(line.quantity, 3);
+  assert.equal(line.config.font, 'simply-serif');
 });

@@ -93,6 +93,8 @@
   .configure-controls { --stack-space: 2rem; align-items: stretch; }
   .configure-controls .field h2 { font-size: var(--fs-body); line-height: var(--lh-title); font-weight: 700; }
   .configure-controls .pill-list button { display: flex; align-items: center; gap: 0.5rem; }
+  .numeral-sample { inline-size: 5.5rem; block-size: 1rem; object-fit: contain; }
+  .pill-list button.is-active .numeral-sample { filter: invert(1); }
   .configure-price { font-size: var(--fs-title); font-weight: 800; }
   .swatch { inline-size: 0.95rem; block-size: 0.95rem; border: 1px solid var(--color-border); border-radius: 50%; }
   .pill-list button.is-active .swatch { border-color: var(--color-on-action); }

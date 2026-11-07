@@ -31,7 +31,7 @@ test('roll is deliberately slow and includes a visible pause on mobile', () => {
 
 test('hero has a passive seamless loop, without click controls', () => {
   const storefront = readFileSync('src/components/Storefront.tsx', 'utf8');
-  assert.match(storefront, /<DiceViewer config=\{initialConfig\} continuous \/>/);
+  assert.match(storefront, /<DiceViewer config=\{heroConfig\} continuous \/>/);
   assert.match(viewer, /if \(continuous\) \{/);
   assert.match(viewer, /gsap\.timeline\(\{ repeat: -1 \}\)\.to\(dice\.rotation/);
   assert.match(viewer, /duration: 12, ease: 'none'/);

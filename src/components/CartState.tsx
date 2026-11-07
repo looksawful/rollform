@@ -12,6 +12,7 @@ type CartContextValue = {
   add: (config: DiceConfig, origin: CartOrigin, available?: number) => boolean;
   change: (id: string, delta: number) => void;
   remove: (id: string) => void;
+  clear: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -42,6 +43,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return true;
     },
     change(id, delta) { setItems(current => changeQuantity(current, id, delta)); },
+    clear() { setItems([]); },
     remove(id) { setItems(current => current.filter(item => item.id !== id)); },
   }), [items]);
 

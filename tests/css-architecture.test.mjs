@@ -204,7 +204,7 @@ test('centered Hero composition preserves approved copy and passive 3D motion', 
   const home = read('src/components/Storefront.tsx');
   const css = read('src/styles/sections.css');
   assert.match(home, /className="wrapper hero hero-centered"/);
-  assert.match(home, /<DiceViewer config=\{initialConfig\} continuous \/>/);
+  assert.match(home, /<DiceViewer config=\{heroConfig\} continuous \/>/);
   assert.match(home, />Заголовок<\/h1>/);
   assert.match(home, /Здесь появится рассказ о кубиках и возможностях конструктора/);
   assert.match(home, />Создать случайный кубик<\/span>/);

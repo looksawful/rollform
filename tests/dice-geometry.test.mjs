@@ -1,92 +1,52 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import * as THREE from 'three';
+import { DoubleSide, Mesh, MeshBasicMaterial, Raycaster, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { diceShapes } from '../src/lib/catalog.ts';
-import { buildGeometry, faceLabel, facePlacements } from '../src/lib/diceGeometry.ts';
+import { diceShapes, fontStyles } from '../src/lib/catalog.ts';
 
 const counts = { d4: 4, d6: 6, d8: 8, d10: 10, d12: 12, d20: 20, 'd%': 10 };
 
-test('all dice have distinct labels on the expected number of planar faces', () => {
-  for (const shape of diceShapes) {
-    const geometry = buildGeometry(shape);
-    const faces = facePlacements(geometry, shape);
-    assert.equal(faces.length, counts[shape], shape);
-    assert.equal(new Set(faces.map((_, i) => faceLabel(shape, i))).size, counts[shape], shape);
-    for (const face of faces) {
-      assert.ok(Math.abs(face.normal.length() - 1) < 1e-6, shape);
-      assert.ok(Number.isFinite(face.center.x + face.center.y + face.center.z), shape);
-    }
-    geometry.dispose();
-  }
-});
-
-test('opposite D6 faces add to seven', () => {
-  for (let i = 0; i < 6; i += 2) {
-    assert.equal(Number(faceLabel('d6', i)) + Number(faceLabel('d6', i + 1)), 7);
-  }
-});
-
-test('percentile D10 uses 00 to 90 in tens', () => {
-  assert.deepEqual(Array.from({length: 10}, (_, i) => faceLabel('d%', i)).sort(),
-    ['00', '10', '20', '30', '40', '50', '60', '70', '80', '90']);
-});
-
-
-test('Blender bevel models exist and contain normals and more vertices than flat shapes', () => {
-  for (const shape of ['d4', 'd6', 'd8', 'd10', 'd12', 'd20']) {
-    const bytes = readFileSync('public/models/' + shape + '.glb');
-    assert.equal(bytes.toString('ascii', 0, 4), 'glTF', shape);
-    assert.equal(bytes.readUInt32LE(4), 2, shape);
-    const length = bytes.readUInt32LE(12);
-    const document = JSON.parse(bytes.toString('utf8', 20, 20 + length));
-    const attrs = document.meshes[0].primitives[0].attributes;
-    assert.ok(Number.isInteger(attrs.NORMAL), shape);
-    const beveledCount = document.accessors[attrs.POSITION].count;
-    const indexAccessor = document.meshes[0].primitives[0].indices;
-    const triangleCount = document.accessors[indexAccessor].count / 3;
-    // Four narrow bevel segments should not require the swollen six-segment mesh.
-    const upperBounds = { d4: 400, d6: 700, d8: 700, d10: 1200, d12: 1800, d20: 1800 };
-    assert.ok(triangleCount <= upperBounds[shape], shape + ': bevel has too many triangles');
-    const flat = buildGeometry(shape);
-    assert.ok(beveledCount > flat.getAttribute('position').count, shape);
-    flat.dispose();
-  }
-});
-
-
-test('Blender GLB surfaces keep all number planes in their original positions', async () => {
+test('the seven cast GLBs have unique markings placed over the actual facets', async () => {
   const loader = new GLTFLoader();
-  for (const shape of ['d4', 'd6', 'd8', 'd10', 'd12', 'd20']) {
-    const bytes = readFileSync('public/models/' + shape + '.glb');
-    const data = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
-    const gltf = await new Promise((resolve, reject) => loader.parse(data, '', resolve, reject));
-    gltf.scene.updateMatrixWorld(true);
-    const model = gltf.scene.getObjectByProperty('isMesh', true);
-    assert.ok(model, shape);
-    const geometry = model.geometry.clone().applyMatrix4(model.matrixWorld);
-    const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
-    const original = buildGeometry(shape);
-    for (const { normal, center } of facePlacements(original, shape)) {
-      const ray = new THREE.Raycaster(center.clone().addScaledVector(normal, 0.6),
-        normal.clone().negate(), 0, 1.5);
-      const hits = ray.intersectObject(mesh);
-      assert.ok(hits.length, shape + ': missing front face');
-      assert.ok(hits[0].point.distanceTo(center) < 0.001, shape + ': number plane displaced');
-      // Physical dice have genuinely planar face normals, not blanket-smoothed
-      // normals spilling over from thick bevel ribbons.
-      const face = hits[0].faceIndex;
-      const vertexNormals = geometry.getAttribute('normal');
-      for (let corner = 0; corner < 3; corner++) {
-        const idx = geometry.index ? geometry.index.getX(face * 3 + corner) : face * 3 + corner;
-        const interpolated = new THREE.Vector3().fromBufferAttribute(vertexNormals, idx);
-        assert.ok(interpolated.dot(normal) > 0.99999,
-          shape + ': primary facet should be flat-shaded');
+  for (const shape of diceShapes) {
+    const bytes = readFileSync(`public/models/cast/${shape === 'd%' ? 'd00' : shape}.glb`);
+    assert.equal(bytes.toString('ascii', 0, 4), 'glTF', shape);
+    const { scene } = await loader.parseAsync(Uint8Array.from(bytes).buffer, '');
+    const { markings } = scene.children[0].userData;
+    assert.equal(markings.length, counts[shape], shape);
+    assert.equal(new Set(markings.map(face => face.label)).size, counts[shape], shape);
+    const expected = Array.from({ length: counts[shape] }, (_, i) =>
+      shape === 'd%' ? String(i * 10).padStart(2, '0') : String(i + (shape === 'd10' ? 0 : 1)));
+    assert.deepEqual(markings.map(face => face.label).sort(), expected.sort(), shape);
+    const geometry = scene.getObjectByProperty('isMesh', true).geometry;
+    const mesh = new Mesh(geometry, new MeshBasicMaterial({ side: DoubleSide }));
+    for (const face of markings) {
+      const normal = new Vector3(...face.normal);
+      const center = new Vector3(...face.center);
+      const up = new Vector3(...face.up);
+      assert.ok(Math.abs(normal.length() - 1) < 1e-6, shape);
+      assert.ok(Math.abs(normal.dot(up)) < 1e-6, shape);
+      assert.ok(face.size > 0, shape);
+      const hits = new Raycaster(center, normal.clone().negate(), 0, 0.025).intersectObject(mesh);
+      assert.ok(hits.length, shape + ': marking is off the facet');
+      assert.ok(hits[0].face.normal.dot(normal) > 0.99, shape + ': facet must be planar');
+    }
+    if (shape === 'd6') {
+      for (let i = 0; i < markings.length; i += 2) {
+        assert.equal(Number(markings[i].label) + Number(markings[i + 1].label), 7);
       }
     }
-    original.dispose();
     geometry.dispose();
     mesh.material.dispose();
+  }
+});
+
+test('each selectable font has a numeral atlas and matching specimen', () => {
+  for (const font of fontStyles) {
+    for (const suffix of ['', '-sample']) {
+      const bytes = readFileSync(`public/numerals/${font}${suffix}.webp`);
+      assert.equal(bytes.toString('ascii', 8, 12), 'WEBP', font);
+    }
   }
 });

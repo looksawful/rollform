@@ -13,7 +13,7 @@ const describe = (item: CartItem) =>
   shellColors.find(x => x.value === item.config.shell)?.name + ', ' + fontNames[item.config.font];
 
 export default function CartView() {
-  const { items, change, remove } = useCart();
+  const { items, change, remove, clear } = useCart();
   const total = items.reduce((sum, item) => sum + priceForCartItem(item) * item.quantity, 0);
   return <section className="wrapper section page-section cart-page stack">
     <p className="eyebrow">Ваш выбор</p>
@@ -62,6 +62,9 @@ export default function CartView() {
           <p className="cart-total">{formatPrice(total)}</p>
           <Link href="/production">Изготовление и доставка</Link>
           <Link href="/contacts#contact-form" className="button button-black">Оформить заказ</Link>
+          <button type="button" className="button button-secondary" onClick={clear}>
+            <Trash2 className="icon" aria-hidden="true" /><span>Очистить корзину</span>
+          </button>
         </div>
       </>}
   </section>;

@@ -62,7 +62,6 @@ test('nine licensed photographic examples are available without losing accurate 
     assert.equal(photo.toString('ascii', 0, 4), 'RIFF');
     assert.equal(photo.toString('ascii', 8, 12), 'WEBP');
     assert.ok(photo.length > 9000);
-    assert.ok(existsSync(`public/products/demo-${index}.webp`));
   }
   assert.match(source('src/components/ProductDetail.tsx'), /photoPath\(index\)/);
   assert.match(source('src/components/ProductCard.tsx'), /photoPath\(index\)/);

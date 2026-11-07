@@ -15,7 +15,7 @@ test('product covers use photographs rather than SVG sketches', () => {
 
 test('every preset has a valid local WebP cover', () => {
   for (let i = 1; i <= 9; i++) {
-    const file = path.join(root, 'public', 'products', 'demo-' + i + '.webp');
+    const file = path.join(root, 'public', 'photos', 'dice-' + String(i).padStart(2, '0') + '.webp');
     assert.ok(existsSync(file), file);
     assert.ok(statSync(file).size > 1024, file);
     assert.equal(readFileSync(file).toString('ascii', 8, 12), 'WEBP', file);

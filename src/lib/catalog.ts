@@ -1,7 +1,28 @@
 export const diceShapes = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd%'] as const;
 export type DiceShape = (typeof diceShapes)[number];
-export const fontStyles = ['grotesk', 'mono', 'serif'] as const;
-export type FontStyle = (typeof fontStyles)[number];
+export const fontNames = {
+  'nova-flat': 'Nova Flat',
+  avqest: 'AvQest',
+  'renata-cat': 'Renata CAT',
+  dihjau: 'Dihjau Regular',
+  'chrysanthemum-bold': 'Chrysanthemum Bold',
+  'dystopian-canticle': 'Dystopian Canticle Regular',
+  'simply-serif': 'Simply Serif',
+  'square-antiqua': 'Square Antiqua',
+  'simply-mono': 'Simply Mono',
+} as const;
+export type FontStyle = keyof typeof fontNames;
+export const fontStyles = Object.keys(fontNames) as FontStyle[];
+
+const legacyFonts: Partial<Record<string, FontStyle>> = {
+  grotesk: 'nova-flat', mono: 'simply-mono', serif: 'simply-serif',
+};
+
+export function resolveFont(value: unknown): FontStyle | undefined {
+  if (typeof value !== 'string') return;
+  if (Object.hasOwn(fontNames, value)) return value as FontStyle;
+  if (Object.hasOwn(legacyFonts, value)) return legacyFonts[value];
+}
 
 /** Values describe the on-screen prototype, not confirmed manufacturing options. */
 export type DiceConfig = {
@@ -14,7 +35,7 @@ export type Fulfillment = { kind: 'preorder' } | { kind: 'in_stock'; available: 
 export type Preset = { id: string; title: string; config: DiceConfig; fulfillment: Fulfillment };
 
 export const initialConfig: DiceConfig = {
-  shape: 'd20', shell: '#000000', font: 'grotesk',
+  shape: 'd20', shell: '#000000', font: 'nova-flat',
 };
 
 export const shellColors: { name: string; value: DiceConfig['shell'] }[] = [
@@ -24,10 +45,6 @@ export const shellColors: { name: string; value: DiceConfig['shell'] }[] = [
   { name: 'Синий', value: '#215BA8' },
 ];
 
-export const fontNames: Record<FontStyle, string> = {
-  grotesk: 'Inter', mono: 'Моноширинный', serif: 'Georgia',
-};
-
 export function configFromParams(params: Pick<URLSearchParams, 'get'>): DiceConfig {
   const base = presets.find(item => item.id === params.get('preset'))?.config ?? initialConfig;
   const shape = params.get('shape');
@@ -36,7 +53,7 @@ export function configFromParams(params: Pick<URLSearchParams, 'get'>): DiceConf
   return {
     shape: diceShapes.find(x => x === shape) ?? base.shape,
     shell: shellColors.find(x => x.value === shell)?.value ?? base.shell,
-    font: fontStyles.find(x => x === font) ?? base.font,
+    font: resolveFont(font) ?? base.font,
   };
 }
 
@@ -50,8 +67,12 @@ export function diceQuery(config: DiceConfig): string {
 
 export function readSavedDice(raw: string | null): DiceConfig | null {
   if (!raw) return null;
-  const config = configFromParams(new URLSearchParams(raw));
-  return diceQuery(config) === raw ? config : null;
+  const params = new URLSearchParams(raw);
+  const font = resolveFont(params.get('font'));
+  if (!font) return null;
+  params.set('font', font);
+  const config = configFromParams(params);
+  return diceQuery(config) === params.toString() ? config : null;
 }
 
 export function randomDiceConfig(

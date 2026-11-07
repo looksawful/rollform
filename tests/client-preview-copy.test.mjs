@@ -53,7 +53,7 @@ test('builder, cart and production pages honor accepted copy decisions',()=>{
   assert.match(cart,/>Смотреть кубики<\/Link>/);
   assert.match(cart,/<Trash2[^>]*\/>.*<span>Удалить<\/span>/);
   assert.match(data,/name: 'Чёрный'/);
-  assert.match(data,/grotesk: 'Inter'/);
+  assert.match(data,/nova-flat': 'Nova Flat'/);
   assert.ok(existsSync('src/app/production/page.tsx'));
   assert.ok(!existsSync('src/app/dark/production/page.tsx'));
   assert.match(read('src/components/ProductionInfo.tsx'),/Как оформить заказ/);

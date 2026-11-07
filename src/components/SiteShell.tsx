@@ -118,6 +118,7 @@ function SiteChrome({ children }: { children: ReactNode }) {
           <Link href={"/configure"}>Конструктор</Link>
           <Link href={"/#about"}>О нас</Link>
           <Link href={"/production"}>Изготовление и доставка</Link>
+          <Link href="/terms">Пользовательское соглашение</Link>
         </nav>
         <div className="stack">
           <h2>Контакты</h2>

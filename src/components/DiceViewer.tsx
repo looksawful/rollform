@@ -3,25 +3,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { Orbit } from 'lucide-react';
 import type { DiceConfig } from '@/lib/catalog';
-import type { Vector3, Mesh } from 'three';
-import { buildGeometry, faceLabel, facePlacements } from '@/lib/diceGeometry';
+import type { Vector3 } from 'three';
 import { cssTimeSeconds } from '@/lib/cssTime';
-import type { CastFinish, loadCastDie } from '@/lib/castDice';
+import type { loadCastDie } from '@/lib/castDice';
 
-export type DicePreview = 'classic' | CastFinish;
-
-export default function DiceViewer({ config, continuous = false, preview = 'classic' }: {
-  config: DiceConfig; continuous?: boolean; preview?: DicePreview;
-}) {
+export default function DiceViewer({ config, continuous = false }: { config: DiceConfig; continuous?: boolean }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const configRef = useRef(config);
-  const previewRef = useRef(preview);
-  const viewerRef = useRef<{ update: (config: DiceConfig, preview: DicePreview) => void } | null>(null);
+  const viewerRef = useRef<{ update: (config: DiceConfig) => void } | null>(null);
   const [fallback, setFallback] = useState(false);
   configRef.current = config;
-  previewRef.current = preview;
 
-  useEffect(() => { viewerRef.current?.update(config, preview); }, [config, preview]);
+  useEffect(() => { viewerRef.current?.update(config); }, [config]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -31,9 +24,9 @@ export default function DiceViewer({ config, continuous = false, preview = 'clas
 
     (async () => {
       try {
-        const [THREE, { gsap }, { GLTFLoader }, { RoomEnvironment }, { OrbitControls }] = await Promise.all([
+        const [THREE, { gsap }, { loadCastDie }, { RoomEnvironment }, { OrbitControls }] = await Promise.all([
           import('three'), import('gsap'),
-          import('three/addons/loaders/GLTFLoader.js'),
+          import('@/lib/castDice'),
           import('three/addons/environments/RoomEnvironment.js'),
           import('three/addons/controls/OrbitControls.js'),
         ]);
@@ -46,7 +39,7 @@ export default function DiceViewer({ config, continuous = false, preview = 'clas
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, continuous ? 1.25 : 2));
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.5;
+        renderer.toneMappingExposure = 1;
         renderer.setClearColor(0xffffff, 0);
         const canvas = renderer.domElement;
         canvas.setAttribute('aria-hidden', 'true');
@@ -81,16 +74,11 @@ export default function DiceViewer({ config, continuous = false, preview = 'clas
         fill.position.set(-5, -3, -2);
         scene.add(fill);
 
-        // One already-supported PBR material; no maps or physics engine needed for this prototype.
-        const surface = new THREE.MeshStandardMaterial({
-          color: '#191919', roughness: 0.37, metalness: 0.06,
-        });
         let renderedKey: string | undefined, pendingKey: string | undefined;
         let cast: Awaited<ReturnType<typeof loadCastDie>> | undefined;
         let normals: Vector3[] = [];
         const front = new THREE.Vector3(0, 0, 1);
         const spin = new THREE.Quaternion();
-        const loader = new GLTFLoader();
         const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
         let visible = true, lost = false, request = 0, lastFace = -1;
         let lastPaint = 0;
@@ -103,78 +91,20 @@ export default function DiceViewer({ config, continuous = false, preview = 'clas
           timeline = null;
           cast?.dispose();
           cast = undefined;
-          dice.children.forEach(child => {
-            if (child instanceof THREE.Mesh) {
-              child.geometry.dispose();
-              if (child.material instanceof THREE.MeshBasicMaterial) {
-                child.material.map?.dispose();
-                child.material.dispose();
-              }
-            }
-          });
           dice.clear();
         };
 
-        const loadClassic = async (next: DiceConfig, basePath: string, id: number) => {
-          const key = next.shape === 'd%' ? 'd10' : next.shape;
-          const gltf = await loader.loadAsync(`${basePath}/models/${key}.glb`);
-          if (closed || id !== request) return false;
-          const model = gltf.scene.getObjectByProperty('isMesh', true) as Mesh | undefined;
-          if (!model) throw Error('Missing GLB mesh');
-          gltf.scene.updateMatrixWorld(true);
-          const geometry = model.geometry.clone().applyMatrix4(model.matrixWorld);
-          const original = buildGeometry(next.shape);
-          const faces = facePlacements(original, next.shape);
-          original.dispose();
-          clearShape();
-          normals = faces.map(face => face.normal.clone());
-          dice.add(new THREE.Mesh(geometry, surface));
-          const family = next.font === 'mono' ? 'monospace'
-            : next.font === 'serif' ? 'Georgia, serif' : 'Inter, Arial, sans-serif';
-          const width = ({ d4: 0.83, d6: 0.92, d8: 0.77, d10: 0.74,
-            d12: 0.82, d20: 0.72, 'd%': 0.74 } as const)[next.shape];
-          faces.forEach((face, index) => {
-            const image = document.createElement('canvas');
-            image.width = image.height = 256;
-            const ctx = image.getContext('2d');
-            if (!ctx) return;
-            const label = faceLabel(next.shape, index);
-            ctx.font = '700 ' + (label.length > 1 ? 120 : 156) + 'px ' + family;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(label, 128, 135);
-            const texture = new THREE.CanvasTexture(image);
-            texture.colorSpace = THREE.SRGBColorSpace;
-            const material = new THREE.MeshBasicMaterial({
-              map: texture, transparent: true, depthWrite: false,
-              side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2,
-            });
-            const text = new THREE.Mesh(new THREE.PlaneGeometry(width, width), material);
-            text.position.copy(face.center).addScaledVector(face.normal, 0.034);
-            text.quaternion.setFromUnitVectors(front, face.normal);
-            dice.add(text);
-          });
-          return true;
-        };
-
-        const buildShape = async (next: DiceConfig, mode: DicePreview, shapeKey: string) => {
+        const buildShape = async (next: DiceConfig, shapeKey: string) => {
           const id = ++request;
           pendingKey = shapeKey;
-          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
           try {
-            if (mode !== 'classic') {
-              const { loadCastDie } = await import('@/lib/castDice');
-              if (closed || id !== request) return;
-              const model = await loadCastDie(next.shape, basePath);
-              if (closed || id !== request) { model.dispose(); return; }
-              clearShape();
-              cast = model;
-              cast.setFinish(previewRef.current === 'classic' ? mode : previewRef.current, configRef.current.shell);
-              normals = cast.normals;
-              dice.add(cast.scene);
-            } else if (!await loadClassic(next, basePath, id)) return;
-            renderer.toneMappingExposure = cast ? 1 : 1.5;
+            const model = await loadCastDie(next, process.env.NEXT_PUBLIC_BASE_PATH || '');
+            if (closed || id !== request) { model.dispose(); return; }
+            clearShape();
+            cast = model;
+            model.setShell(configRef.current.shell);
+            normals = model.normals;
+            dice.add(model.scene);
             renderedKey = shapeKey;
             pendingKey = undefined;
             lastFace = -1;
@@ -305,20 +235,19 @@ export default function DiceViewer({ config, continuous = false, preview = 'clas
         controls?.addEventListener('start', stopAuto);
         controls?.addEventListener('change', () => render(true));
         if (controls) host.addEventListener('keydown', onKeyDown);
-        const update = (next: DiceConfig, mode: DicePreview) => {
-          surface.color.set(next.shell === '#000000' ? '#191919' : next.shell);
-          const shapeKey = `${next.shape}/${mode === 'classic' ? next.font : 'cast'}`;
+        const update = (next: DiceConfig) => {
+          const shapeKey = `${next.shape}/${next.font}`;
           if (shapeKey !== renderedKey) {
-            if (shapeKey !== pendingKey) void buildShape(next, mode, shapeKey);
+            if (shapeKey !== pendingKey) void buildShape(next, shapeKey);
             return;
           }
           if (pendingKey) { request++; pendingKey = undefined; }
-          if (mode !== 'classic') cast?.setFinish(mode, next.shell);
+          cast?.setShell(next.shell);
           setFallback(lost);
           render();
         };
         viewerRef.current = { update };
-        update(configRef.current, previewRef.current);
+        update(configRef.current);
 
         const onMotion = () => {
           if (motion.matches) { timeline?.pause(); host.dataset.motion = 'paused'; }
@@ -382,7 +311,6 @@ export default function DiceViewer({ config, continuous = false, preview = 'clas
           canvas.removeEventListener('webglcontextrestored', onRestored);
           if (viewerRef.current?.update === update) viewerRef.current = null;
           clearShape();
-          surface.dispose();
           envTarget.dispose();
           renderer.dispose();
           canvas.remove();

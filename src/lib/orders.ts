@@ -1,4 +1,4 @@
-import { diceShapes, fontStyles, shellColors } from './catalog.ts';
+import { diceShapes, resolveFont, shellColors } from './catalog.ts';
 import type { DiceConfig } from './catalog.ts';
 
 export type CartOrigin =
@@ -35,12 +35,13 @@ export function changeQuantity(items: CartItem[], id: string, delta: number) {
     : [{ ...item, quantity: Math.min(99, item.quantity + delta) }]);
 }
 
-function validConfig(value: unknown): value is DiceConfig {
-  if (!value || typeof value !== 'object') return false;
-  const x = value as Partial<DiceConfig>;
-  return diceShapes.includes(x.shape as DiceConfig['shape']) &&
-    shellColors.some(c => c.value === x.shell) &&
-    fontStyles.includes(x.font as DiceConfig['font']);
+function readConfig(value: unknown): DiceConfig | null {
+  if (!value || typeof value !== 'object') return null;
+  const raw = value as Record<string, unknown>;
+  const shape = diceShapes.find(shape => shape === raw.shape);
+  const shell = shellColors.find(color => color.value === raw.shell)?.value;
+  const font = resolveFont(raw.font);
+  return shape && shell && font ? { shape, shell, font } : null;
 }
 
 function validOrigin(value: unknown): value is CartOrigin {
@@ -54,8 +55,13 @@ export function readCart(raw: string | null): CartItem[] {
   try {
     const parsed: unknown = JSON.parse(raw || '[]');
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((v): v is CartItem => !!v && typeof v === 'object' &&
-      typeof v.id === 'string' && v.id.length > 0 && validOrigin(v.origin) && validConfig(v.config) &&
-      Number.isInteger(v.quantity) && v.quantity > 0 && v.quantity <= 99);
+    return parsed.flatMap(value => {
+      if (!value || typeof value !== 'object') return [];
+      const { id, origin, quantity } = value;
+      const config = readConfig(value.config);
+      return typeof id === 'string' && id.length > 0 && validOrigin(origin) && config &&
+        Number.isInteger(quantity) && quantity > 0 && quantity <= 99
+        ? [{ id, origin, quantity, config }] : [];
+    });
   } catch { return []; }
 }

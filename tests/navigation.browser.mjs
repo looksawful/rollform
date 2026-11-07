@@ -50,11 +50,11 @@ assert.ok(executable, 'Set CHROME_PATH to an installed Chrome/Chromium executabl
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 test('CI static export preserves the original site without the removed lab', { skip: !process.env.CI }, () => {
-  for (const route of ['', 'cart', 'catalog', 'configure', 'contacts', 'product', 'production']) {
+  for (const route of ['', 'cart', 'catalog', 'configure', 'contacts', 'product', 'production', 'terms']) {
     assert.ok(existsSync(join('out', route, 'index.html')), 'Missing exported route: ' + route);
   }
   for (const shape of ['d4', 'd6', 'd8', 'd10', 'd12', 'd20']) {
-    assert.ok(existsSync(join('out', 'models', shape + '.glb')), 'Missing original GLB: ' + shape);
+    assert.equal(existsSync(join('out', 'models', shape + '.glb')), false, 'Archived GLB still exported: ' + shape);
   }
   for (const shape of ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd00']) {
     assert.ok(existsSync(join('out', 'models', 'cast', shape + '.glb')), 'Missing cast GLB: ' + shape);
@@ -198,7 +198,7 @@ test('page motion and navigation', { timeout: 180000, skip: Boolean(process.env.
         await until(`location.pathname.endsWith('/configure/') &&
           ['shape', 'shell', 'font'].every(k => new URLSearchParams(location.search).has(k))`);
         const created = await evaluate('location.search');
-        await until(`document.querySelectorAll('.pill-list:not([aria-labelledby="preview-heading"]) [aria-pressed="true"]').length === 3`);
+        await until(`document.querySelectorAll('.pill-list [aria-pressed="true"]').length === 3`);
         await send('Page.navigate', { url: home });
         await until(`document.readyState === 'complete' && !!document.querySelector('.desktop-nav a[href$="/configure/"]')`);
         await evaluate(`document.querySelector('.desktop-nav a[href$="/configure/"]').click()`);
@@ -215,7 +215,7 @@ test('page motion and navigation', { timeout: 180000, skip: Boolean(process.env.
         const links = await evaluate(`Array.from(document.querySelectorAll('a[href]'))
           .map(a => a.href).filter(href => href.startsWith(location.origin) && !href.includes('#'))`);
         for (const href of new Set([...links, ...[
-          'catalog/', 'configure/', 'contacts/', 'production/', 'product/', 'cart/'
+          'catalog/', 'configure/', 'contacts/', 'production/', 'product/', 'cart/', 'terms/'
         ].map(path => new URL(path, new URL(theme, base)).href)])) {
           const result = await evaluate(`fetch(${JSON.stringify(href)}, {cache: 'no-store'})
             .then(response => ({status: response.status, ok: response.ok, url: response.url}))

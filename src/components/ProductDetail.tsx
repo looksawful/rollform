@@ -5,7 +5,7 @@ import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Orbit, ShoppingBag } from 'lucide-react';
 import { presets, fontNames, shellColors } from '@/lib/catalog';
 import { photoPath } from '@/lib/photoAssets';
 import { formatPrice, priceForPreset } from '@/lib/pricing';
@@ -15,13 +15,12 @@ import { useCart } from './CartState';
 export default function ProductDetail() {
   const params = useSearchParams();
   const router = useRouter();
-  const [view, setView] = useState<'photo' | 'model'>('photo');
+  const [view, setView] = useState<number | 'model'>(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const { add } = useCart();
   const index = Math.max(0, presets.findIndex(p => p.id === params.get('item')));
   const product = presets[index];
-  const photo = photoPath(index);
-  const model = `${process.env.NEXT_PUBLIC_BASE_PATH || ''}/products/${product.id}.webp`;
+  const photos = [photoPath(index), photoPath((index + 1) % presets.length), photoPath((index + 2) % presets.length)];
   const buy = () => {
     if (add(product.config, { kind: 'preorder_preset', presetId: product.id })) {
       router.push('/cart');
@@ -38,15 +37,17 @@ export default function ProductDetail() {
             <button className="product-detail-photo-trigger" type="button"
               onClick={() => setLightboxOpen(true)}
               aria-label={'Увеличить изображение: ' + product.title}>
-              <img src={photo} alt="Игральные кубики" width={1000} height={900} />
+              <img src={photos[view]} alt="Игральные кубики, пример" width={1000} height={900} />
             </button>}
         </div>
         <div className="product-detail-thumbs cluster" aria-label="Вид товара">
-          <button type="button" aria-pressed={view === 'photo'} onClick={() => setView('photo')}>
-            <img src={photo} alt="" width={80} height={80} /> Фото
-          </button>
+          {photos.map((photo, number) => (
+            <button key={photo} type="button" aria-label={`Фото ${number + 1}`} aria-pressed={view === number} onClick={() => setView(number)}>
+              <img src={photo} alt="" width={80} height={80} />
+            </button>
+          ))}
           <button type="button" aria-pressed={view === 'model'} onClick={() => setView('model')}>
-            <img src={model} alt="" width={80} height={80} /> 3D-вариант
+            <Orbit className="icon" aria-hidden="true" /> 3D-вариант
           </button>
         </div>
       </div>
@@ -71,11 +72,8 @@ export default function ProductDetail() {
       </div>
     </div>
     <Lightbox open={lightboxOpen} close={() => setLightboxOpen(false)}
-      index={view === 'photo' ? 0 : 1}
-      slides={[
-        { src: photo, alt: 'Игральные кубики: ' + product.title },
-        { src: model, alt: '3D-визуализация: ' + product.title },
-      ]}
+      index={view === 'model' ? 0 : view}
+      slides={photos.map((src, number) => ({ src, alt: `Игральные кубики, пример ${number + 1}` }))}
       carousel={{ finite: true }}
       labels={{ Close: 'Закрыть', Previous: 'Предыдущее изображение', Next: 'Следующее изображение' }}
     />

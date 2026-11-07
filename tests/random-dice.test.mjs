@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { diceShapes, shellColors, fontStyles, initialConfig, configFromParams,
   randomDiceConfig, diceQuery, readSavedDice } from '../src/lib/catalog.ts';
 
-test('random Hero config covers all 84 valid combinations without coupling parameters', () => {
+test('random Hero config covers all valid combinations without coupling parameters', () => {
   const combinations = new Set();
   for (let shape = 0; shape < diceShapes.length; shape++) {
     for (let shell = 0; shell < shellColors.length; shell++) {
@@ -18,11 +18,11 @@ test('random Hero config covers all 84 valid combinations without coupling param
       }
     }
   }
-  assert.equal(combinations.size, 84);
+  assert.equal(combinations.size, diceShapes.length * shellColors.length * fontStyles.length);
 });
 
 test('random dice is shareable in URL; direct entry without saved dice stays on default', () => {
-  const generated = { shape: 'd%', shell: '#215BA8', font: 'serif' };
+  const generated = { shape: 'd%', shell: '#215BA8', font: 'simply-serif' };
   const query = diceQuery(generated);
   assert.deepEqual(configFromParams(new URLSearchParams(query)), generated);
   assert.equal(readSavedDice(null), null);
@@ -30,7 +30,7 @@ test('random dice is shareable in URL; direct entry without saved dice stays on 
 });
 
 test('saved dice restores only complete valid query strings', () => {
-  const generated = { shape: 'd8', shell: '#196641', font: 'mono' };
+  const generated = { shape: 'd8', shell: '#196641', font: 'simply-mono' };
   assert.deepEqual(readSavedDice(diceQuery(generated)), generated);
   assert.equal(readSavedDice('shape=d20'), null);
   assert.equal(readSavedDice('shape=d20&shell=not-a-color&font=mono'), null);
