@@ -6,15 +6,22 @@ import type { DiceConfig } from '@/lib/catalog';
 import type { Vector3, Mesh } from 'three';
 import { buildGeometry, faceLabel, facePlacements } from '@/lib/diceGeometry';
 import { cssTimeSeconds } from '@/lib/cssTime';
+import type { CastFinish, loadCastDie } from '@/lib/castDice';
 
-export default function DiceViewer({ config, continuous = false }: { config: DiceConfig; continuous?: boolean }) {
+export type DicePreview = 'classic' | CastFinish;
+
+export default function DiceViewer({ config, continuous = false, preview = 'classic' }: {
+  config: DiceConfig; continuous?: boolean; preview?: DicePreview;
+}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const configRef = useRef(config);
-  const viewerRef = useRef<{ update: (config: DiceConfig) => void } | null>(null);
+  const previewRef = useRef(preview);
+  const viewerRef = useRef<{ update: (config: DiceConfig, preview: DicePreview) => void } | null>(null);
   const [fallback, setFallback] = useState(false);
   configRef.current = config;
+  previewRef.current = preview;
 
-  useEffect(() => { viewerRef.current?.update(config); }, [config]);
+  useEffect(() => { viewerRef.current?.update(config, preview); }, [config, preview]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -78,8 +85,8 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const surface = new THREE.MeshStandardMaterial({
           color: '#191919', roughness: 0.37, metalness: 0.06,
         });
-        let renderedShape: DiceConfig['shape'] | undefined;
-        let renderedFont: DiceConfig['font'] | undefined;
+        let renderedKey: string | undefined, pendingKey: string | undefined;
+        let cast: Awaited<ReturnType<typeof loadCastDie>> | undefined;
         let normals: Vector3[] = [];
         const front = new THREE.Vector3(0, 0, 1);
         const spin = new THREE.Quaternion();
@@ -94,6 +101,8 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const clearShape = () => {
           timeline?.kill();
           timeline = null;
+          cast?.dispose();
+          cast = undefined;
           dice.children.forEach(child => {
             if (child instanceof THREE.Mesh) {
               child.geometry.dispose();
@@ -106,56 +115,74 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           dice.clear();
         };
 
-        const buildShape = async (next: DiceConfig) => {
-          const id = ++request;
+        const loadClassic = async (next: DiceConfig, basePath: string, id: number) => {
           const key = next.shape === 'd%' ? 'd10' : next.shape;
-          const asset = (process.env.NEXT_PUBLIC_BASE_PATH || '') + '/models/' + key + '.glb';
-          try {
-            const gltf = await loader.loadAsync(asset);
-            if (closed || id !== request) return;
-            const model = gltf.scene.getObjectByProperty('isMesh', true) as Mesh | undefined;
-            if (!model) throw Error('Missing GLB mesh');
-            gltf.scene.updateMatrixWorld(true);
-            const geometry = model.geometry.clone().applyMatrix4(model.matrixWorld);
-            const original = buildGeometry(next.shape);
-            const faces = facePlacements(original, next.shape);
-            original.dispose();
-            clearShape();
-            normals = faces.map(face => face.normal.clone());
-            dice.add(new THREE.Mesh(geometry, surface));
-            const family = next.font === 'mono' ? 'monospace'
-              : next.font === 'serif' ? 'Georgia, serif' : 'Inter, Arial, sans-serif';
-            const width = ({ d4: 0.83, d6: 0.92, d8: 0.77, d10: 0.74,
-              d12: 0.82, d20: 0.72, 'd%': 0.74 } as const)[next.shape];
-            faces.forEach((face, index) => {
-              const image = document.createElement('canvas');
-              image.width = image.height = 256;
-              const ctx = image.getContext('2d');
-              if (!ctx) return;
-              const label = faceLabel(next.shape, index);
-              ctx.font = '700 ' + (label.length > 1 ? 120 : 156) + 'px ' + family;
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillStyle = '#ffffff';
-              ctx.fillText(label, 128, 135);
-              const texture = new THREE.CanvasTexture(image);
-              texture.colorSpace = THREE.SRGBColorSpace;
-              const material = new THREE.MeshBasicMaterial({
-                map: texture, transparent: true, depthWrite: false,
-                side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2,
-              });
-              const text = new THREE.Mesh(new THREE.PlaneGeometry(width, width), material);
-              text.position.copy(face.center).addScaledVector(face.normal, 0.034);
-              text.quaternion.setFromUnitVectors(front, face.normal);
-              dice.add(text);
+          const gltf = await loader.loadAsync(`${basePath}/models/${key}.glb`);
+          if (closed || id !== request) return false;
+          const model = gltf.scene.getObjectByProperty('isMesh', true) as Mesh | undefined;
+          if (!model) throw Error('Missing GLB mesh');
+          gltf.scene.updateMatrixWorld(true);
+          const geometry = model.geometry.clone().applyMatrix4(model.matrixWorld);
+          const original = buildGeometry(next.shape);
+          const faces = facePlacements(original, next.shape);
+          original.dispose();
+          clearShape();
+          normals = faces.map(face => face.normal.clone());
+          dice.add(new THREE.Mesh(geometry, surface));
+          const family = next.font === 'mono' ? 'monospace'
+            : next.font === 'serif' ? 'Georgia, serif' : 'Inter, Arial, sans-serif';
+          const width = ({ d4: 0.83, d6: 0.92, d8: 0.77, d10: 0.74,
+            d12: 0.82, d20: 0.72, 'd%': 0.74 } as const)[next.shape];
+          faces.forEach((face, index) => {
+            const image = document.createElement('canvas');
+            image.width = image.height = 256;
+            const ctx = image.getContext('2d');
+            if (!ctx) return;
+            const label = faceLabel(next.shape, index);
+            ctx.font = '700 ' + (label.length > 1 ? 120 : 156) + 'px ' + family;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(label, 128, 135);
+            const texture = new THREE.CanvasTexture(image);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            const material = new THREE.MeshBasicMaterial({
+              map: texture, transparent: true, depthWrite: false,
+              side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2,
             });
-            renderedShape = next.shape;
-            renderedFont = next.font;
+            const text = new THREE.Mesh(new THREE.PlaneGeometry(width, width), material);
+            text.position.copy(face.center).addScaledVector(face.normal, 0.034);
+            text.quaternion.setFromUnitVectors(front, face.normal);
+            dice.add(text);
+          });
+          return true;
+        };
+
+        const buildShape = async (next: DiceConfig, mode: DicePreview, shapeKey: string) => {
+          const id = ++request;
+          pendingKey = shapeKey;
+          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+          try {
+            if (mode !== 'classic') {
+              const { loadCastDie } = await import('@/lib/castDice');
+              if (closed || id !== request) return;
+              const model = await loadCastDie(next.shape, basePath);
+              if (closed || id !== request) { model.dispose(); return; }
+              clearShape();
+              cast = model;
+              cast.setFinish(previewRef.current === 'classic' ? mode : previewRef.current, configRef.current.shell);
+              normals = cast.normals;
+              dice.add(cast.scene);
+            } else if (!await loadClassic(next, basePath, id)) return;
+            renderer.toneMappingExposure = cast ? 1 : 1.5;
+            renderedKey = shapeKey;
+            pendingKey = undefined;
             lastFace = -1;
-            setFallback(false);
+            setFallback(lost);
             play();
           } catch (error) {
             if (!closed && id === request) {
+              pendingKey = undefined;
               console.warn('3D model unavailable', error);
               setFallback(true);
             }
@@ -278,13 +305,20 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         controls?.addEventListener('start', stopAuto);
         controls?.addEventListener('change', () => render(true));
         if (controls) host.addEventListener('keydown', onKeyDown);
-        const update = (next: DiceConfig) => {
+        const update = (next: DiceConfig, mode: DicePreview) => {
           surface.color.set(next.shell === '#000000' ? '#191919' : next.shell);
-          if (next.shape !== renderedShape || next.font !== renderedFont) void buildShape(next);
-          else render();
+          const shapeKey = `${next.shape}/${mode === 'classic' ? next.font : 'cast'}`;
+          if (shapeKey !== renderedKey) {
+            if (shapeKey !== pendingKey) void buildShape(next, mode, shapeKey);
+            return;
+          }
+          if (pendingKey) { request++; pendingKey = undefined; }
+          if (mode !== 'classic') cast?.setFinish(mode, next.shell);
+          setFallback(lost);
+          render();
         };
         viewerRef.current = { update };
-        update(configRef.current);
+        update(configRef.current, previewRef.current);
 
         const onMotion = () => {
           if (motion.matches) { timeline?.pause(); host.dataset.motion = 'paused'; }

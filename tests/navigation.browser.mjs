@@ -56,6 +56,9 @@ test('CI static export preserves the original site without the removed lab', { s
   for (const shape of ['d4', 'd6', 'd8', 'd10', 'd12', 'd20']) {
     assert.ok(existsSync(join('out', 'models', shape + '.glb')), 'Missing original GLB: ' + shape);
   }
+  for (const shape of ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd00']) {
+    assert.ok(existsSync(join('out', 'models', 'cast', shape + '.glb')), 'Missing cast GLB: ' + shape);
+  }
   assert.equal(existsSync(join('out', 'material-lab')), false, 'Removed lab still exported');
 });
 
@@ -195,7 +198,7 @@ test('page motion and navigation', { timeout: 180000, skip: Boolean(process.env.
         await until(`location.pathname.endsWith('/configure/') &&
           ['shape', 'shell', 'font'].every(k => new URLSearchParams(location.search).has(k))`);
         const created = await evaluate('location.search');
-        await until(`document.querySelectorAll('.pill-list [aria-pressed="true"]').length === 3`);
+        await until(`document.querySelectorAll('.pill-list:not([aria-labelledby="preview-heading"]) [aria-pressed="true"]').length === 3`);
         await send('Page.navigate', { url: home });
         await until(`document.readyState === 'complete' && !!document.querySelector('.desktop-nav a[href$="/configure/"]')`);
         await evaluate(`document.querySelector('.desktop-nav a[href$="/configure/"]').click()`);
@@ -248,9 +251,9 @@ test('page motion and navigation', { timeout: 180000, skip: Boolean(process.env.
         await until(`document.readyState === 'complete' && !!document.querySelector('.random-dice-button')`);
         await delay(100);
         for(let n=0;n<4;n++) {
-          const color=await evaluate(`document.querySelectorAll('.field')[1].querySelector('[aria-pressed="true"]').textContent`);
+          const color=await evaluate(`document.querySelector('[aria-pressed="true"] .swatch').parentElement.textContent`);
           await evaluate(`document.querySelector('.random-dice-button').click()`);
-          await until(`document.querySelectorAll('.field')[1].querySelector('[aria-pressed="true"]').textContent !== ${JSON.stringify(color)}`);
+          await until(`document.querySelector('[aria-pressed="true"] .swatch').parentElement.textContent !== ${JSON.stringify(color)}`);
         }
         for (const path of ['configure/','product/?item=demo-1']) {
           await send('Page.navigate',{url:new URL(path,base).href});
