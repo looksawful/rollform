@@ -24,13 +24,17 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
 
     (async () => {
       try {
-        const [THREE, { gsap }, { loadCastDie }, { RoomEnvironment }, { OrbitControls }] = await Promise.all([
+        const [THREE, { gsap }, { loadCastDie }, { HDRLoader }, { OrbitControls }] = await Promise.all([
           import('three'), import('gsap'),
           import('@/lib/castDice'),
-          import('three/addons/environments/RoomEnvironment.js'),
+          import('three/addons/loaders/HDRLoader.js'),
           import('three/addons/controls/OrbitControls.js'),
         ]);
         if (closed) return;
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const environment = await new HDRLoader().loadAsync(`${basePath}/environments/studio-small-08-soft.hdr`)
+          .catch(() => null);
+        if (closed) { environment?.dispose(); return; }
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(39, 1, 0.1, 100);
@@ -56,23 +60,15 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         }
         canvas.style.touchAction = 'pan-y';
 
-        const environment = new RoomEnvironment();
-        const pmrem = new THREE.PMREMGenerator(renderer);
-        const envTarget = pmrem.fromScene(environment);
-        scene.environment = envTarget.texture;
-        pmrem.dispose();
-        environment.dispose();
+        if (environment) {
+          environment.mapping = THREE.EquirectangularReflectionMapping;
+          scene.environment = environment;
+        }
 
         const dice = new THREE.Group();
         dice.rotation.set(-0.38, 0.4, 0.12);
         scene.add(dice);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-        const key = new THREE.DirectionalLight(0xffffff, 2.2);
-        key.position.set(4, 6, 7);
-        scene.add(key);
-        const fill = new THREE.DirectionalLight(0xffffff, 0.7);
-        fill.position.set(-5, -3, -2);
-        scene.add(fill);
+        scene.add(new THREE.HemisphereLight(0xffffff, 0xb9b2ad, environment ? 0.95 : 1.6));
 
         let renderedKey: string | undefined, pendingKey: string | undefined;
         let cast: Awaited<ReturnType<typeof loadCastDie>> | undefined;
@@ -98,7 +94,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           const id = ++request;
           pendingKey = shapeKey;
           try {
-            const model = await loadCastDie(next, process.env.NEXT_PUBLIC_BASE_PATH || '');
+            const model = await loadCastDie(next, basePath);
             if (closed || id !== request) { model.dispose(); return; }
             clearShape();
             cast = model;
@@ -311,7 +307,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           canvas.removeEventListener('webglcontextrestored', onRestored);
           if (viewerRef.current?.update === update) viewerRef.current = null;
           clearShape();
-          envTarget.dispose();
+          environment?.dispose();
           renderer.dispose();
           canvas.remove();
         };
