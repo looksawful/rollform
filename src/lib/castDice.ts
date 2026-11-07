@@ -24,7 +24,8 @@ type Marking = { normal: Point; center: Point; up: Point; size: number; label: s
 export async function loadCastDie(config: DiceConfig, basePath: string) {
   const filename = config.shape === 'd%' ? 'd00' : config.shape;
   const [{ scene }, map] = await Promise.all([
-    new GLTFLoader().loadAsync(`${basePath}/models/cast/${filename}.glb`),
+    // The face-marking metadata is absent from meshes cached by the previous release.
+    new GLTFLoader().loadAsync(`${basePath}/models/cast/${filename}.glb?v=2`),
     new TextureLoader().loadAsync(`${basePath}/numerals/${config.font}.webp`),
   ]);
   map.colorSpace = SRGBColorSpace;
