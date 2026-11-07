@@ -529,14 +529,19 @@ test('page motion and navigation', { timeout: 180000, skip: Boolean(process.env.
       });
       await t.test(`${theme || 'light/'} one-shot reveals and reduced motion`, async () => {
         await send('Emulation.setEmulatedMedia', { features: [{name:'prefers-reduced-motion',value:'no-preference'}] });
+        await send('Emulation.setDeviceMetricsOverride', {width:390,height:844,deviceScaleFactor:1,mobile:true});
         exceptions.length = 0;
         const home = new URL(theme, base).href;
         await send('Page.navigate', { url: home });
         await until(`document.readyState === 'complete' && !!document.querySelector('.dice-canvas canvas')`);
         const title = '#production .production-intro';
-        assert.equal(await evaluate(`getComputedStyle(document.querySelector('${title}')).opacity`), '1', 'Offscreen content starts visible');
+        await until(`Number(getComputedStyle(document.querySelector('${title}')).opacity) < 0.99`);
+        const preparedOpacity = Number(await evaluate(`getComputedStyle(document.querySelector('${title}')).opacity`));
+        assert.ok(preparedOpacity >= 0.6 && preparedOpacity < 1, 'Offscreen cards have a visible pre-reveal state');
+        assert.equal(await evaluate(`getComputedStyle(document.querySelector('.product-scroller .product')).animationName`), 'none', 'Mobile reel cards do not continuously rescale while scrolling');
         const firstEntry = await sampleEntry(title);
         assert.ok(firstEntry.some(opacity => opacity < 0.99), 'Copy reveals on its first entry');
+        assert.ok(firstEntry.every((opacity, index) => !index || opacity + 0.04 >= firstEntry[index - 1]), 'Reveal never flashes from visible to hidden');
         assert.equal(firstEntry.at(-1), 1, 'Copy finishes fully visible');
         assert.equal(await evaluate(`document.querySelector('${title}').style.transform`), '', 'Finished motion leaves no transform');
         await evaluate(`scrollTo({ top: 0, behavior: 'instant' })`);

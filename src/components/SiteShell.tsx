@@ -55,10 +55,9 @@ function SiteChrome({ children }: { children: ReactNode }) {
             seen.add(target);
             observer.unobserve(target);
             context.add(() => {
-              const isMedia = target.matches('.editorial-photo');
-              gsap.fromTo(target, { opacity: 0, y: 20, scale: isMedia ? 0.98 : 1 }, {
-                opacity: 1, y: 0, scale: 1, duration: 0.8, delay: Math.min(index++ * 0.07, 0.21),
-                ease: 'power3.out', clearProps: 'opacity,transform',
+              gsap.to(target, {
+                opacity: 1, y: 0, scale: 1, duration: 0.7, delay: Math.min(index++ * 0.05, 0.15),
+                ease: 'power2.out', clearProps: 'opacity,transform',
               });
             });
           }
@@ -66,8 +65,12 @@ function SiteChrome({ children }: { children: ReactNode }) {
         for (const target of targets) {
           // Keep SSR, restored scroll positions and the initial viewport visible.
           // Offscreen content stays visible too until its observer callback runs.
-          if (target.getBoundingClientRect().top < window.innerHeight) seen.add(target);
-          if (!seen.has(target)) observer.observe(target);
+          if (target.getBoundingClientRect().top < window.innerHeight) {
+            seen.add(target);
+            continue;
+          }
+          gsap.set(target, { opacity: 0.78, y: 10, scale: target.matches('.editorial-photo') ? 0.995 : 1 });
+          observer.observe(target);
         }
         return () => observer.disconnect();
       });

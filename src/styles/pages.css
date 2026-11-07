@@ -229,6 +229,9 @@
     from, to { scale: 0.72; }
     50% { scale: 1; }
   }
+  @media (width <= 56rem), (hover: none) {
+    .product-scroller .product { animation: none; scale: 1; }
+  }
   .product {
     position: relative;
     --stack-space: 0.8rem;
