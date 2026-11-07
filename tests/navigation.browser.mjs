@@ -1,6 +1,4 @@
 import test from 'node:test';
-// CI validates exported assets; browser regression runs explicitly on developers' machines.
-import '../scripts/verify-static-export.mjs';
 import assert from 'node:assert/strict';
 import { createReadStream, existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
@@ -51,7 +49,7 @@ const executable = process.env.CHROME_PATH || [
 assert.ok(executable, 'Set CHROME_PATH to an installed Chrome/Chromium executable');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-test('page motion and navigation', { timeout: 180000, skip: Boolean(process.env.CI) }, async t => {
+test('page motion and navigation', { timeout: 180000 }, async t => {
   const base = process.env.ROLLFORM_TEST_URL || await localBase(t);
   const profile = mkdtempSync(join(tmpdir(), 'rollform-navigation-'));
   const browser = spawn(executable, [
