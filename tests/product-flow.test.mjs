@@ -78,3 +78,14 @@ test('quantity changes keep selections and have bounds', () => {
   const other = addCartItem(saved, { origin: { kind: 'preorder_custom' }, config: { ...initialConfig, shape: 'd6' } });
   assert.deepEqual(changeQuantity(other, saved[0].id, -1), [other[1]]);
 });
+
+test('repeated adds never exceed the persisted cart limit', () => {
+  for (const origin of [{ kind: 'preorder_custom' }, { kind: 'in_stock', presetId: 'x' }]) {
+    const input = { origin, config: initialConfig, available: 101 };
+    const added = addCartItem([], input);
+    const full = changeQuantity(added, added[0].id, 98);
+    const next = addCartItem(full, input);
+    assert.equal(next[0].quantity, 99);
+    assert.deepEqual(readCart(JSON.stringify(next)), next);
+  }
+});

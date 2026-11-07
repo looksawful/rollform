@@ -24,7 +24,7 @@ export function addCartItem(items: CartItem[], input: AddInput): CartItem[] {
     if (!Number.isInteger(input.available) || (input.available ?? 0) <= 0) throw Error('Наличие не подтверждено');
     if ((existing?.quantity ?? 0) >= input.available!) throw Error('Количество превышает остаток');
   }
-  if (existing) return items.map(item => item.id === existing.id ? { ...item, quantity: item.quantity + 1 } : item);
+  if (existing) return items.map(item => item.id === existing.id ? { ...item, quantity: Math.min(99, item.quantity + 1) } : item);
   return [...items, { id: crypto.randomUUID(), origin: input.origin, config: { ...input.config }, quantity: 1 }];
 }
 
