@@ -137,10 +137,10 @@ test('page motion and navigation', { timeout: 180000, skip: Boolean(process.env.
           const layout = await evaluate(`(() => {
             const rect = selector => {
               const r = document.querySelector(selector).getBoundingClientRect();
-              return { left: r.left, right: r.right, width: r.width };
+              return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width };
             };
             return {
-              object: rect('.hero-object'), copy: rect('.hero-copy'),
+              object: rect('.hero-object'), copy: rect('.hero-copy'), description: rect('.hero-copy p'),
               button: rect('.hero-copy .button'),
               viewport: document.documentElement.clientWidth,
               contentWidth: document.documentElement.scrollWidth,
@@ -153,6 +153,10 @@ test('page motion and navigation', { timeout: 180000, skip: Boolean(process.env.
           assert.equal(layout.label, 'Создать случайный кубик');
           assert.equal(layout.tag, 'BUTTON');
           assert.equal(layout.icon, true);
+          if (width <= 430) {
+            assert.ok(layout.object.top >= layout.description.bottom, 'Mobile 3D dice must not overlap the description');
+            assert.ok(layout.object.bottom <= layout.button.top, 'Mobile 3D dice must not overlap the CTA');
+          }
           if (mobile) {
             assert.ok(Math.abs(layout.button.width - layout.copy.width) < 2,
               'Mobile primary CTA fills the content width');
