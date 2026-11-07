@@ -53,7 +53,8 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
   const base = process.env.ROLLFORM_TEST_URL || await localBase(t);
   const profile = mkdtempSync(join(tmpdir(), 'rollform-navigation-'));
   const browser = spawn(executable, [
-    ...(process.env.DISPLAY ? [] : ['--headless=new']), '--remote-debugging-port=0', '--user-data-dir=' + profile,
+    ...(process.env.DISPLAY ? ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader'] : ['--headless=new']),
+    '--remote-debugging-port=0', '--user-data-dir=' + profile,
     '--no-first-run', '--no-default-browser-check', '--disable-extensions', 'about:blank',
   ], { windowsHide: true, stdio: 'ignore' });
   let socket, send;
