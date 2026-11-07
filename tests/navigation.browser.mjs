@@ -49,7 +49,17 @@ const executable = process.env.CHROME_PATH || [
 assert.ok(executable, 'Set CHROME_PATH to an installed Chrome/Chromium executable');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-test('page motion and navigation', { timeout: 180000 }, async t => {
+test('CI static export preserves the original site without the removed lab', { skip: !process.env.CI }, () => {
+  for (const route of ['', 'cart', 'catalog', 'configure', 'contacts', 'product', 'production']) {
+    assert.ok(existsSync(join('out', route, 'index.html')), 'Missing exported route: ' + route);
+  }
+  for (const shape of ['d4', 'd6', 'd8', 'd10', 'd12', 'd20']) {
+    assert.ok(existsSync(join('out', 'models', shape + '.glb')), 'Missing original GLB: ' + shape);
+  }
+  assert.equal(existsSync(join('out', 'material-lab')), false, 'Removed lab still exported');
+});
+
+test('page motion and navigation', { timeout: 180000, skip: Boolean(process.env.CI) }, async t => {
   const base = process.env.ROLLFORM_TEST_URL || await localBase(t);
   const profile = mkdtempSync(join(tmpdir(), 'rollform-navigation-'));
   const browser = spawn(executable, [
