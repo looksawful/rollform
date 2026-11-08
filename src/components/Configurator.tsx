@@ -69,7 +69,7 @@ export default function Configurator() {
           <Link href={'/production'}>Изготовление и доставка</Link>
         </div>
         <p className="configure-price">{price}</p>
-        <button type="button" className="button button-black button-fill configure-desktop-buy" onClick={addCustom}><span>В корзину</span><ShoppingBag className="icon" aria-hidden="true" /></button>
+        <button type="button" className="button button-black button-fill" onClick={addCustom}><span>В корзину</span><ShoppingBag className="icon" aria-hidden="true" /></button>
       </div>
     </div>
     <div className="configure-mobile-buy" aria-label="Выбранный кубик и добавление в корзину">
