@@ -376,6 +376,12 @@
   .production-note h2 { font-size: var(--fs-body); line-height: var(--lh-title); font-weight: 700; }
   .production-note p, .production-note a { font-size: var(--fs-small); line-height: var(--lh-small); }
   .production-note a, .footer-secondary-link { text-underline-offset: 0.3em; }
+  /* Give inline navigation links a usable touch target without changing their text. */
+  :where(.breadcrumb, .detail-delivery, .production-note a, .production-map-caption a) {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.75rem;
+  }
   .production-info {
     display: grid;
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
