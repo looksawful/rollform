@@ -437,26 +437,6 @@
   .production-map-frame { position: relative; min-inline-size: 0; }
   .production-map-frame iframe { display: block; inline-size: 100%; block-size: clamp(22rem, 40vw, 32rem); border: 0; pointer-events: none; }
   .production-map-frame[data-active="true"] iframe { pointer-events: auto; }
-  .production-map-activate {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-  }
-  .production-map-activate span {
-    padding: 0.75rem 1.1rem;
-    border: var(--border-default);
-    border-radius: var(--radius-full);
-    background: var(--color-surface);
-    color: var(--color-text);
-    font-size: var(--fs-small);
-    font-weight: 700;
-    box-shadow: var(--shadow-card);
-  }
-  .production-map-activate:hover span { transform: translateY(-1px); }
   .production-map-caption {
     display: flex;
     justify-content: space-between;
@@ -467,7 +447,6 @@
     font-size: var(--fs-small);
     line-height: var(--lh-small);
   }
-  .production-map-caption a { text-decoration: underline; text-underline-offset: 0.25em; }
   .faq-list { inline-size: 100%; max-inline-size: none; }
   .faq-list details { border-block-end: var(--border-default); }
   .faq-list details:first-child { border-block-start: var(--border-default); }

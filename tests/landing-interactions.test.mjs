@@ -12,7 +12,9 @@ test('responsive split production, map activation and no placeholder',()=>{
  assert.match(p,/useState\(false\)/);
  assert.match(p,/onPointerLeave=\{\(\) => setMapActive\(false\)\}/);
  assert.match(p,/setMapActive\(true\)/);
- assert.match(p,/aria-label="Включить управление картой"/);
+ assert.match(p,/onPointerMove=/);
+ assert.match(p,/aria-label="Обзорная карта Москвы/);
+ assert.doesNotMatch(p,/Управлять картой|Открыть карту|production-map-activate/);
  assert.match(c,/\.production-map-frame iframe\s*\{[^}]*pointer-events:\s*none/);
  assert.match(c,/\.production-map-frame\[data-active="true"\] iframe\s*\{[^}]*pointer-events:\s*auto/);
 });

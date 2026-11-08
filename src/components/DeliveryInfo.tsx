@@ -19,25 +19,26 @@ export default function DeliveryInfo() {
     <div className="production-map" onBlurCapture={event => {
       if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setMapActive(false);
     }}>
-      <div className="production-map-frame" tabIndex={-1} data-active={mapActive ? 'true' : 'false'}
+      <div className="production-map-frame" tabIndex={0} role="group"
+        aria-label="Обзорная карта Москвы. Для управления нажмите Enter или коснитесь карты"
+        data-active={mapActive ? 'true' : 'false'}
+        onPointerMove={event => { if (event.pointerType === 'mouse' && Math.abs(event.movementX) + Math.abs(event.movementY) > 2) setMapActive(true); }}
+        onClick={() => setMapActive(true)}
         onPointerLeave={() => setMapActive(false)}
-        onKeyDown={event => { if (event.key === 'Escape') setMapActive(false); }}
+        onKeyDown={event => {
+          if (event.key === 'Escape') setMapActive(false);
+          if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            setMapActive(true);
+          }
+        }}
         >
         <iframe title="Обзорная карта Москвы"
           src="https://www.openstreetmap.org/export/embed.html?bbox=37.3%2C55.5%2C37.9%2C55.9&layer=mapnik"
           loading="lazy" tabIndex={mapActive ? 0 : -1} referrerPolicy="strict-origin-when-cross-origin" />
-        {!mapActive && <button type="button" className="production-map-activate"
-          aria-label="Включить управление картой" onClick={event => {
-            setMapActive(true);
-            event.currentTarget.parentElement?.focus({ preventScroll: true });
-          }}>
-          <span>Управлять картой</span>
-        </button>}
       </div>
       <div className="production-map-caption">
         <span>Пункт самовывоза по адресу: …, д. 12, …, 12:00–18:00.</span>
-        <a href="https://www.openstreetmap.org/#map=10/55.7/37.6" target="_blank" rel="noopener noreferrer">Открыть карту</a>
-        {mapActive && <button type="button" className="text-action" onClick={() => setMapActive(false)}>Выключить управление картой</button>}
       </div>
     </div>
   </section>;

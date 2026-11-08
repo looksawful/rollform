@@ -576,6 +576,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           }
 
           assert.equal(await evaluate(`document.querySelector('.production-map-caption span').textContent`),'Пункт самовывоза по адресу: …, д. 12, …, 12:00–18:00.');
+          assert.equal(await evaluate(`document.querySelectorAll('.production-map-activate, .production-map-caption a, .production-map-caption button').length`),0,'Map has no extra visible controls');
           assert.ok(await evaluate(`!document.querySelector('#delivery iframe').src.includes('marker=')`));
           assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Contacts fit ${width}px`);
           await evaluate(`document.querySelector('.production-map-frame').scrollIntoView({block:'center',behavior:'instant'})`);
@@ -587,13 +588,19 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           await send('Input.dispatchMouseEvent', { type: 'mouseWheel', ...mapPoint, deltaX: 0, deltaY: 100 * direction });
           await delay(200);
           assert.ok(await evaluate(`(scrollY - ${pageBefore}) * ${direction} > 20`), 'Inactive map lets the page scroll');
-          await evaluate(`document.querySelector('.production-map-activate').focus()`);
+          await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: mapPoint.x + 12, y: mapPoint.y + 8 });
+          await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: mapPoint.x + 28, y: mapPoint.y + 8 });
+          await until(`document.querySelector('.production-map-frame').dataset.active === 'true'`);
+          await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 2, y: 2 });
+          await until(`document.querySelector('.production-map-frame').dataset.active === 'false'`);
+          await evaluate(`document.querySelector('.production-map-frame').focus()`);
           await send('Input.dispatchKeyEvent', { type:'rawKeyDown', key:'Enter', code:'Enter', windowsVirtualKeyCode:13 });
           await send('Input.dispatchKeyEvent', { type:'char', text:'\r', unmodifiedText:'\r', key:'Enter', code:'Enter', windowsVirtualKeyCode:13 });
           await send('Input.dispatchKeyEvent', { type:'keyUp', key:'Enter', code:'Enter', windowsVirtualKeyCode:13 });
           await until(`document.querySelector('.production-map-frame').dataset.active === 'true'`);
           assert.equal(await evaluate(`document.querySelector('.production-map-frame iframe').tabIndex`), 0);
-          await evaluate(`Array.from(document.querySelectorAll('.production-map button')).find(b=>b.textContent.includes('Выключить')).click()`);
+          await send('Input.dispatchKeyEvent', { type:'rawKeyDown', key:'Escape', code:'Escape', windowsVirtualKeyCode:27 });
+          await send('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape', windowsVirtualKeyCode:27 });
           await until(`document.querySelector('.production-map-frame').dataset.active === 'false'`);
           await send('Page.navigate', { url: new URL(theme + 'cart/', base).href });
           await until(`!!document.querySelector('.cart-entry')`);
