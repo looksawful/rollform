@@ -53,7 +53,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | Button: `.button`, `.button-black`, `.button-secondary` в страницах | есть | есть (подъём/инверсия) | глобальный outline | active CSS | нет общего API, native button допускает disabled | нет общего async-состояния, не нужно |
 | ChoicePill: `.pill-list button` в `Configurator.tsx` | есть | есть | глобальный outline | `aria-pressed` + `.is-active` | нет | нет |
-| ProductCard: `ProductCard.tsx` | есть | `.product:hover`, action | глобальный outline на ссылке/кнопке | количество в корзине и `role=status` | нет | изображения с `loading="lazy"`; **нет** UI загрузки/ошибки |
+| ProductCard: `ProductCard.tsx` | есть | `.product:hover`, action | глобальный outline на ссылке/кнопке | счётчик в корзине, локальное `role=status` / `aria-live` с результатом add | нет | при лимите 99 объявляется максимум; `loading="lazy"` у изображения не является UI loading |
 | Price: `.product-price`, `.configure-price`, `.cart-price`, `.cart-total` | есть | не требуется | неинтерактивный | не требуется | не требуется | нет, синхронный расчёт |
 | Gallery: `ProductDetail.tsx` (фото/3D/Lightbox; `ProductGallery.tsx` — лента карточек, отдельно) | есть | карточки и миниатюры | глобальный outline | `aria-pressed` у миниатюр, `view` фото/3D | нет | браузерный lazy-load; lightbox на странице товара |
 | DiceViewer: `DiceViewer.tsx` | есть | не кнопка | tabindex=0 кроме Hero | auto → manual при взаимодействии | нет | `fallback` при WebGL/модели, context lost/restored; отдельного loading UI нет |
@@ -67,7 +67,7 @@
 
 1. Интерактивные действия — `button type="button"` (или submit для формы); переходы — `a`/`Link`. Для выбранных вариантов сохранять синхронность `aria-pressed` и `.is-active`; для текущей страницы — `aria-current="page"`.
 2. Базовый `:focus-visible` уже установлен в `base.css`: `outline: 2px solid var(--color-focus); outline-offset: 4px`. Сначала проверить, не обрезается ли он `overflow:hidden` у конкретного компонента. Не добавлять второй глобальный outline.
-3. `.button` имеет `min-block-size: 3.25rem`, `.quantity button` — 2.75rem, `.pill-list button` имеет min-inline-size 4.5rem. На узких экранах есть локальное правило `.product-grid .product-actions .button { font-size: 0.75rem }` — **известный кандидат на RF-03**, не менять в RF-02, чтобы избежать конфликта с исполнителем каталога.
+3. `.button` имеет `min-block-size: 3.25rem`, `.quantity button` — 2.75rem, `.pill-list button` — `min-inline-size: 4.5rem`. В каталоге на узких экранах RF-03 использует `.product-grid .product-actions .button { font-size: 0.875rem; min-block-size: 3rem; }` и `.product-add-label`; сам `ProductCard.tsx` теперь показывает форму и цвет из `presets.config`. Это **локальный вариант карточки**, не причина добавлять глобальный токен.
 4. `prefers-reduced-motion` уже отключает анимацию кнопок и влияет на карусель/3D; сохранять эти исключения.
 5. Статические цены не требуют `aria-live`; динамическое подтверждение корзины уже находится в `ProductCard`. Не плодить одинаковые live-region на каждом уровне.
 6. Тексты/данные временные, не дополнять их выдуманными свойствами. Все изменения визуальной системы должны опираться на реальный компонент и тестируемый дефект.
@@ -78,7 +78,7 @@
 
 **RF-02:** существующие токены, `.stack`, `.cluster`, `.wrapper`, `.grid`, `.prose` и общий `:focus-visible` уже присутствуют. Изолированная инвентаризация не выявила необходимости переписывать глобальные значения или Hero. Визуальная унификация конкретных карточек/форм/мобильного конструктора выполняется в RF-03…RF-11, а не повторяется здесь.
 
-**Ограничение проверки:** это статический аудит файлов GitHub. До выполнения тестов и реального browser QA на 320/390/768/1440 нельзя считать адаптивность, контраст и отсутствие обрезки фокуса подтверждёнными. Проверки `npm test`, `npm run typecheck`, `npm run build`, `npm run test:navigation` обязательны для каждого будущего изменения кода; CI после документального коммита подтверждает только текущий pipeline.
+**Граница приёмки:** реестр подтверждён чтением исходников и браузерной проверкой восьми маршрутов на 320/390/768/1440. Скриншоты, результаты проверки клавиатурного фокуса, точные команды, проверенная SHA и оставшиеся ограничения хранятся в [Issue №5](https://github.com/looksawful/rollform-internal/issues/5), а не в этом нормативном документе. Это не заменяет проверку визуального обрезания контура, 200% zoom, контраста, реального touch и NVDA/VoiceOver. `npm test`, `npm run typecheck`, `npm run build`, `npm run test:navigation` остаются обязательными после изменений кода.
 
 История выполнения и QA — в [issue #5](https://github.com/looksawful/rollform-internal/issues/5) и Asana, без дополнительного журнала в README.
 
@@ -105,7 +105,7 @@
 | --- | --- | --- | --- |
 | Button | HTML button/Link + `components.css`; обработчик в владельце | CSS hover/active/focus, семантические кнопки/ссылки; вариант чёрный/вторичный | Универсального `Button.tsx`, глобального `isLoading` или отдельного disabled-variant |
 | ChoicePill | `configFromParams`, `DiceConfig` и `Configurator.tsx` | `aria-pressed=true` и `is-active` одновременно при выбранных shape/shell/font | Отдельного choice-store, async/loading/error, состояния выбора нескольких вариантов одной группы |
-| ProductCard | `presets`, `useCart().items`, `ProductCard.tsx` | переход в детальную страницу, add, count, live-region; у дубликатов ленты `tabIndex=-1` и `aria-hidden` на копии | Собственного товара/API, network loading и native disabled |
+| ProductCard | `presets`, `useCart().items`, `ProductCard.tsx` | переход в детали, локальная форма+цвет из `config`, add/count, `announcement` через `role=status` (max 99 / failed add); у дубликатов ленты `tabIndex=-1` и `aria-hidden` на копии | Реального SKU/API, network loading и native disabled |
 | Price | `src/lib/pricing.ts` + `formatPrice` | Синхронные placeholder-цены пресета/конфигурации/итога | Асинхронной стоимости, discount-state, discount token, live-region на статической цене |
 | Gallery товара | локальный `view` и `lightboxOpen` в `ProductDetail.tsx` | Выбрана миниатюра (`aria-pressed`), фото или 3D, открыть/закрыть Lightbox | Компонента `Gallery.tsx`, единого network loading или ошибки миниатюры |
 | DiceViewer | `config`, `continuous`, WebGL/GLB, `fallback` в `DiceViewer.tsx` | idle/rolling/manual/paused через `data-motion`; fallback при ошибке/потере контекста | Глобального загрузчика или универсальной кнопки Retry; Hero не захватывает фокус |
@@ -158,11 +158,11 @@ npm run test:navigation
 
 | Следующий пакет | Владеет | Что пакет 1 **не** меняет |
 | --- | --- | --- |
-| RF-03…RF-05 | `ProductCard.tsx`, `ProductGallery.tsx`, `pages.css`, каталог, счётчик и обратная связь | Текст кнопки карточки 12 px на узком экране, ложные storefront-states; остаются задачей каталога |
+| RF-03…RF-05 | `ProductCard.tsx`, `ProductGallery.tsx`, `pages.css`, каталог, счётчик и обратная связь | Уже реализованное увеличение шрифта CTA до 14px, локальные параметры пресета и объявление добавления; дополнительные исправления принадлежат владельцу каталога |
 | RF-06…RF-07 | `Configurator.tsx`, `DiceViewer.tsx`, fallback, sticky CTA | WebGL pipeline, 3D, параметры выбора, URL-конфигурация |
 | RF-08…RF-10 | `CartState.tsx`, `CartView.tsx`, `ContactContent.tsx` и бизнес-путь прототипа | Checkout, лимит количества, отправка формы |
 | RF-11…RF-14 | Полный путь, доступность, motion, перформанс, заключительная приемка | Не объявлять WCAG/physical-device pass без проверки |
 
-**Известная граница**: некоторые текстовые ссылки и иконки могут иметь область действия меньше 44×44 CSS px; это предмет RF-11 после проверки конкретных целей, не повод вводить универсальный padding у всех `a`. Каталожный мобильный текст 12 px уже относится к RF-03. Не скрывать эти кандидаты общей записью «все focus-состояния есть».
+**Известная граница**: некоторые текстовые ссылки и иконки могут иметь область действия меньше 44×44 CSS px; это предмет RF-11 после проверки конкретных целей, не повод вводить универсальный padding у всех `a`. Мобильный CTA каталога теперь 14 px и `min-block-size: 3rem` по RF-03; повторно проверять его на новых версиях `main`. Не скрывать иные кандидаты общей записью «все focus-состояния есть».
 
 Правило завершения: перечитать `AGENTS.md`, `README.md` и затронутые исходники; работать поверх актуального `main`; не применять `force push`; сначала тест/браузер/CI/Pages, только затем «готово» в Issue №5 и Asana. Если изменяется только документация, фиксировать это именно как документальную работу, а не как исправление поведения CSS.
