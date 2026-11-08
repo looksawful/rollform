@@ -20,7 +20,7 @@ test('mobile configurator summary reuses the current config and price', () => {
 
 test('3D preview exposes loading, ready, error and a bounded loading fallback', () => {
   assert.match(viewer, /'loading' \| 'ready' \| 'error'/);
-  assert.match(viewer, /setStatus\('ready'\)/);
+  assert.match(viewer, /setStatus\(lost \? 'error' : 'ready'\)/);
   assert.match(viewer, /setStatus\('error'\)/);
   assert.match(viewer, /window\.setTimeout\(/);
   assert.match(viewer, /window\.clearTimeout\(slowLoad\)/);
