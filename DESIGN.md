@@ -56,7 +56,7 @@
 | ProductCard: `ProductCard.tsx` | есть | `.product:hover`, action | глобальный outline на ссылке/кнопке | счётчик в корзине, локальное `role=status` / `aria-live` с результатом add | нет | при лимите 99 объявляется максимум; `loading="lazy"` у изображения не является UI loading |
 | Price: `.product-price`, `.configure-price`, `.cart-price`, `.cart-total` | есть | не требуется | неинтерактивный | не требуется | не требуется | нет, синхронный расчёт |
 | Gallery: `ProductDetail.tsx` (фото/3D/Lightbox; `ProductGallery.tsx` — лента карточек, отдельно) | есть | карточки и миниатюры | глобальный outline | `aria-pressed` у миниатюр, `view` фото/3D | нет | браузерный lazy-load; lightbox на странице товара |
-| DiceViewer: `DiceViewer.tsx` | есть | не кнопка | tabindex=0 кроме Hero | auto → manual при взаимодействии | нет | `fallback` при WebGL/модели, context lost/restored; отдельного loading UI нет |
+| DiceViewer: `DiceViewer.tsx` | есть | не кнопка | tabindex=0 кроме Hero | auto → manual при взаимодействии | нет | реальные `status: loading/ready/error`, fallback, context lost/restored; `role=status` озвучивается вне Hero |
 | CartLine: `.cart-entry` в `CartView.tsx` | есть | quantity/remove | глобальный outline | `aria-live` у количества | `disabled` у плюса при 99 | empty-state для пустой корзины; async loading нет |
 | FormField: `ContactContent.tsx` | есть | браузерный | глобальный outline | input/textarea focus | native required | native validation; `role=status` при демо-submit, backend отсутствует |
 | Menu: `SiteShell.tsx` (`.nav`, `.mobile-menu`) | есть | ссылки | глобальный outline | `aria-current="page"`, details open | нет | нет |
@@ -89,7 +89,7 @@
 | `/` | `src/app/page.tsx`, `Storefront.tsx`, `ProductGallery.tsx`, `ProductCard.tsx`, `DiceViewer.tsx` | Hero (не изменять), section/heading, wrapper, stack, reel, карточка |
 | `/catalog/` | `src/app/catalog/page.tsx`, `ProductGallery.tsx`, `ProductCard.tsx` | grid, карточка, ссылка и отдельное действие |
 | `/product/` | `src/app/product/page.tsx`, `ProductDetail.tsx` | галерея фото/3D, thumbnails, Lightbox, цена и действие |
-| `/configure/` | `src/app/configure/page.tsx`, `Configurator.tsx`, `DiceViewer.tsx` | sidebar, stack, field, cluster, выбор с aria-pressed |
+| `/configure/` | `src/app/configure/page.tsx`, `Configurator.tsx`, `DiceViewer.tsx` | sidebar, stack, field, cluster, `aria-pressed`; мобильная sticky-сводка выбора/цены/CTA уже реализована RF-06 |
 | `/cart/` | `src/app/cart/page.tsx`, `CartView.tsx`, `CartState.tsx` | пустое состояние, строка, количество, итог |
 | `/contacts/` | `src/app/contacts/page.tsx`, `ContactContent.tsx` | switcher, prose, label/input/textarea, native validation |
 | `/production/` | `src/app/production/page.tsx`, `ProductionInfo.tsx`, `DeliveryInfo.tsx` | split, текст, карта; не принимать за checkout |
@@ -108,7 +108,7 @@
 | ProductCard | `presets`, `useCart().items`, `ProductCard.tsx` | переход в детали, локальная форма+цвет из `config`, add/count, `announcement` через `role=status` (max 99 / failed add); у дубликатов ленты `tabIndex=-1` и `aria-hidden` на копии | Реального SKU/API, network loading и native disabled |
 | Price | `src/lib/pricing.ts` + `formatPrice` | Синхронные placeholder-цены пресета/конфигурации/итога | Асинхронной стоимости, discount-state, discount token, live-region на статической цене |
 | Gallery товара | локальный `view` и `lightboxOpen` в `ProductDetail.tsx` | Выбрана миниатюра (`aria-pressed`), фото или 3D, открыть/закрыть Lightbox | Компонента `Gallery.tsx`, единого network loading или ошибки миниатюры |
-| DiceViewer | `config`, `continuous`, WebGL/GLB, `fallback` в `DiceViewer.tsx` | idle/rolling/manual/paused через `data-motion`; fallback при ошибке/потере контекста | Глобального загрузчика или универсальной кнопки Retry; Hero не захватывает фокус |
+| DiceViewer | `config`, `continuous`, WebGL/GLB и `status` в `DiceViewer.tsx` | `loading → ready/error`, fallback с кратким сообщением вне Hero, context lost/restored; анимация через `data-motion` | Глобального loading-store или универсальной Retry; Hero не захватывает фокус |
 | CartLine | `CartState`, `orders.ts` и `CartView.tsx` | количество, удаление, disable плюса при 99, полное empty-состояние корзины | Отдельного `CartLine.tsx`, loading после запроса, настоящего checkout |
 | FormField | браузерная HTML-validation и `submitted` в `ContactContent.tsx` | required/email validation, фокус, `role=status` «сообщение не отправлено» | `FormField.tsx`, backend, отправки, сохранения ввода или настоящего success |
 | Menu | `SiteShell.tsx`, `usePathname`, native `details/summary` | `aria-current=page` у текущего маршрута, `open` мобильного меню, Escape, keyboard focus | Отдельного `Menu.tsx` или JS popup state machine |
@@ -131,7 +131,7 @@
 - Секция: `.section-title` использует те же смысловые heading-токены. Hero использует display-токены и отдельные согласованные локальные ограничения, **не** менять его в RF-02.
 - Товар: `.product-copy.stack`, заголовок `--fs-title`, цена `.product-price`; локальное уплотнение карточек на узких экранах остаётся владельцем RF-03.
 - Корзина: `.cart-entry-copy.stack`, `--fs-title` и `--fs-small`, стоимость `.cart-price`. Не перерабатывать сетку строк корзины в пакете 1.
-- Конструктор: `.configure-controls.stack`, `.field.stack`, группы `.pill-list.cluster` и собственный `.configure-price`. Параметры/липкий CTA принадлежат RF-06.
+- Конструктор: `.configure-controls.stack`, `.field.stack`, `.pill-list.cluster`, `.configure-price`; `.configure-mobile-buy` — локальная sticky-сводка выбора/цены/CTA на узких экранах, `.configure-desktop-buy` — исходная десктопная кнопка. Поддержка этих сценариев принадлежит RF-06, не RF-02.
 - Контакты: `.contact-form.stack` + `.prose` для вводного заголовка/лида; `label.stack`, `input`, `textarea` остаются нативными, без нового `FormField`.
 
 ## 9. Воспроизводимая проверка для последующих исполнителей
@@ -159,7 +159,7 @@ npm run test:navigation
 | Следующий пакет | Владеет | Что пакет 1 **не** меняет |
 | --- | --- | --- |
 | RF-03…RF-05 | `ProductCard.tsx`, `ProductGallery.tsx`, `pages.css`, каталог, счётчик и обратная связь | Уже реализованное увеличение шрифта CTA до 14px, локальные параметры пресета и объявление добавления; дополнительные исправления принадлежат владельцу каталога |
-| RF-06…RF-07 | `Configurator.tsx`, `DiceViewer.tsx`, fallback, sticky CTA | WebGL pipeline, 3D, параметры выбора, URL-конфигурация |
+| RF-06…RF-07 | `Configurator.tsx`, `DiceViewer.tsx`, fallback и sticky CTA | Уже реализованные мобильная сводка и загрузка/ошибка 3D; их дальнейшая проверка и исправления принадлежат владельцу пакета 3 |
 | RF-08…RF-10 | `CartState.tsx`, `CartView.tsx`, `ContactContent.tsx` и бизнес-путь прототипа | Checkout, лимит количества, отправка формы |
 | RF-11…RF-14 | Полный путь, доступность, motion, перформанс, заключительная приемка | Не объявлять WCAG/physical-device pass без проверки |
 
