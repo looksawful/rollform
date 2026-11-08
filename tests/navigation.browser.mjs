@@ -109,7 +109,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
       }
       assert.fail('Timed out: ' + expression);
     };
-    const clickVisible = async selector => {
+    const clickVisible = async (selector, touch = false) => {
       const { x, y } = await until(`(() => {
         const target = document.querySelector(${JSON.stringify(selector)});
         if (!target) return false;
@@ -119,8 +119,13 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
         return false;
       })()`);
-      await send('Input.dispatchMouseEvent', { type:'mousePressed', x, y, button:'left', buttons:1, clickCount:1 });
-      await send('Input.dispatchMouseEvent', { type:'mouseReleased', x, y, button:'left', buttons:0, clickCount:1 });
+      if (touch) {
+        await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+        await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      } else {
+        await send('Input.dispatchMouseEvent', { type:'mousePressed', x, y, button:'left', buttons:1, clickCount:1 });
+        await send('Input.dispatchMouseEvent', { type:'mouseReleased', x, y, button:'left', buttons:0, clickCount:1 });
+      }
     };
     const sampleEntry = selector => evaluate(`new Promise(resolve => {
       const element = document.querySelector(${JSON.stringify(selector)});
@@ -186,7 +191,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
             await until(`!!document.querySelector('.hero-object .dice-canvas')`);
             // Center the target before sending CDP pointer input on the emulated phone.
             if (mobile) await evaluate(`document.querySelector('.hero-copy .button').scrollIntoView({ block: 'center', behavior: 'instant' })`);
-            await clickVisible('.hero-copy .button');
+            await clickVisible('.hero-copy .button', mobile);
             await until(`location.pathname.endsWith('/configure/') &&
               document.querySelector('h1')?.textContent === 'Собери сам' &&
               ['shape','shell','font'].every(key => new URLSearchParams(location.search).has(key))`);
