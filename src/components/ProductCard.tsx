@@ -24,10 +24,6 @@ export default function ProductCard({ product, index, duplicate = false }: {
   const attributes = `${product.config.shape.toUpperCase()} · ${colorName ?? product.config.shell}`;
 
   const addToCart = () => {
-    if (quantity >= 99) {
-      setAnnouncement(`${product.title}: максимум 99 в корзине`);
-      return;
-    }
     const updatedQuantity = add(product.config, { kind: 'preorder_preset', presetId: product.id });
     setAnnouncement(updatedQuantity !== false
       ? `${product.title}: добавлено в корзину, теперь ${updatedQuantity}`
