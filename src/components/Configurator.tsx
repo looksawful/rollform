@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Box, ShoppingBag } from 'lucide-react';
+import { Box, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import Breadcrumbs, { catalogCrumb } from './Breadcrumbs';
 import DiceViewer from './DiceViewer';
@@ -39,6 +39,11 @@ export default function Configurator() {
     next.set(key, value);
     window.history.replaceState(null, '', `?${next}`);
   };
+  const stepFont = (direction: -1 | 1) => {
+    const { font } = configFromParams(new URLSearchParams(window.location.search));
+    const index = fontStyles.indexOf(font);
+    change('font', fontStyles[(index + direction + fontStyles.length) % fontStyles.length]);
+  };
   const createRandomDice = () => {
     const next = new URLSearchParams(diceQuery(randomDiceConfig(Math.random, config.shell)));
     if (preset) next.set('preset', preset.id);
@@ -47,7 +52,7 @@ export default function Configurator() {
   const addCustom = () => { if (add(config, { kind: 'preorder_custom' })) router.push('/cart'); };
 
   const price = formatPrice(priceForConfig(config));
-  const summary = `${config.shape.toUpperCase()} · ${shellColors.find(color => color.value === config.shell)?.name ?? ""} · ${fontNames[config.font]}`;
+  const summary = `${config.shape.toUpperCase()} · ${shellColors.find(color => color.value === config.shell)?.name ?? ""}`;
 
   return <section className="wrapper section page-section configure-page">
     <Breadcrumbs current="Собери сам" ancestors={preset ? [catalogCrumb, {
@@ -85,13 +90,15 @@ export default function Configurator() {
         </div>
         <div className="field stack">
           <h2 id="dice-font">Шрифт</h2>
-          <div className="option-list font-options" role="group" aria-labelledby="dice-font">
-            {fontStyles.map(font => (
-              <button key={font} type="button" aria-pressed={config.font === font} onClick={() => change('font', font)}>
-                <span>{fontNames[font]}</span>
-                <img className="numeral-sample" src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/numerals/${font}-sample.webp`} alt="" width={104} height={20} />
-              </button>
-            ))}
+          <div className="font-picker" role="group" aria-labelledby="dice-font">
+            <button type="button" aria-label="Предыдущий шрифт" onClick={() => stepFont(-1)}>
+              <ChevronLeft className="icon" aria-hidden="true" />
+            </button>
+            <img className="numeral-sample" src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/numerals/${config.font}-sample.webp`} alt="" width={400} height={76} />
+            <button type="button" aria-label="Следующий шрифт" onClick={() => stepFont(1)}>
+              <ChevronRight className="icon" aria-hidden="true" />
+            </button>
+            <span className="visually-hidden" role="status">{fontNames[config.font]}</span>
           </div>
         </div>
         <p className="configure-price">{price}</p>

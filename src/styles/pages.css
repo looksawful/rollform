@@ -127,20 +127,31 @@
     outline-offset: 3px;
   }
 
-  .font-options { border-block-start: var(--border-default); }
-  .font-options button {
+  .font-picker {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) min(36%, 6.5rem);
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
     align-items: center;
-    gap: var(--space-1);
-    inline-size: 100%;
-    padding: var(--space-1);
-    text-align: start;
-    border-block-end: var(--border-default);
+    align-self: center;
+    column-gap: var(--space-1);
+    inline-size: min(100%, 22rem);
+    min-block-size: 4.5rem;
   }
-  .font-options button:is([aria-pressed="true"], :hover) { background: var(--color-surface); }
-  .font-options button[aria-pressed="true"] { box-shadow: inset 2px 0 var(--color-text); }
-  .numeral-sample { inline-size: 100%; block-size: auto; }
+  .font-picker button {
+    display: grid;
+    place-items: center;
+    block-size: 2.75rem;
+    border: var(--border-default);
+    border-radius: var(--radius-full);
+    color: inherit;
+    background: transparent;
+  }
+  .font-picker button:hover { background: var(--color-surface); }
+  .font-picker .icon { --icon-size: 1.25rem; }
+  .numeral-sample {
+    justify-self: center;
+    inline-size: min(100%, 12.5rem);
+    block-size: auto;
+  }
   .configure-price { font-size: var(--fs-title); font-weight: 800; }
 
   @media (width > 56rem) {
@@ -173,31 +184,6 @@
     .configure-controls > .button-fill { inline-size: auto; }
     .shape-options { grid-template-columns: repeat(7, minmax(0, 1fr)); }
     .color-options .swatch { inline-size: 2.25rem; block-size: 2.25rem; }
-    .font-options {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--space-1);
-      border: 0;
-    }
-    .font-options button {
-      display: flex;
-      flex-direction: column-reverse;
-      justify-content: flex-end;
-      align-items: flex-start;
-      gap: 0.125rem;
-      min-block-size: 3.5rem;
-      padding-block: 0.375rem;
-      border: var(--border-default);
-      border-radius: var(--radius-sm);
-      overflow-wrap: anywhere;
-    }
-    .font-options button[aria-pressed="true"] { border-color: var(--color-text); box-shadow: none; }
-    .font-options .numeral-sample {
-      max-inline-size: 6.5rem;
-      block-size: 1.25rem;
-      object-fit: contain;
-      object-position: left center;
-    }
   }
 
   .cart-page { --stack-space: 1.5rem; }

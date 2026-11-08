@@ -557,7 +557,10 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           if (width === 1440) {
             await send('Emulation.setDeviceMetricsOverride', { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false });
           }
-          await send('Page.navigate', { url: new URL(theme + 'configure/', base).href });
+          const checkFontPicker = width === 390 || width === 1440;
+          const configure = new URL(theme + 'configure/', base);
+          if (checkFontPicker) configure.searchParams.set('font', 'nova-flat');
+          await send('Page.navigate', { url: configure.href });
           await until(`document.readyState === 'complete' && !!document.querySelector('.configure-controls')`);
           await delay(150);
           await evaluate(`localStorage.removeItem('rollform:demo-cart:v3')`);
@@ -575,6 +578,16 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
                 && buy.height > 0 && buy.bottom <= innerHeight;
             })()`), 'Preview and purchase fit side by side at 1024×768');
           }
+          if (checkFontPicker) {
+            const previous = '.font-picker button:first-child';
+            const next = '.font-picker button:last-of-type';
+            await clickVisible(previous);
+            await until(`document.querySelector('.numeral-sample').src.endsWith('/simply-mono-sample.webp')`);
+            await clickVisible(next);
+            await until(`document.querySelector('.numeral-sample').src.endsWith('/nova-flat-sample.webp')`);
+            await clickVisible(next);
+            await until(`document.querySelector('.numeral-sample').src.endsWith('/avqest-sample.webp')`);
+          }
           await clickVisible(width <= 896 ? '.configure-mobile-buy .button' : '.configure-controls > .button-fill');
           if (width === 1440) {
             await send('Emulation.setDeviceMetricsOverride', { width, height: 1000, deviceScaleFactor: 1, mobile: false });
@@ -582,6 +595,9 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           // The button navigates to the cart. Await that router transition;
           // forcing a CDP navigation here races its pending router.push.
           await until(`location.pathname.endsWith('/cart/') && !!document.querySelector('.cart-entry')`);
+          if (checkFontPicker) {
+            assert.match(await evaluate(`document.querySelector('.cart-entry').textContent`), /AvQest/);
+          }
           await until(`Number(document.querySelector('.cart-count')?.textContent) === 1`);
           await until(`document.querySelector('.quantity button')?.disabled === false`);
           await until(`!!document.querySelector('.cart-entry-actions .cart-remove svg')`);

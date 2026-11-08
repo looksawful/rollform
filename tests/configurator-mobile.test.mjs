@@ -8,7 +8,7 @@ const responsive = readFileSync('src/styles/responsive.css', 'utf8');
 
 test('mobile configurator summary reuses the current config and price', () => {
   assert.match(editor, /const price = formatPrice\(priceForConfig\(config\)\)/);
-  assert.match(editor, /const summary = .*config\.shape.*config\.shell.*config\.font/);
+  assert.match(editor, /const summary = .*config\.shape.*config\.shell/);
   assert.match(editor, /className="configure-mobile-buy"/);
   assert.match(editor, /className="configure-mobile-buy-price">\{price\}/);
   assert.match(responsive, /\.configure-mobile-buy\s*\{\s*display:\s*none/);
