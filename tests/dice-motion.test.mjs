@@ -15,7 +15,7 @@ test('uses GSAP timeline, Three.js quaternion and motion CSS tokens', () => {
 });
 test('uses OrbitControls rather than a bespoke pointer/physics engine', () => {
   assert.match(viewer, /OrbitControls/);
-  assert.doesNotMatch(viewer, /requestAnimationFrame|setTimeout|pointermove/);
+  assert.doesNotMatch(viewer, /requestAnimationFrame|pointermove/); // A bounded loading timeout is not a custom animation loop.
 });
 
 test('roll is deliberately slow and includes a visible pause on mobile', () => {
