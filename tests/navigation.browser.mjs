@@ -212,7 +212,8 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         await until(`location.pathname.endsWith('/configure/') &&
           ['shape', 'shell', 'font'].every(k => new URLSearchParams(location.search).has(k))`);
         const created = await evaluate('location.search');
-        await until(`document.querySelectorAll('.option-list [aria-pressed="true"]').length === 3`);
+        await until(`document.querySelectorAll('.option-list [aria-pressed="true"]').length === 2 &&
+          document.querySelector('.numeral-sample')?.src.endsWith('/' + new URLSearchParams(location.search).get('font') + '-sample.webp')`);
         await send('Page.navigate', { url: home });
         await until(`document.readyState === 'complete' && !!document.querySelector('.desktop-nav a[href$="/configure/"]')`);
         await evaluate(`document.querySelector('.desktop-nav a[href$="/configure/"]').click()`);
