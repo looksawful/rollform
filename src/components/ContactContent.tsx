@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Camera, Mail, Phone, Send } from 'lucide-react';
 
@@ -13,8 +13,12 @@ const channels = [
 
 export default function ContactContent() {
   const [submitted, setSubmitted] = useState(false);
+  const [invalid, setInvalid] = useState(false);
+  const resultRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { if (submitted) resultRef.current?.focus(); }, [submitted]);
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setInvalid(false);
     setSubmitted(true);
   };
   return <div className="contact-content switcher">
@@ -34,7 +38,7 @@ export default function ContactContent() {
         )}
       </ul>
     </div>
-    <form id="contact-form" className="contact-form stack" onSubmit={onSubmit} onInput={() => setSubmitted(false)} aria-describedby="contact-demo-note">
+    <form id="contact-form" className="contact-form stack" onSubmit={onSubmit} onInput={() => { setSubmitted(false); setInvalid(false); }} onInvalid={() => { setInvalid(true); setSubmitted(false); }} aria-describedby="contact-demo-note">
       <div className="prose">
         <h3>Написать нам</h3>
         <p id="contact-demo-note">Это демонстрационная форма. Сообщения не отправляются и не сохраняются.</p>
@@ -49,7 +53,8 @@ export default function ContactContent() {
         <textarea id="contact-message" name="message" rows={4} required maxLength={1500} />
       </label>
       <button className="button button-black" type="submit">Отправить сообщение</button>
-      {submitted && <p role="status">Форма проверена. Это прототип: сообщение не отправлено.</p>}
+      {invalid && <p role="alert">Проверьте обязательные поля и адрес электронной почты.</p>}
+      {submitted && <p ref={resultRef} tabIndex={-1} role="status">Форма проверена. Это прототип: сообщение не отправлено.</p>}
     </form>
   </div>;
 }
