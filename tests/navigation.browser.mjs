@@ -249,7 +249,8 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         ['product/?item=demo-2', 'Вариант 02'], ['terms/', 'Пользовательское соглашение'],
       ]) {
         await send('Page.navigate', {url:new URL(route,base).href});
-        await until(`document.querySelector('${breadcrumb} [aria-current="page"]')?.textContent === ${JSON.stringify(current)}`);
+        await until(`document.readyState === 'complete' &&
+          document.querySelector('${breadcrumb} [aria-current="page"]')?.textContent === ${JSON.stringify(current)}`);
         assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('${breadcrumb} a'), a => a.href)`),
           route.startsWith('product/') ? [base, new URL('catalog/',base).href] : [base]);
         assert.ok(await evaluate(`Array.from(document.querySelectorAll('${breadcrumb} li')).every(item => item.getBoundingClientRect().right <= innerWidth)`), route);
@@ -545,9 +546,14 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
               reel.focus({preventScroll:true});
               return false;
             })()`);
-            await send('Input.dispatchKeyEvent',{type:'rawKeyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
-            await send('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
-            await until(`document.querySelector('.bento-viewport').scrollLeft > 0`);
+            // Chromium can drop the first keyboard scroll while the scrollport gains focus.
+            const hasScrolled = `document.querySelector('.bento-viewport').scrollLeft > 0`;
+            for (let attempt = 0; attempt < 3 && !await evaluate(hasScrolled); attempt++) {
+              await send('Input.dispatchKeyEvent',{type:'rawKeyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+              await send('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+              await delay(300);
+            }
+            assert.ok(await evaluate(hasScrolled), 'ArrowRight scrolls the focused Bento viewport');
           }
           assert.equal(await evaluate(`document.querySelector('#benefits-title').textContent`), 'О кубиках');
           assert.ok(await evaluate(`document.querySelector('.bento-grid').textContent.includes('Выбирайте из 4 цветов')`));
