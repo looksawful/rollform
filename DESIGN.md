@@ -60,6 +60,7 @@
 | CartLine: `.cart-entry` в `CartView.tsx` | есть | quantity/remove | глобальный outline | `aria-live` у количества | `disabled` у плюса при 99 | empty-state для пустой корзины; async loading нет |
 | FormField: `ContactContent.tsx` | есть | браузерный | глобальный outline | input/textarea focus | native required | native validation; `role=status` при демо-submit, backend отсутствует |
 | Menu: `SiteShell.tsx` (`.nav`, `.mobile-menu`) | есть | ссылки | глобальный outline | `aria-current="page"`, details open | нет | нет |
+| Breadcrumbs: `Breadcrumbs.tsx` (`.breadcrumbs`) | есть на внутренних экранах | ссылки с hover | глобальный outline на ссылках | `aria-current="page"` на текущем неинтерактивном пункте; на странице товара есть родитель «Кубики в наличии» | нет | нет; нативный `nav` + `ol`, без собственного состояния |
 
 Важные отличия: Hero `DiceViewer continuous=true` не интерактивен и не попадает в tab order; остальные 3D управляются pointer/стрелками. Карусель может иметь дубли карточек для бесконечной прокрутки, у дубликатов отключён tab order. Нельзя объявлять наличие loading/error для всех компонентов только ради симметрии таблицы.
 
@@ -112,6 +113,7 @@
 | CartLine | `CartState`, `orders.ts` и `CartView.tsx` | количество, удаление, disable плюса при 99, полное empty-состояние корзины | Отдельного `CartLine.tsx`, loading после запроса, настоящего checkout |
 | FormField | браузерная HTML-validation и `submitted` в `ContactContent.tsx` | required/email validation, фокус, `role=status` «сообщение не отправлено» | `FormField.tsx`, backend, отправки, сохранения ввода или настоящего success |
 | Menu | `SiteShell.tsx`, `usePathname`, native `details/summary` | `aria-current=page` у текущего маршрута, `open` мобильного меню, Escape, keyboard focus | Отдельного `Menu.tsx` или JS popup state machine |
+| Breadcrumbs | `Breadcrumbs.tsx`, `catalogCrumb`, Next `Link`, текущий маршрут/пресет | `nav[aria-label="Хлебные крошки"]`, нативный список, ссылки на главную/каталог/пресет, текущий `span[aria-current="page"]`; responsive и keyboard проверяются `tests/navigation.browser.mjs` | Отдельного store, диалога, selected-кнопки или асинхронных состояний |
 
 Нельзя по наличию общего CSS `:active` объявлять кнопку «selected». Также `loading="lazy"` у изображения означает стратегию загрузки ресурса, **не видимый UI-state loading**. `disabled` у HTML-ввода лишь поддерживается нативно; он не считается реализованным сценарием до появления соответствующей причины блокировки.
 
