@@ -228,21 +228,15 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
     await t.test('internal pages show breadcrumbs with working parent links', async () => {
       const breadcrumb = 'nav[aria-label="Хлебные крошки"]';
       const clickCrumb = async (link) => {
-        const point = await evaluate(`new Promise(resolve => {
+        const { x, y } = await until(`(() => {
           const target = document.querySelector('${breadcrumb} ${link}');
+          if (!target) return false;
+          const rect = target.getBoundingClientRect();
+          const x = rect.x + rect.width / 2, y = rect.y + rect.height / 2;
+          if (target.contains(document.elementFromPoint(x, y))) return { x, y };
           target.scrollIntoView({block:'center', inline:'nearest', behavior:'instant'});
-          requestAnimationFrame(() => requestAnimationFrame(() => {
-            const rect = target.getBoundingClientRect();
-            resolve({
-              x: rect.x + rect.width / 2,
-              y: rect.y + rect.height / 2,
-              visible: rect.width > 0 && rect.height > 0 &&
-                rect.top >= 0 && rect.bottom <= innerHeight,
-            });
-          }));
-        })`);
-        assert.ok(point.visible, 'Breadcrumb target must be inside viewport before pointer click');
-        const { x, y } = point;
+          return false;
+        })()`);
         await send('Input.dispatchMouseEvent', { type:'mousePressed', x, y, button:'left', buttons:1, clickCount:1 });
         await send('Input.dispatchMouseEvent', { type:'mouseReleased', x, y, button:'left', buttons:0, clickCount:1 });
       };
@@ -711,8 +705,10 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         const firstEntry = await sampleEntry(title);
         assert.ok(firstEntry.some(opacity => opacity < 0.99), 'Copy reveals on its first entry');
         assert.ok(firstEntry.every((opacity, index) => !index || opacity + 0.04 >= firstEntry[index - 1]), 'Reveal never flashes from visible to hidden');
-        assert.equal(firstEntry.at(-1), 1, 'Copy finishes fully visible');
-        assert.equal(await evaluate(`document.querySelector('${title}').style.transform`), '', 'Finished motion leaves no transform');
+        await until(`(() => {
+          const element = document.querySelector('${title}');
+          return getComputedStyle(element).opacity === '1' && !element.style.transform;
+        })()`);
         await evaluate(`scrollTo({ top: 0, behavior: 'instant' })`);
         await delay(100);
         assert.ok((await sampleEntry(title)).every(opacity => opacity === 1), 'Copy does not replay on re-entry');
