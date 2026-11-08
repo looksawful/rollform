@@ -1,8 +1,8 @@
 // Cast optics adapted from AwfulShading (MIT, Ivan Krushinsky).
 // See public/models/cast/awfulshading-code-license.txt.
 import {
-  Color, InstancedMesh, Matrix4, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, PlaneGeometry,
-  ShaderChunk, ShaderMaterial, SphereGeometry, SRGBColorSpace, TextureLoader, Vector3,
+  Color, Matrix4, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, PlaneGeometry,
+  ShaderChunk, SRGBColorSpace, TextureLoader, Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { DiceConfig } from './catalog';
@@ -22,59 +22,6 @@ const labels = [
 ];
 type Point = [number, number, number];
 type Marking = { normal: Point; center: Point; up: Point; size: number; label: string };
-
-const inclusions = [
-  [-0.55, 0.52, 0.76, 0.043], [0.44, 0.65, 0.50, 0.029],
-  [-0.18, 0.45, 0.91, 0.019], [0.66, -0.39, 0.69, 0.034],
-  [0.73, 0.13, -0.32, 0.025], [-0.49, -0.57, 0.38, 0.032],
-  [-0.26, -0.62, -0.72, 0.044], [0.30, 0.34, -0.58, 0.018],
-  [0.17, -0.30, 0.64, 0.021],
-] as const;
-
-const bubbleFragment = /* glsl */ `
-  varying vec3 vNormal;
-  varying vec3 vView;
-
-  void main() {
-    vec3 normal = normalize(vNormal);
-    float fresnel = 1.0 - clamp(dot(normal, normalize(vView)), 0.0, 1.0);
-    if (fresnel < 0.32) discard;
-    float rim = smoothstep(0.32, 0.76, fresnel);
-    float glint = max(0.0, dot(normal, normalize(vec3(-0.8, 0.6, 0.18))));
-    gl_FragColor = vec4(mix(vec3(0.026, 0.013, 0.029), vec3(0.72, 0.51, 0.48),
-      rim * (0.35 + 0.65 * glint)), 1.0);
-    #include <colorspace_fragment>
-  }
-`;
-
-function castBubbles(castScale: number) {
-  const material = new ShaderMaterial({
-    toneMapped: false,
-    vertexShader: `
-      varying vec3 vNormal;
-      varying vec3 vView;
-
-      void main() {
-        // Instances use uniform scale and translation, so their normal directions are unchanged.
-        vec4 point = modelViewMatrix * instanceMatrix * vec4(position, 1.0);
-        vNormal = normalMatrix * normal;
-        vView = -point.xyz;
-        gl_Position = projectionMatrix * point;
-      }
-    `,
-    fragmentShader: bubbleFragment,
-  });
-  const bubbles = new InstancedMesh(new SphereGeometry(1, 12, 8), material, inclusions.length);
-  const transform = new Matrix4();
-  const position = new Vector3();
-  inclusions.forEach(([x, y, z, radius], index) => {
-    position.set(x, y, z).setLength(0.96 * 0.72 * castScale);
-    const size = radius * castScale;
-    transform.makeScale(size, size, size).setPosition(position);
-    bubbles.setMatrixAt(index, transform);
-  });
-  return bubbles;
-}
 
 export async function loadCastDie(config: DiceConfig, basePath: string, onAssetReady?: () => void) {
   const report = <T,>(asset: Promise<T>) => asset.then(result => {
@@ -134,6 +81,31 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
         float wisps = sin(p.z * 9.5 + p.y * 6.0 + warp * 3.8);
         return smoothstep(-0.26, 0.70, vein + wisps * 0.17);
       }
+      // Sample inclusions on the refracted ray, in D20-normalized model coordinates.
+      float internalBubble(vec3 start, vec3 ray, float path, vec3 light, vec3 center, float radius) {
+        vec3 offset = center - start;
+        float depth = dot(offset, ray);
+        vec3 radial = ray * depth - offset;
+        float distance = length(radial) / radius;
+        float pixel = fwidth(distance);
+        float blur = 0.12 + 0.13 * max(0.0, depth) + min(pixel, 0.45);
+        float body = 1.0 - smoothstep(0.6 - 0.4 * blur, 1.0 + blur, distance);
+        float rim = 1.0 - smoothstep(0.02, blur, abs(distance - 0.85));
+        float facing = dot(radial, light) / radius;
+        float glint = rim * smoothstep(0.16, 0.76, facing);
+        float shade = rim * smoothstep(0.0, 0.82, -facing);
+        float inside = smoothstep(0.0, radius, depth) * smoothstep(0.0, radius, path - depth);
+        float visibility = inside * exp(-0.36 * max(0.0, depth)) * (1.0 - smoothstep(0.35, 1.2, pixel));
+        return (0.46 * glint - 0.26 * shade - 0.06 * body) * visibility;
+      }
+
+      float pigmentFleck(vec3 start, vec3 ray, float path) {
+        vec3 stretch = vec3(9.0, 24.0, 17.0);
+        vec3 offset = (start - vec3(0.42, 0.12, -0.38)) * stretch;
+        vec3 direction = ray * stretch;
+        float depth = clamp(-dot(offset, direction) / dot(direction, direction), 0.0, path);
+        return 1.0 - smoothstep(0.18, 1.0, length(offset + depth * direction));
+      }
     ` + shader.fragmentShader.replace('#include <lights_fragment_end>', `
       #include <lights_fragment_end>
       float grazing = 1.0 - saturate(dot(normal, normalize(vViewPosition)));
@@ -158,6 +130,13 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
             stain += dyeConcentration(point / uCastScale);
           }
           transmitted.rgb *= exp(-opticalDepth * (stain / 6.0) * uDyeDensity);
+          vec3 start = p / uCastScale;
+          float path = material.thickness / uCastScale;
+          vec3 light = normalize(toLocal * vec3(-0.8, 0.6, 0.25));
+          float bubbles = internalBubble(start, ray, path, light, vec3(-0.45, 0.31, 0.55), 0.034);
+          bubbles += internalBubble(start, ray, path, light, vec3(0.28, -0.27, 0.12), 0.048);
+          bubbles += internalBubble(start, ray, path, light, vec3(-0.12, -0.39, -0.61), 0.023);
+          transmitted.rgb *= 1.0 + bubbles - 0.085 * pigmentFleck(start, ray, path);
           // Approximate the tinted skin at the thinnest corners, as in the lab study.
           float skinDepth = 0.22 * uCastScale * exp(-material.thickness * 2.5 / uCastScale);
           transmitted.rgb *= volumeAttenuation(skinDepth * castModelScale,
@@ -175,8 +154,6 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
     node.material.dispose();
     node.material = surface;
   });
-  const bubbles = castBubbles(castScale);
-  scene.add(bubbles);
   markings.forEach((marking, index) => {
     const normal = normals[index];
     const up = new Vector3(...marking.up);
@@ -212,8 +189,6 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
       scene.traverse(node => {
         if (node instanceof Mesh) node.geometry.dispose();
       });
-      bubbles.dispose();
-      bubbles.material.dispose();
       surface.dispose();
       gold.dispose();
       map.dispose();
