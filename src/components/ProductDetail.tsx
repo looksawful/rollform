@@ -40,7 +40,7 @@ export default function ProductDetail() {
               <img src={photos[view]} alt="Игральные кубики, пример" width={1000} height={900} />
             </button>}
         </div>
-        <div className="product-detail-thumbs cluster" aria-label="Вид товара">
+        <div className="product-detail-thumbs cluster" role="group" aria-label="Вид товара">
           {photos.map((photo, number) => (
             <button key={photo} type="button" aria-label={`Фото ${number + 1}`} aria-pressed={view === number} onClick={() => setView(number)}>
               <img src={photo} alt="" width={80} height={80} />
