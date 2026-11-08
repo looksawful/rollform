@@ -9,7 +9,7 @@ import type { DiceConfig } from '@/lib/catalog';
 type CartContextValue = {
   items: CartItem[];
   count: number;
-  add: (config: DiceConfig, origin: CartOrigin, available?: number) => boolean;
+  add: (config: DiceConfig, origin: CartOrigin, available?: number) => number | false;
   change: (id: string, delta: number) => void;
   remove: (id: string) => void;
   clear: () => void;
@@ -38,10 +38,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       try {
         const current = itemsRef.current;
         const next = addCartItem(current, { config, origin, available });
-        // addCartItem returns the same array at the per-line limit of 99.
+        // Return the committed line quantity, even when several clicks share one React render.
         if (next === current) return false;
+        const changed = next.find(line => !current.some(previous =>
+          previous.id === line.id && previous.quantity === line.quantity));
+        if (!changed) return false;
         commit(next);
-        return true;
+        return changed.quantity;
       } catch {
         return false;
       }

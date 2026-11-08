@@ -28,10 +28,10 @@ export default function ProductCard({ product, index, duplicate = false }: {
       setAnnouncement(`${product.title}: максимум 99 в корзине`);
       return;
     }
-    const accepted = add(product.config, { kind: 'preorder_preset', presetId: product.id });
-    setAnnouncement(accepted
-      ? `${product.title}: добавлено в корзину, теперь ${quantity + 1}`
-      : `${product.title}: не удалось добавить в корзину`);
+    const updatedQuantity = add(product.config, { kind: 'preorder_preset', presetId: product.id });
+    setAnnouncement(updatedQuantity !== false
+      ? `${product.title}: добавлено в корзину, теперь ${updatedQuantity}`
+      : `${product.title}: максимум 99 в корзине`);
   };
 
   return <article className="product stack">

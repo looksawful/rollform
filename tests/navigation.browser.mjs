@@ -291,6 +291,33 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         const firstCount=await evaluate(`Number(document.querySelector('.product-add-count').textContent)`);
         await evaluate(`document.querySelector('.product-grid button').click()`);
         await until(`Number(document.querySelector('.product-add-count').textContent) === ${firstCount+1}`);
+        const beforeBurst = firstCount + 1;
+        await evaluate(`(() => {
+          const button = document.querySelector('.product-grid .product-actions button');
+          button.click(); button.click(); button.click();
+        })()`);
+        await until(`Number(document.querySelector('.product-grid .product-add-count')?.textContent) === ${beforeBurst + 3}`);
+        assert.equal(await evaluate(`document.querySelector('.product-grid [role="status"]')?.textContent`),
+          `Вариант 01: добавлено в корзину, теперь ${beforeBurst + 3}`,
+          'Rapid clicks must announce the committed quantity, not stale render state');
+        // Seed a valid persisted full cart; 110 synthetic clicks in one event are not a user flow.
+        await until(`JSON.parse(localStorage.getItem('rollform:demo-cart:v3') || '[]')
+          .some(line => line.origin?.presetId === 'demo-1' && line.quantity === ${beforeBurst + 3})`);
+        await evaluate(`(() => {
+          const key = 'rollform:demo-cart:v3';
+          const saved = JSON.parse(localStorage.getItem(key));
+          saved.find(line => line.origin?.presetId === 'demo-1').quantity = 99;
+          localStorage.setItem(key, JSON.stringify(saved));
+        })()`);
+        await send('Page.reload');
+        await until(`Number(document.querySelector('.product-grid .product-add-count')?.textContent) === 99`);
+        await evaluate(`document.querySelector('.product-grid .product-actions button').click()`);
+        await until(`document.querySelector('.product-grid [role="status"]')?.textContent.includes('максимум 99')`);
+        assert.equal(await evaluate(`Number(document.querySelector('.product-grid .product-add-count')?.textContent)`), 99,
+          'Limit must not increment the persisted count');
+        await evaluate(`localStorage.removeItem('rollform:demo-cart:v3')`);
+        await send('Page.reload');
+        await until(`!document.querySelector('.product-grid .product-add-count')`);
         await send('Page.navigate',{url:new URL('configure/',base).href});
         await until(`document.readyState === 'complete' && !!document.querySelector('.random-dice-button')`);
         await delay(100);
@@ -506,9 +533,10 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           await until(`document.readyState === 'complete' && !!document.querySelector('.configure-controls')`);
           await delay(150);
           await evaluate(`Array.from(document.querySelectorAll('.configure-controls button')).find(b => b.textContent.includes('В корзину')).click()`);
+          // The button navigates to the cart. Await that router transition;
+          // forcing a CDP navigation here races its pending router.push.
+          await until(`location.pathname.endsWith('/cart/') && !!document.querySelector('.cart-entry')`);
           await until(`Number(document.querySelector('.cart-count')?.textContent) === 1`);
-          await send('Page.navigate', { url: new URL(theme + 'cart/', base).href });
-          await until(`!!document.querySelector('.cart-entry')`);
           assert.equal(await evaluate(`document.querySelector('.quantity button').disabled`), false);
           assert.ok(await evaluate(`!!document.querySelector('.cart-entry-actions .cart-remove svg')`));
           assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Cart fits ${width}px`);
