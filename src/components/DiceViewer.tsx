@@ -32,7 +32,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         ]);
         if (closed) return;
         const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-        const environment = await new HDRLoader().loadAsync(`${basePath}/environments/studio-small-08-soft.hdr`)
+        const environment = await new HDRLoader().loadAsync(`${basePath}/environments/catalog-rim.hdr`)
           .catch(() => null);
         if (closed) { environment?.dispose(); return; }
 
@@ -43,7 +43,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, continuous ? 1.25 : 2));
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1;
+        renderer.toneMappingExposure = environment ? 0.76 : 1;
         renderer.setClearColor(0xffffff, 0);
         const canvas = renderer.domElement;
         canvas.setAttribute('aria-hidden', 'true');
