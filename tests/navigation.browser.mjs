@@ -265,7 +265,8 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
       })()`), 'Purchase row follows the settings, with an unframed preview');
       await clickCrumb('li:nth-child(3) a');
       await until(`location.pathname.endsWith('/product/') && location.search === '?item=demo-2'`);
-      await until(`document.querySelector('${breadcrumb} li:nth-child(2) a')?.textContent === 'Кубики в наличии'`);
+      // The previous page and the product loading fallback also contain a catalog link.
+      await until(`document.querySelector('${breadcrumb} [aria-current="page"]')?.textContent === 'Вариант 02'`);
       await clickCrumb('li:nth-child(2) a');
       await until(`location.pathname.endsWith('/catalog/') && !!document.querySelector('.product-grid')`);
       await clickCrumb('a');
