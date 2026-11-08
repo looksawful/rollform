@@ -57,3 +57,15 @@ test('Cyrillic headings avoid aggressive tracking and mobile Hero remains respon
   assert.doesNotMatch([base,component,section,pages].join('\n'), /letter-spacing:\s*-0\.0[5-9]/);
   assert.doesNotMatch([base,component,section,pages].join('\n'), /text-transform:\s*uppercase/);
 });
+
+
+test('wide editorial layouts cap catalog cards through shared composition limits', () => {
+  const contentMax = Number(token.match(/--content-max:\s*([\d.]+)rem;/)?.[1]);
+  const collectionMax = Number(token.match(/--collection-max:\s*([\d.]+)rem;/)?.[1]);
+  assert.ok(contentMax >= 72 && contentMax <= 82, 'Site content is bounded on ultrawide displays');
+  assert.ok(collectionMax >= 64 && collectionMax <= 72 && collectionMax < contentMax,
+    'Product collection has a narrower layout measure than the site wrapper');
+  assert.match(pages, /\.product-grid\s*\{[^}]*max-inline-size:\s*var\(--collection-max\)/);
+  assert.match(pages, /\.product-grid\s*\{[^}]*margin-inline:\s*auto/);
+  assert.match(pages, /--reel-card-size:\s*clamp\(17rem,\s*25vw,\s*20rem\)/);
+});

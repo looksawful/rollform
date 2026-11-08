@@ -29,7 +29,8 @@
     --tracking-display: -0.03em;
 
     --gutter: clamp(1.25rem, 3.5vw, 4.5rem);
-    --content-max: 94rem;
+    --content-max: 80rem;
+    --collection-max: 72rem;
     --header-height: 5.25rem;
     --measure: 62ch;
 
