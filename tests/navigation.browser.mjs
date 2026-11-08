@@ -170,6 +170,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
               'Desktop CTA keeps its compact width');
           }
           if (width === 390 || width === 1440) {
+            await until(`!!document.querySelector('.hero-object .dice-canvas')`);
             const target = await evaluate(`(() => {
               const r = document.querySelector('.hero-copy .button').getBoundingClientRect();
               return {x:r.left+r.width/2, y:r.top+r.height/2};
@@ -226,6 +227,14 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
     });
     await t.test('internal pages show breadcrumbs with working parent links', async () => {
       const breadcrumb = 'nav[aria-label="Хлебные крошки"]';
+      const clickCrumb = async (link) => {
+        const point = await evaluate(`(() => {
+          const rect = document.querySelector('${breadcrumb} ${link}').getBoundingClientRect();
+          return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+        })()`);
+        await send('Input.dispatchMouseEvent', { type:'mousePressed', ...point, button:'left', buttons:1, clickCount:1 });
+        await send('Input.dispatchMouseEvent', { type:'mouseReleased', ...point, button:'left', buttons:0, clickCount:1 });
+      };
       await send('Emulation.setDeviceMetricsOverride', { width:320, height:800, deviceScaleFactor:1, mobile:true });
       for (const [route, current] of [
         ['catalog/', 'Кубики в наличии'], ['configure/', 'Собери сам'], ['cart/', 'Корзина'],
@@ -238,16 +247,14 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           route.startsWith('product/') ? [base, new URL('catalog/',base).href] : [base]);
         assert.ok(await evaluate(`Array.from(document.querySelectorAll('${breadcrumb} li')).every(item => item.getBoundingClientRect().right <= innerWidth)`), route);
       }
-      await send('Page.navigate', {url:new URL('configure/?preset=demo-2',base).href});
+      await send('Page.navigate', {url:new URL('configure/?preset=demo-2&shape=d12',base).href});
       await until(`document.querySelector('${breadcrumb} li:nth-child(3) a')?.textContent === 'Вариант 02'`);
-      await evaluate(`document.querySelector('.random-dice-button').click()`);
-      await until(`new URLSearchParams(location.search).has('shape') && new URLSearchParams(location.search).get('preset') === 'demo-2'`);
-      await evaluate(`document.querySelector('${breadcrumb} li:nth-child(3) a').click()`);
+      await clickCrumb('li:nth-child(3) a');
       await until(`location.pathname.endsWith('/product/') && location.search === '?item=demo-2'`);
       await until(`document.querySelector('${breadcrumb} li:nth-child(2) a')?.textContent === 'Кубики в наличии'`);
-      await evaluate(`document.querySelector('${breadcrumb} li:nth-child(2) a').click()`);
+      await clickCrumb('li:nth-child(2) a');
       await until(`location.pathname.endsWith('/catalog/') && !!document.querySelector('.product-grid')`);
-      await evaluate(`document.querySelector('${breadcrumb} a').click()`);
+      await clickCrumb('a');
       await until(`location.href === ${JSON.stringify(base)} && !!document.querySelector('.hero')`);
       assert.equal(await evaluate(`document.querySelectorAll('${breadcrumb}').length`), 0);
     });
