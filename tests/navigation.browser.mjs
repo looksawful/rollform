@@ -537,8 +537,14 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           assert.equal(await evaluate(`getComputedStyle(document.querySelector('.bento-viewport')).scrollbarWidth`),'none');
           assert.equal(await evaluate(`getComputedStyle(document.querySelector('.bento-viewport'),'::-webkit-scrollbar').display`),'none');
           if (width < 600) {
-            await evaluate(`document.querySelector('.bento-viewport').scrollIntoView({block:'center',behavior:'instant'}); document.querySelector('.bento-viewport').focus({preventScroll:true})`);
-            await send('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+            await until(`(() => {
+              const reel = document.querySelector('.bento-viewport');
+              if (document.activeElement === reel && reel.scrollWidth > reel.clientWidth) return true;
+              reel.scrollIntoView({block:'center',behavior:'instant'});
+              reel.focus({preventScroll:true});
+              return false;
+            })()`);
+            await send('Input.dispatchKeyEvent',{type:'rawKeyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
             await send('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
             await until(`document.querySelector('.bento-viewport').scrollLeft > 0`);
           }
@@ -555,12 +561,12 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           await send('Page.reload');
           await until(`document.readyState === 'complete' && !!document.querySelector('.configure-controls')`);
           await delay(150);
-          await evaluate(`Array.from(document.querySelectorAll('.configure-controls button')).find(b => b.textContent.includes('В корзину')).click()`);
+          await clickVisible(width <= 896 ? '.configure-mobile-buy .button' : '.configure-controls > .button-fill');
           // The button navigates to the cart. Await that router transition;
           // forcing a CDP navigation here races its pending router.push.
           await until(`location.pathname.endsWith('/cart/') && !!document.querySelector('.cart-entry')`);
           await until(`Number(document.querySelector('.cart-count')?.textContent) === 1`);
-          assert.equal(await evaluate(`document.querySelector('.quantity button').disabled`), false);
+          await until(`document.querySelector('.quantity button')?.disabled === false`);
           await until(`!!document.querySelector('.cart-entry-actions .cart-remove svg')`);
           assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Cart fits ${width}px`);
           assert.equal(await evaluate(`document.querySelector('.cart-summary .button').textContent`), 'Оформить заказ');
