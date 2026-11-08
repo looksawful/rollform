@@ -21,6 +21,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
     if (!host) return;
     let closed = false;
     setStatus('loading');
+    const slowLoad = window.setTimeout(() => { if (!closed) setStatus(current => current === 'loading' ? 'error' : current); }, 15000);
     let cleanup: (() => void) | undefined;
 
     (async () => {
@@ -324,7 +325,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         if (!closed) { console.warn('3D preview unavailable', error); setStatus('error'); }
       }
     })();
-    return () => { closed = true; cleanup?.(); };
+    return () => { closed = true; window.clearTimeout(slowLoad); cleanup?.(); };
   }, []);
 
   return <div ref={hostRef} className="dice-canvas" role={continuous ? 'img' : 'group'} tabIndex={continuous ? undefined : 0} data-motion="paused"
