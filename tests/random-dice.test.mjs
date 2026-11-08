@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { diceShapes, shellColors, fontStyles, initialConfig, configFromParams,
-  randomDiceConfig, diceQuery, readSavedDice } from '../src/lib/catalog.ts';
+  randomDiceConfig, randomHeroDiceConfig, diceQuery, readSavedDice } from '../src/lib/catalog.ts';
 
-test('random Hero config covers all valid combinations without coupling parameters', () => {
+test('the random configurator entry covers all valid combinations without coupling parameters', () => {
   const combinations = new Set();
   for (let shape = 0; shape < diceShapes.length; shape++) {
     for (let shell = 0; shell < shellColors.length; shell++) {
@@ -19,6 +19,17 @@ test('random Hero config covers all valid combinations without coupling paramete
     }
   }
   assert.equal(combinations.size, diceShapes.length * shellColors.length * fontStyles.length);
+});
+
+test('Hero draws only D12 and D20, both available in every color', () => {
+  for (const [shapeDraw, shape] of [[0.1, 'd12'], [0.9, 'd20']]) {
+    shellColors.forEach(({ value }, index) => {
+      const draws = [shapeDraw, (index + 0.5) / shellColors.length, 0.5];
+      assert.deepEqual(randomHeroDiceConfig(() => draws.shift()), {
+        shape, shell: value, font: fontStyles[Math.floor(fontStyles.length / 2)],
+      });
+    });
+  }
 });
 
 test('random dice is shareable in URL; direct entry without saved dice stays on default', () => {

@@ -136,7 +136,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
             if (motion.matches || !visible || document.hidden) {
               timeline.pause();
               if (motion.matches) host.dataset.motion = 'paused';
-              render();
+              render(true);
             }
             return;
           }

@@ -75,16 +75,25 @@ export function readSavedDice(raw: string | null): DiceConfig | null {
   return diceQuery(config) === params.toString() ? config : null;
 }
 
-export function randomDiceConfig(
-  random: () => number = Math.random,
+function pickDiceConfig(
+  shapes: readonly DiceShape[],
+  random: () => number,
   previousShell?: DiceConfig['shell'],
 ): DiceConfig {
   const pick = <T,>(values: readonly T[]): T => values[Math.floor(random() * values.length)];
   return {
-    shape: pick(diceShapes),
+    shape: pick(shapes),
     shell: pick(previousShell ? shellColors.filter(color => color.value !== previousShell) : shellColors).value,
     font: pick(fontStyles),
   };
+}
+
+export function randomDiceConfig(random = Math.random, previousShell?: DiceConfig['shell']): DiceConfig {
+  return pickDiceConfig(diceShapes, random, previousShell);
+}
+
+export function randomHeroDiceConfig(random = Math.random): DiceConfig {
+  return pickDiceConfig(['d12', 'd20'], random);
 }
 
 // Placeholder presets only. No confirmed stock, price, lead time or production claims.

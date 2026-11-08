@@ -11,13 +11,13 @@ import ContactContent from './ContactContent';
 import BentoSection from './BentoSection';
 import DeliveryInfo from './DeliveryInfo';
 import ScrollProgress from './ScrollProgress';
-import { diceQuery, randomDiceConfig } from '@/lib/catalog';
+import { diceQuery, randomDiceConfig, randomHeroDiceConfig } from '@/lib/catalog';
 import type { DiceConfig } from '@/lib/catalog';
 
 export default function Storefront() {
   const router = useRouter();
   const [heroConfig, setHeroConfig] = useState<DiceConfig | null>(null);
-  useEffect(() => { setHeroConfig({ ...randomDiceConfig(), shell: '#000000' }); }, []);
+  useEffect(() => { setHeroConfig(randomHeroDiceConfig()); }, []);
   const createRandomDice = () => router.push(`/configure?${diceQuery(randomDiceConfig())}`);
   return <>
     <section className="wrapper hero hero-centered" aria-labelledby="hero-title">
