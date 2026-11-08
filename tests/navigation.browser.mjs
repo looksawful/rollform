@@ -228,12 +228,23 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
     await t.test('internal pages show breadcrumbs with working parent links', async () => {
       const breadcrumb = 'nav[aria-label="Хлебные крошки"]';
       const clickCrumb = async (link) => {
-        const point = await evaluate(`(() => {
-          const rect = document.querySelector('${breadcrumb} ${link}').getBoundingClientRect();
-          return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
-        })()`);
-        await send('Input.dispatchMouseEvent', { type:'mousePressed', ...point, button:'left', buttons:1, clickCount:1 });
-        await send('Input.dispatchMouseEvent', { type:'mouseReleased', ...point, button:'left', buttons:0, clickCount:1 });
+        const point = await evaluate(`new Promise(resolve => {
+          const target = document.querySelector('${breadcrumb} ${link}');
+          target.scrollIntoView({block:'center', inline:'nearest', behavior:'instant'});
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const rect = target.getBoundingClientRect();
+            resolve({
+              x: rect.x + rect.width / 2,
+              y: rect.y + rect.height / 2,
+              visible: rect.width > 0 && rect.height > 0 &&
+                rect.top >= 0 && rect.bottom <= innerHeight,
+            });
+          }));
+        })`);
+        assert.ok(point.visible, 'Breadcrumb target must be inside viewport before pointer click');
+        const { x, y } = point;
+        await send('Input.dispatchMouseEvent', { type:'mousePressed', x, y, button:'left', buttons:1, clickCount:1 });
+        await send('Input.dispatchMouseEvent', { type:'mouseReleased', x, y, button:'left', buttons:0, clickCount:1 });
       };
       await send('Emulation.setDeviceMetricsOverride', { width:320, height:800, deviceScaleFactor:1, mobile:true });
       for (const [route, current] of [
@@ -538,7 +549,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           await until(`location.pathname.endsWith('/cart/') && !!document.querySelector('.cart-entry')`);
           await until(`Number(document.querySelector('.cart-count')?.textContent) === 1`);
           assert.equal(await evaluate(`document.querySelector('.quantity button').disabled`), false);
-          assert.ok(await evaluate(`!!document.querySelector('.cart-entry-actions .cart-remove svg')`));
+          await until(`!!document.querySelector('.cart-entry-actions .cart-remove svg')`);
           assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Cart fits ${width}px`);
           assert.equal(await evaluate(`document.querySelector('.cart-summary .button').textContent`), 'Оформить заказ');
           await evaluate(`document.querySelector('.quantity button:last-child').click()`);
