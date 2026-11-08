@@ -549,9 +549,12 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
               button.click(); button.click();
             })()`);
             await until(`Number(document.querySelector('.cart-count')?.textContent) === 2`);
+            // The configurator navigates to cart on add; exercise the 99 limit
+            // through cart quantity controls instead of clicking a detached button.
+            await send('Page.navigate', { url: new URL(theme + 'cart/', base).href });
+            await until(`!!document.querySelector('.cart-entry')`);
             await evaluate(`(() => {
-              const button = Array.from(document.querySelectorAll('.configure-controls button'))
-                .find(b => b.textContent.includes('В корзину'));
+              const button = document.querySelector('.quantity button:last-child');
               for (let i = 0; i < 105; i++) button.click();
             })()`);
             await until(`Number(document.querySelector('.cart-count')?.textContent) === 99`);
