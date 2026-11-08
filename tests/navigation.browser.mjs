@@ -109,6 +109,19 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
       }
       assert.fail('Timed out: ' + expression);
     };
+    const clickVisible = async selector => {
+      const { x, y } = await until(`(() => {
+        const target = document.querySelector(${JSON.stringify(selector)});
+        if (!target) return false;
+        const rect = target.getBoundingClientRect();
+        const x = rect.x + rect.width / 2, y = rect.y + rect.height / 2;
+        if (target.contains(document.elementFromPoint(x, y))) return { x, y };
+        target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+        return false;
+      })()`);
+      await send('Input.dispatchMouseEvent', { type:'mousePressed', x, y, button:'left', buttons:1, clickCount:1 });
+      await send('Input.dispatchMouseEvent', { type:'mouseReleased', x, y, button:'left', buttons:0, clickCount:1 });
+    };
     const sampleEntry = selector => evaluate(`new Promise(resolve => {
       const element = document.querySelector(${JSON.stringify(selector)});
       const samples = [], started = performance.now();
@@ -171,14 +184,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           }
           if (width === 390 || width === 1440) {
             await until(`!!document.querySelector('.hero-object .dice-canvas')`);
-            const target = await evaluate(`(() => {
-              const r = document.querySelector('.hero-copy .button').getBoundingClientRect();
-              return {x:r.left+r.width/2, y:r.top+r.height/2};
-            })()`);
-            await send('Input.dispatchMouseEvent', {type:'mousePressed', ...target,
-              button:'left', buttons:1, clickCount:1});
-            await send('Input.dispatchMouseEvent', {type:'mouseReleased', ...target,
-              button:'left', buttons:0, clickCount:1});
+            await clickVisible('.hero-copy .button');
             await until(`location.pathname.endsWith('/configure/') &&
               document.querySelector('h1')?.textContent === 'Собери сам' &&
               ['shape','shell','font'].every(key => new URLSearchParams(location.search).has(key))`);
@@ -227,19 +233,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
     });
     await t.test('internal pages show breadcrumbs with working parent links', async () => {
       const breadcrumb = 'nav[aria-label="Хлебные крошки"]';
-      const clickCrumb = async (link) => {
-        const { x, y } = await until(`(() => {
-          const target = document.querySelector('${breadcrumb} ${link}');
-          if (!target) return false;
-          const rect = target.getBoundingClientRect();
-          const x = rect.x + rect.width / 2, y = rect.y + rect.height / 2;
-          if (target.contains(document.elementFromPoint(x, y))) return { x, y };
-          target.scrollIntoView({block:'center', inline:'nearest', behavior:'instant'});
-          return false;
-        })()`);
-        await send('Input.dispatchMouseEvent', { type:'mousePressed', x, y, button:'left', buttons:1, clickCount:1 });
-        await send('Input.dispatchMouseEvent', { type:'mouseReleased', x, y, button:'left', buttons:0, clickCount:1 });
-      };
+      const clickCrumb = link => clickVisible(`${breadcrumb} ${link}`);
       await send('Emulation.setDeviceMetricsOverride', { width:320, height:800, deviceScaleFactor:1, mobile:true });
       for (const [route, current] of [
         ['catalog/', 'Кубики в наличии'], ['configure/', 'Собери сам'], ['cart/', 'Корзина'],
