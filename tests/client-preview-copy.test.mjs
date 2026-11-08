@@ -47,7 +47,7 @@ test('builder, cart and production pages honor accepted copy decisions',()=>{
   const cart=read('src/components/CartView.tsx');
   const data=read('src/lib/catalog.ts');
   assert.match(builder,/>Собери сам<\/h1>/);
-  assert.match(builder,/<h2>Количество граней<\/h2>/);
+  assert.match(builder,/<h2 id="dice-shape">Количество граней<\/h2>/);
   assert.ok(builder.includes('href={\'/production\'}'));
   assert.match(cart,/Пока ничего нет/);
   assert.match(cart,/>Смотреть кубики<\/Link>/);

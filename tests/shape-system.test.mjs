@@ -19,9 +19,9 @@ test('shape design uses just four reusable Material-inspired tokens', () => {
   assert.equal(names.length, 4);
 });
 
-test('primary, choice, quantity and catalog action buttons have capsule shapes', () => {
+test('actions have capsule shapes and shape choices use compact corners', () => {
   assert.match(components, /\.button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
-  assert.match(components, /\.pill-list button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
+  assert.match(pages, /\.shape-options button\s*\{[^}]*border-radius:\s*var\(--radius-sm\)/);
   assert.match(pages, /\.quantity button\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
   assert.match(pages, /\.product-actions \.button\s*\{[^}]*inline-size:\s*100%/);
 });
@@ -38,7 +38,7 @@ test('cards and photos use design-system corners while 3D previews stay open', (
 test('text-only actions and physical dice stay independent of site shape scale', () => {
   assert.doesNotMatch(pages.match(/\.legal-links button\s*\{[^}]*\}/)?.[0] ?? '', /border-radius/);
   assert.doesNotMatch(pages.match(/\.text-action\s*\{[^}]*\}/)?.[0] ?? '', /border-radius/);
-  assert.match(pages, /\.swatch\s*\{[^}]*border-radius:\s*50%/);
+  assert.match(pages, /\.swatch\s*\{[^}]*border-radius:\s*var\(--radius-sm\)/);
 });
 
 test('no per-component literal corner radii are introduced', () => {

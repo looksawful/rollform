@@ -36,7 +36,7 @@ test('display, headings, cards and interactive text reuse their semantic roles',
   assert.match(pages, /\.product-copy h3\s*\{[^}]*font-size:\s*var\(--fs-title\)/);
   assert.match(component, /\.nav\s*\{[^}]*font-size:\s*var\(--fs-small\)/);
   assert.match(component, /\.button\s*\{[^}]*font-size:\s*var\(--fs-small\)/);
-  assert.match(pages, /\.pill-list/);
+  assert.match(pages, /\.option-list/);
 });
 
 test('body text and Prose preserve vertical rhythm without overriding Stack', () => {

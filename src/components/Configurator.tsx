@@ -60,16 +60,37 @@ export default function Configurator() {
         <button type="button" className="button button-secondary random-dice-button" onClick={createRandomDice}>
           <span>Создать случайный кубик</span><Box className="icon" aria-hidden="true" />
         </button>
-        <div className="field stack"><h2>Количество граней</h2><div className="pill-list cluster">{diceShapes.map(shape => <button key={shape} type="button" aria-pressed={config.shape === shape} className={config.shape === shape ? 'is-active' : ''} onClick={() => change('shape', shape)}>{shape.toUpperCase()}</button>)}</div></div>
-        <div className="field stack"><h2>Цвет</h2><div className="pill-list cluster">{shellColors.map(color => <button key={color.value} type="button" aria-pressed={config.shell === color.value} className={config.shell === color.value ? 'is-active' : ''} onClick={() => change('shell', color.value)}><span className="swatch" style={{ background: color.value }}/> {color.name}</button>)}</div></div>
         <div className="field stack">
-          <h2>Шрифт</h2>
-          <div className="pill-list cluster">{fontStyles.map(font => (
-            <button key={font} type="button" aria-pressed={config.font === font} className={config.font === font ? 'is-active' : ''} onClick={() => change('font', font)}>
-              <span>{fontNames[font]}</span>
-              <img className="numeral-sample" src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/numerals/${font}-sample.webp`} alt="" width={104} height={20} />
-            </button>
-          ))}</div>
+          <h2 id="dice-shape">Количество граней</h2>
+          <div className="option-list shape-options" role="group" aria-labelledby="dice-shape">
+            {diceShapes.map(shape => (
+              <button key={shape} type="button" aria-pressed={config.shape === shape} onClick={() => change('shape', shape)}>
+                {shape.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="field stack">
+          <h2 id="dice-color">Цвет</h2>
+          <div className="option-list color-options" role="group" aria-labelledby="dice-color">
+            {shellColors.map(color => (
+              <button key={color.value} type="button" aria-pressed={config.shell === color.value} onClick={() => change('shell', color.value)}>
+                <span className="swatch" style={{ background: color.value }} />
+                {color.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="field stack">
+          <h2 id="dice-font">Шрифт</h2>
+          <div className="option-list font-options" role="group" aria-labelledby="dice-font">
+            {fontStyles.map(font => (
+              <button key={font} type="button" aria-pressed={config.font === font} onClick={() => change('font', font)}>
+                <span>{fontNames[font]}</span>
+                <img className="numeral-sample" src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/numerals/${font}-sample.webp`} alt="" width={104} height={20} />
+              </button>
+            ))}
+          </div>
         </div>
         <div className="production-note stack">
           <h2>Кубики на заказ</h2>

@@ -212,7 +212,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         await until(`location.pathname.endsWith('/configure/') &&
           ['shape', 'shell', 'font'].every(k => new URLSearchParams(location.search).has(k))`);
         const created = await evaluate('location.search');
-        await until(`document.querySelectorAll('.pill-list [aria-pressed="true"]').length === 3`);
+        await until(`document.querySelectorAll('.option-list [aria-pressed="true"]').length === 3`);
         await send('Page.navigate', { url: home });
         await until(`document.readyState === 'complete' && !!document.querySelector('.desktop-nav a[href$="/configure/"]')`);
         await evaluate(`document.querySelector('.desktop-nav a[href$="/configure/"]').click()`);
@@ -266,10 +266,11 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         const buy = document.querySelector('.configure-mobile-buy');
         const controls = document.querySelector('.configure-controls');
         const preview = getComputedStyle(document.querySelector('.configure-preview'));
-        return getComputedStyle(buy).position === 'static' &&
-          buy.getBoundingClientRect().top >= controls.getBoundingClientRect().bottom &&
+        return getComputedStyle(buy).position === 'sticky' &&
+          buy.getBoundingClientRect().bottom <= innerHeight &&
+          parseFloat(getComputedStyle(document.documentElement).scrollPaddingBlockEnd) >= buy.getBoundingClientRect().height &&
           preview.borderTopWidth === '0px' && preview.backgroundColor === 'rgba(0, 0, 0, 0)';
-      })()`), 'Purchase row follows the settings, with an unframed preview');
+      })()`), 'Purchase row sticks below the viewport content, with an unframed preview');
       await clickCrumb('li:nth-child(3) a');
       await until(`location.pathname.endsWith('/product/') && location.search === '?item=demo-2'`);
       // The previous page and the product loading fallback also contain a catalog link.

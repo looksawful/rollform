@@ -34,7 +34,7 @@ test('all existing layout algorithms are reused where appropriate', () => {
   assert.match(patterns, /\.icon\s*\{/);
   assert.match(shell, /className="icon"/);
   assert.match(builder, /className="configure-layout sidebar"/);
-  assert.match(builder, /className="pill-list cluster"/);
+  assert.match(builder, /className="option-list shape-options"/);
   assert.match(home, /className="bento-viewport scroller"/);
   assert.match(home, /className="bento-card box"/);
   assert.match(css, /\.product\s*\{[^}]*border:\s*var\(--border-default\)/);

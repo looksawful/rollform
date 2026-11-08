@@ -85,7 +85,7 @@
   }
   .button-secondary { color: var(--color-text); background: transparent; }
   .button-secondary:hover { background: var(--color-preview); }
-  :where(.theme-toggle, .cart-shortcut, .quantity button, .pill-list button,
+  :where(.theme-toggle, .cart-shortcut, .quantity button, .option-list button,
     .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumbs a, .nav a) {
     transition: transform 160ms ease, background-color 160ms ease, opacity 160ms ease;
   }
@@ -95,12 +95,12 @@
   :where(.product-detail-thumbs button, .text-action, .catalog-link, .breadcrumbs a, .nav a):hover {
     opacity: 0.75;
   }
-  :where(.theme-toggle, .cart-shortcut, .quantity button, .pill-list button,
+  :where(.theme-toggle, .cart-shortcut, .quantity button, .option-list button,
     .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumbs a, .nav a):active {
     transform: scale(0.96);
   }
   @media (prefers-reduced-motion: reduce) {
-    :where(.theme-toggle, .cart-shortcut, .quantity button, .pill-list button,
+    :where(.theme-toggle, .cart-shortcut, .quantity button, .option-list button,
       .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumbs a, .nav a) {
       transition: none;
     }
@@ -116,23 +116,6 @@
   .button-fill { inline-size: 100%; }
 
   .field { --stack-space: var(--space-1); }
-
-  .pill-list { --cluster-gap: 0.4rem; }
-
-  .pill-list button {
-    min-inline-size: 4.5rem;
-    border: var(--border-default);
-    border-radius: var(--radius-full);
-    padding: 0.7rem 0.9rem;
-    background: var(--color-surface);
-    font-size: var(--fs-small);
-    line-height: var(--lh-small);
-  }
-
-  .pill-list button:is(.is-active, :hover) {
-    background: var(--color-text);
-    color: var(--color-background);
-  }
 
   .quantity { --cluster-gap: 0.6rem; flex-wrap: nowrap; }
 
