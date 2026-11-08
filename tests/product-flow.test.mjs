@@ -85,6 +85,7 @@ test('repeated adds never exceed the persisted cart limit', () => {
     const added = addCartItem([], input);
     const full = changeQuantity(added, added[0].id, 98);
     const next = addCartItem(full, input);
+    assert.strictEqual(next, full, 'Adding at the limit must report no state change');
     assert.equal(next[0].quantity, 99);
     assert.deepEqual(readCart(JSON.stringify(next)), next);
   }
