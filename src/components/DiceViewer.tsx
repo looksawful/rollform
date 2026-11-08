@@ -11,7 +11,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
   const hostRef = useRef<HTMLDivElement>(null);
   const configRef = useRef(config);
   const viewerRef = useRef<{ update: (config: DiceConfig) => void } | null>(null);
-  const [fallback, setFallback] = useState(false);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   configRef.current = config;
 
   useEffect(() => { viewerRef.current?.update(config); }, [config]);
@@ -20,6 +20,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
     const host = hostRef.current;
     if (!host) return;
     let closed = false;
+    setStatus('loading');
     let cleanup: (() => void) | undefined;
 
     (async () => {
@@ -91,6 +92,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const buildShape = async (next: DiceConfig, shapeKey: string) => {
           const id = ++request;
           pendingKey = shapeKey;
+          if (!cast) setStatus('loading');
           try {
             const model = await loadCastDie(next, basePath);
             if (closed || id !== request) { model.dispose(); return; }
@@ -102,13 +104,13 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
             renderedKey = shapeKey;
             pendingKey = undefined;
             lastFace = -1;
-            setFallback(lost);
+            setStatus(lost ? 'error' : 'ready');
             play();
           } catch (error) {
             if (!closed && id === request) {
               pendingKey = undefined;
               console.warn('3D model unavailable', error);
-              setFallback(true);
+              setStatus('error');
             }
           }
         };
@@ -243,7 +245,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           }
           if (pendingKey) { request++; pendingKey = undefined; }
           cast?.setShell(next.shell);
-          setFallback(lost);
+          setStatus(lost ? 'error' : 'ready');
           render();
         };
         viewerRef.current = { update };
@@ -263,12 +265,12 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           lost = true;
           timeline?.pause();
           canvas.style.visibility = 'hidden';
-          setFallback(true);
+          setStatus('error');
         };
         const onRestored = () => {
           lost = false;
           canvas.style.visibility = '';
-          setFallback(false);
+          setStatus(cast ? 'ready' : 'loading');
           resize();
           onMotion();
         };
@@ -317,9 +319,9 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           canvas.remove();
         };
         if (closed) cleanup();
-        else setFallback(false);
+        else if (cast) setStatus('ready');
       } catch (error) {
-        if (!closed) { console.warn('3D preview unavailable', error); setFallback(true); }
+        if (!closed) { console.warn('3D preview unavailable', error); setStatus('error'); }
       }
     })();
     return () => { closed = true; cleanup?.(); };
@@ -330,6 +332,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
     {!continuous && <span className="dice-preview-badge" aria-hidden="true">
       <Orbit className="icon" />3D-превью
     </span>}
-    {fallback && <div className="canvas-fallback" style={{ backgroundColor: config.shell }}>{config.shape.toUpperCase()}</div>}
+    {status !== 'ready' && <div className="canvas-fallback" style={{ backgroundColor: config.shell }} aria-hidden="true">{config.shape.toUpperCase()}</div>}
+    {!continuous && <span className="dice-preview-status" role="status" aria-live="polite">{status === 'loading' ? 'Загрузка 3D-превью' : status === 'error' ? '3D недоступно. Показан упрощённый вид кубика.' : ''}</span>}
   </div>;
 }
