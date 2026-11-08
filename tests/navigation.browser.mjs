@@ -184,6 +184,8 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           }
           if (width === 390 || width === 1440) {
             await until(`!!document.querySelector('.hero-object .dice-canvas')`);
+            // Center the target before sending CDP pointer input on the emulated phone.
+            if (mobile) await evaluate(`document.querySelector('.hero-copy .button').scrollIntoView({ block: 'center', behavior: 'instant' })`);
             await clickVisible('.hero-copy .button');
             await until(`location.pathname.endsWith('/configure/') &&
               document.querySelector('h1')?.textContent === 'Собери сам' &&
