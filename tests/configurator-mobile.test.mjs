@@ -25,7 +25,9 @@ test('3D preview exposes loading, ready, error and a bounded loading fallback', 
   assert.match(viewer, /window\.setTimeout\(/);
   assert.match(viewer, /window\.clearTimeout\(slowLoad\)/);
   assert.match(viewer, /aria-live="polite"/);
-  assert.match(viewer, /status !== 'ready'/);
+  assert.match(viewer, /status === 'loading' && <div className="dice-loader" role="progressbar"/);
+  assert.match(viewer, /aria-valuenow=\{progress\}/);
+  assert.match(viewer, /status === 'error' && <div className="canvas-fallback"/);
   assert.match(viewer, /webglcontextlost/);
   assert.match(viewer, /webglcontextrestored/);
 });

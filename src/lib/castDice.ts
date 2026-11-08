@@ -22,12 +22,16 @@ const labels = [
 type Point = [number, number, number];
 type Marking = { normal: Point; center: Point; up: Point; size: number; label: string };
 
-export async function loadCastDie(config: DiceConfig, basePath: string) {
+export async function loadCastDie(config: DiceConfig, basePath: string, onAssetReady?: () => void) {
+  const report = <T,>(asset: Promise<T>) => asset.then(result => {
+    onAssetReady?.();
+    return result;
+  });
   const filename = config.shape === 'd%' ? 'd00' : config.shape;
   const [{ scene }, map] = await Promise.all([
     // The face-marking metadata is absent from meshes cached by the previous release.
-    new GLTFLoader().loadAsync(`${basePath}/models/cast/${filename}.glb?v=2`),
-    new TextureLoader().loadAsync(`${basePath}/numerals/${config.font}.webp`),
+    report(new GLTFLoader().loadAsync(`${basePath}/models/cast/${filename}.glb?v=2`)),
+    report(new TextureLoader().loadAsync(`${basePath}/numerals/${config.font}.webp`)),
   ]);
   map.colorSpace = SRGBColorSpace;
   const { castPlanes: planes, markings } = scene.children[0].userData as {

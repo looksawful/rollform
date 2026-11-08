@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Orbit } from 'lucide-react';
+import CubeOutline from './CubeOutline';
 import type { DiceConfig } from '@/lib/catalog';
 import type { Vector3 } from 'three';
 import { cssTimeSeconds } from '@/lib/cssTime';
@@ -12,6 +13,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
   const configRef = useRef(config);
   const viewerRef = useRef<{ update: (config: DiceConfig) => void } | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [progress, setProgress] = useState(0);
   configRef.current = config;
 
   useEffect(() => { viewerRef.current?.update(config); }, [config]);
@@ -21,6 +23,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
     if (!host) return;
     let closed = false;
     setStatus('loading');
+    setProgress(0);
     const slowLoad = window.setTimeout(() => { if (!closed) setStatus(current => current === 'loading' ? 'error' : current); }, 15000);
     let cleanup: (() => void) | undefined;
 
@@ -34,11 +37,13 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           import('@/lib/rimLight'),
         ]);
         if (closed) return;
+        setProgress(25);
         const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
         const environment = await new HDRLoader().loadAsync(`${basePath}/environments/catalog-rim.hdr`)
           .catch(() => null);
         if (closed) { environment?.dispose(); return; }
 
+        setProgress(50);
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(39, 1, 0.1, 100);
         camera.position.set(0, 0, continuous ? 10 : 6.6);
@@ -77,7 +82,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const spin = new THREE.Quaternion();
         const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
         let visible = true, lost = false, request = 0, lastFace = -1;
-        let lastPaint = 0;
+        let lastPaint = 0, needsFirstFrame = false;
         const frameInterval = continuous ? 33 : 0;
         let timeline: ReturnType<typeof gsap.timeline> | null = null;
         let interacted = false;
@@ -93,9 +98,16 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const buildShape = async (next: DiceConfig, shapeKey: string) => {
           const id = ++request;
           pendingKey = shapeKey;
-          if (!cast) setStatus('loading');
+          const firstModel = !cast;
+          if (firstModel) {
+            setStatus('loading');
+            setProgress(50);
+          }
           try {
-            const model = await loadCastDie(next, basePath);
+            let completed = 0;
+            const model = await loadCastDie(next, basePath, () => {
+              if (firstModel && !closed && id === request) setProgress(50 + ++completed * 20);
+            });
             if (closed || id !== request) { model.dispose(); return; }
             clearShape();
             cast = model;
@@ -105,7 +117,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
             renderedKey = shapeKey;
             pendingKey = undefined;
             lastFace = -1;
-            setStatus(lost ? 'error' : 'ready');
+            needsFirstFrame = true;
             play();
           } catch (error) {
             if (!closed && id === request) {
@@ -124,6 +136,10 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
             (continuous && !force && now - lastPaint < frameInterval)) return;
           lastPaint = now;
           renderer.render(scene, camera);
+          if (needsFirstFrame) {
+            needsFirstFrame = false;
+            setStatus('ready');
+          }
         };
         const play = () => {
           timeline?.kill();
@@ -246,7 +262,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           }
           if (pendingKey) { request++; pendingKey = undefined; }
           cast?.setShell(next.shell);
-          setStatus(lost ? 'error' : 'ready');
+          if (!needsFirstFrame) setStatus(lost ? 'error' : 'ready');
           render();
         };
         viewerRef.current = { update };
@@ -271,7 +287,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         const onRestored = () => {
           lost = false;
           canvas.style.visibility = '';
-          setStatus(cast ? 'ready' : 'loading');
+          setStatus(cast && !needsFirstFrame ? 'ready' : 'loading');
           resize();
           onMotion();
         };
@@ -294,7 +310,10 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         visibility.observe(host);
         const onVisibility = () => {
           if (document.hidden) timeline?.pause();
-          else if (visible && !motion.matches) timeline?.resume();
+          else if (visible) {
+            if (!motion.matches) timeline?.resume();
+            if (needsFirstFrame) render(true);
+          }
         };
         document.addEventListener('visibilitychange', onVisibility);
         resize();
@@ -320,7 +339,6 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           canvas.remove();
         };
         if (closed) cleanup();
-        else if (cast) setStatus('ready');
       } catch (error) {
         if (!closed) { console.warn('3D preview unavailable', error); setStatus('error'); }
       }
@@ -328,12 +346,16 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
     return () => { closed = true; window.clearTimeout(slowLoad); cleanup?.(); };
   }, []);
 
-  return <div ref={hostRef} className="dice-canvas" role={continuous ? 'img' : 'group'} tabIndex={continuous ? undefined : 0} data-motion="paused"
+  return <div ref={hostRef} className="dice-canvas" role={continuous && status !== 'loading' ? 'img' : 'group'} tabIndex={continuous ? undefined : 0} data-motion="paused"
     aria-label={'3D-модель ' + config.shape.toUpperCase() + (continuous ? '' : '. Вращение перетаскиванием или стрелками, масштаб колёсиком.')}>
-    {!continuous && <span className="dice-preview-badge" aria-hidden="true">
+    {!continuous && status !== 'loading' && <span className="dice-preview-badge" aria-hidden="true">
       <Orbit className="icon" />3D-превью
     </span>}
-    {status !== 'ready' && <div className="canvas-fallback" style={{ backgroundColor: config.shell }} aria-hidden="true">{config.shape.toUpperCase()}</div>}
-    {!continuous && <span className="dice-preview-status" role="status" aria-live="polite">{status === 'loading' ? 'Загрузка 3D-превью' : status === 'error' ? '3D недоступно. Показан упрощённый вид кубика.' : ''}</span>}
+    {status === 'loading' && <div className="dice-loader" role="progressbar" aria-label="Загрузка 3D-модели" aria-valuenow={progress}>
+      <CubeOutline />
+      <span aria-hidden="true">{progress}%</span>
+    </div>}
+    {status === 'error' && <div className="canvas-fallback" style={{ backgroundColor: config.shell }} aria-hidden="true">{config.shape.toUpperCase()}</div>}
+    {!continuous && <span className="dice-preview-status" role="status" aria-live="polite">{status === 'error' ? '3D недоступно. Показан упрощённый вид кубика.' : ''}</span>}
   </div>;
 }

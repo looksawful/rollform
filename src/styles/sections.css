@@ -56,6 +56,29 @@
     text-align: center;
     pointer-events: none;
   }
+  .dice-loader {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 0.35rem;
+    color: var(--color-text);
+    font-size: var(--fs-small);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .dice-loader svg {
+    inline-size: 2rem;
+    block-size: 2rem;
+    transform-origin: center;
+    animation: dice-loader-turn 1.8s linear infinite;
+  }
+  @keyframes dice-loader-turn { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .dice-loader svg { animation: none; }
+  }
   .canvas-fallback {
     position: absolute;
     inset: 25%;

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import CubeOutline from './CubeOutline';
 
 export default function ScrollProgress() {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -38,9 +39,6 @@ export default function ScrollProgress() {
   }, []);
 
   return <div ref={trackRef} className="scroll-progress" aria-hidden="true">
-    <svg ref={cubeRef} viewBox="0 0 48 48" width="45" height="48" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round">
-      <path d="m24 5 17 10v20L24 45 7 35V15Z" />
-      <path d="m7 15 17 10 17-10M24 25v20" />
-    </svg>
+    <CubeOutline ref={cubeRef} />
   </div>;
 }

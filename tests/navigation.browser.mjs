@@ -272,7 +272,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
             await delay(150);
             await evaluate(`document.querySelector('.product-detail-thumbs button:last-child').click()`);
           }
-          await until(`document.readyState === 'complete' && !!document.querySelector('.dice-canvas canvas') && !document.querySelector('.canvas-fallback')`);
+          await until(`document.readyState === 'complete' && !!document.querySelector('.dice-canvas canvas') && !document.querySelector('.dice-loader, .canvas-fallback')`);
           await delay(300);
           const point=await evaluate(`(() => {const r=document.querySelector('.dice-canvas').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};})()`);
           await send('Input.dispatchMouseEvent',{type:'mousePressed',...point,button:'left',buttons:1,clickCount:1});
