@@ -20,7 +20,8 @@
 | Крупный display | `--fs-display` / `--lh-display` | clamp(2.75rem, 1.75rem + 4vw, 5.75rem) / 1.02 |
 | Трекинг | `--tracking-heading` / `--tracking-display` | -0.02em / -0.03em |
 | Горизонтальный отступ | `--gutter` | clamp(1.25rem, 3.5vw, 4.5rem) |
-| Контейнер / длина строки | `--content-max` / `--measure` | 94rem / 62ch |
+| Контейнер / длина строки | `--content-max` / `--measure` | 80rem / 62ch |
+| Максимум сетки каталога | `--collection-max` | 72rem (уже основного контейнера) |
 | Высота шапки | `--header-height` | 5.25rem |
 | Скругления | `--radius-sm/md/lg/full` | 0.75rem / 1rem / 1.75rem / 999px |
 | Шаги расстояний | `--space-1/2/3` | 0.5rem / 1rem / 1.5rem |
@@ -41,6 +42,7 @@
 - `.stack`: вертикальный flex, `gap: var(--stack-space, var(--space-2))`. Варианты задают `--stack-space` локально; не вставлять произвольные `margin-bottom` между дочерними элементами.
 - `.cluster`: flex-wrap, alignment через `--cluster-align`, `--cluster-justify`, `--cluster-gap`.
 - `.grid`: auto-fit/minmax с `--grid-min` (18rem по умолчанию), `--grid-gap`.
+- `.product-grid` ограничивает ширину `--collection-max` и центрирует 3-колоночную сетку; на мобильных сохраняет два столбца. `.product-scroller` использует `--reel-card-size: clamp(17rem, 25vw, 20rem)`. Это ограничения композиции, а не `max-width` каждой карточки.
 - `.reel`: горизонтальная сетка, overflow и scroll-snap; специальная `.product-scroller` расширяет её анимацией.
 - `.prose`: обычный текстовый поток с `--prose-gap` и `--prose-heading-gap`; `.frame`, `.sidebar`, `.switcher`, `.box` — вспомогательные композиции.
 - Типографические группы: `.page-heading > .page-title`, `.section-title` для секций, `.product-copy.stack` для заголовка и цены, `.cart-entry-copy.stack` для товара и метаданных, `.contact-form .prose` для заголовка/лида, `.field.stack` для подписи и набора вариантов. Локальные интервалы определяются контекстом, не вторым набором токенов.
