@@ -489,6 +489,30 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           await until(`location.hash === '#contact-form' && !!document.querySelector('#contact-form')`);
           assert.ok((await evaluate('location.pathname')).endsWith(theme + 'contacts/'), 'Checkout retains theme');
           await until(`!!document.querySelector('#delivery iframe')`);
+          if (width === 390) {
+            // Native constraint validation must block demo submission and focus the invalid input.
+            await evaluate(`document.querySelector('#contact-form button[type="submit"]').click()`);
+            await until(`!!document.querySelector('#contact-form [role="alert"]')`);
+            assert.equal(await evaluate(`document.activeElement.id`), 'contact-name');
+            assert.equal(await evaluate(`!!document.querySelector('#contact-form [role="status"]')`), false);
+            await evaluate(`(() => {
+              document.querySelector('#contact-name').value = 'Тест';
+              document.querySelector('#contact-reply').value = 'bad-address';
+              document.querySelector('#contact-message').value = 'Проверка';
+              document.querySelector('#contact-form button[type="submit"]').click();
+            })()`);
+            await until(`document.activeElement.id === 'contact-reply'`);
+            await evaluate(`(() => {
+              const input = document.querySelector('#contact-reply');
+              input.value = 'test@example.invalid';
+              input.dispatchEvent(new Event('input', {bubbles:true}));
+              document.querySelector('#contact-form button[type="submit"]').click();
+            })()`);
+            await until(`!!document.querySelector('#contact-form [role="status"]')`);
+            assert.equal(await evaluate(`document.activeElement.getAttribute('role')`), 'status');
+            assert.ok(await evaluate(`document.querySelector('#contact-form [role="status"]').textContent.includes('не отправлено')`));
+          }
+
           assert.equal(await evaluate(`document.querySelector('.production-map-caption span').textContent`),'Пункт самовывоза по адресу: …, д. 12, …, 12:00–18:00.');
           assert.ok(await evaluate(`!document.querySelector('#delivery iframe').src.includes('marker=')`));
           assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Contacts fit ${width}px`);
@@ -514,6 +538,41 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           await send('Page.reload');
           await until(`document.readyState === 'complete' && !!document.querySelector('.empty-state')`);
           assert.equal(await evaluate(`JSON.parse(localStorage.getItem('rollform:demo-cart:v3')).length`), 0, 'Deletion persists');
+          if (width === 390) {
+            // Two additions in one JavaScript turn must not validate against a stale React closure.
+            await send('Page.navigate', { url: new URL(theme + 'configure/', base).href });
+            await until(`!!document.querySelector('.configure-controls')`);
+            await delay(150);
+            await evaluate(`(() => {
+              const button = Array.from(document.querySelectorAll('.configure-controls button'))
+                .find(b => b.textContent.includes('В корзину'));
+              button.click(); button.click();
+            })()`);
+            await until(`Number(document.querySelector('.cart-count')?.textContent) === 2`);
+            await evaluate(`(() => {
+              const button = Array.from(document.querySelectorAll('.configure-controls button'))
+                .find(b => b.textContent.includes('В корзину'));
+              for (let i = 0; i < 105; i++) button.click();
+            })()`);
+            await until(`Number(document.querySelector('.cart-count')?.textContent) === 99`);
+            await send('Page.reload');
+            await until(`Number(document.querySelector('.cart-count')?.textContent) === 99`);
+            await send('Page.navigate', { url: new URL(theme + 'cart/', base).href });
+            await until(`!!document.querySelector('.cart-entry')`);
+            assert.equal(await evaluate(`document.querySelector('.quantity button:last-child').disabled`), true);
+            await evaluate(`document.querySelector('.cart-summary button').click()`);
+            await until(`!!document.querySelector('.empty-state')`);
+            // Storage is optional; a denied write must not prevent an in-memory add.
+            await send('Page.navigate', { url: new URL(theme + 'configure/', base).href });
+            await until(`!!document.querySelector('.configure-controls')`);
+            await evaluate(`(() => {
+              Storage.prototype.setItem = () => { throw new DOMException('Denied', 'SecurityError'); };
+              Array.from(document.querySelectorAll('.configure-controls button'))
+                .find(b => b.textContent.includes('В корзину')).click();
+            })()`);
+            await until(`Number(document.querySelector('.cart-count')?.textContent) === 1`);
+          }
+
         }
         await send('Emulation.setDeviceMetricsOverride', { width:1440, height:1100, deviceScaleFactor:1, mobile:false });
         assert.deepEqual(exceptions, []);
