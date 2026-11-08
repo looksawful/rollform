@@ -69,3 +69,9 @@ test('wide editorial layouts cap catalog cards through shared composition limits
   assert.match(pages, /\.product-grid\s*\{[^}]*margin-inline:\s*auto/);
   assert.match(pages, /--reel-card-size:\s*clamp\(17rem,\s*25vw,\s*20rem\)/);
 });
+
+
+test('configurator 3D preview keeps a bounded intrinsic frame beside long option lists', () => {
+  assert.match(pages, /\.configure-preview\s*\{[^}]*aspect-ratio:\s*1\b/);
+  assert.match(pages, /\.configure-preview\s*\{[^}]*align-self:\s*flex-start/);
+});

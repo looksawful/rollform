@@ -96,7 +96,15 @@
   :is(.configure-page, .product-detail-page) > .breadcrumbs { margin-block-end: var(--space-2); }
 
   .configure-layout { --sidebar-gap: clamp(2rem, 5vw, 5rem); --sidebar-content-min: 34rem; --sidebar-width: clamp(18rem, 31vw, 26rem); }
-  .configure-preview { min-block-size: clamp(23rem, 50vw, 43rem); border: var(--border-default); border-radius: var(--radius-md); background: var(--color-preview); position: relative; }
+  .configure-preview {
+    align-self: flex-start;
+    aspect-ratio: 1;
+    min-block-size: clamp(23rem, 50vw, 43rem);
+    border: var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--color-preview);
+    position: relative;
+  }
   .configure-controls { --stack-space: 2rem; align-items: stretch; }
   .configure-controls .field h2 { font-size: var(--fs-body); line-height: var(--lh-title); font-weight: 700; }
   .configure-controls .pill-list button { display: flex; align-items: center; gap: 0.5rem; }
