@@ -554,6 +554,9 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           assert.ok(await evaluate(`!!(document.querySelector('#production').compareDocumentPosition(document.querySelector('#delivery')) & Node.DOCUMENT_POSITION_FOLLOWING)`));
           assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), `Home fits ${width}px`);
 
+          if (width === 1440) {
+            await send('Emulation.setDeviceMetricsOverride', { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false });
+          }
           await send('Page.navigate', { url: new URL(theme + 'configure/', base).href });
           await until(`document.readyState === 'complete' && !!document.querySelector('.configure-controls')`);
           await delay(150);
@@ -561,7 +564,21 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
           await send('Page.reload');
           await until(`document.readyState === 'complete' && !!document.querySelector('.configure-controls')`);
           await delay(150);
+          if (width === 1440) {
+            assert.ok(await evaluate(`(() => {
+              const stage = document.querySelector('.configure-stage');
+              const preview = stage.getBoundingClientRect();
+              const controls = document.querySelector('.configure-controls').getBoundingClientRect();
+              const buy = document.querySelector('.configure-controls > .button-fill').getBoundingClientRect();
+              return getComputedStyle(stage).position === 'sticky'
+                && preview.right < controls.left && preview.top === controls.top
+                && buy.height > 0 && buy.bottom <= innerHeight;
+            })()`), 'Preview and purchase fit side by side at 1024×768');
+          }
           await clickVisible(width <= 896 ? '.configure-mobile-buy .button' : '.configure-controls > .button-fill');
+          if (width === 1440) {
+            await send('Emulation.setDeviceMetricsOverride', { width, height: 1000, deviceScaleFactor: 1, mobile: false });
+          }
           // The button navigates to the cart. Await that router transition;
           // forcing a CDP navigation here races its pending router.push.
           await until(`location.pathname.endsWith('/cart/') && !!document.querySelector('.cart-entry')`);

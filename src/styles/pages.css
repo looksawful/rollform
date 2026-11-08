@@ -73,8 +73,11 @@
   :is(.configure-page, .product-detail-page) > .breadcrumbs { margin-block-end: var(--space-2); }
 
   .configure-layout { --sidebar-gap: clamp(2rem, 5vw, 5rem); --sidebar-content-min: 34rem; --sidebar-width: clamp(18rem, 31vw, 26rem); }
+  .configure-stage { --stack-space: var(--sidebar-gap); }
+  .configure-stage .random-dice-button { align-self: flex-start; }
   .configure-preview {
     align-self: flex-start;
+    inline-size: 100%;
     aspect-ratio: 1;
     min-block-size: clamp(23rem, 50vw, 43rem);
     position: relative;
@@ -139,6 +142,63 @@
   .font-options button[aria-pressed="true"] { box-shadow: inset 2px 0 var(--color-text); }
   .numeral-sample { inline-size: 100%; block-size: auto; }
   .configure-price { font-size: var(--fs-title); font-weight: 800; }
+
+  @media (width > 56rem) {
+    .configure-page { padding-block-start: var(--header-height); }
+    .configure-page > .breadcrumbs { margin-block-end: var(--space-1); }
+    .configure-page > .page-heading { padding-block-end: var(--space-2); }
+    .configure-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(23rem, 0.85fr);
+      gap: clamp(1.5rem, 3vw, 3rem);
+      align-items: start;
+    }
+    .configure-layout > .configure-stage {
+      --stack-space: var(--space-1);
+      position: sticky;
+      inset-block-start: calc(var(--header-height) + var(--space-1));
+      justify-self: center;
+      inline-size: min(100%, max(20rem, calc(100svh - var(--header-height) - 11rem)));
+      min-inline-size: 0;
+    }
+    .configure-stage .random-dice-button { align-self: center; }
+    .configure-preview { min-block-size: 0; }
+    .configure-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.75rem var(--space-2);
+    }
+    .configure-controls > :is(.field, .production-note) { grid-column: 1 / -1; }
+    .configure-controls > .configure-price { align-self: center; }
+    .configure-controls > .button-fill { inline-size: auto; }
+    .shape-options { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .color-options .swatch { inline-size: 2.25rem; block-size: 2.25rem; }
+    .font-options {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-1);
+      border: 0;
+    }
+    .font-options button {
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: flex-end;
+      align-items: flex-start;
+      gap: 0.125rem;
+      min-block-size: 3.5rem;
+      padding-block: 0.375rem;
+      border: var(--border-default);
+      border-radius: var(--radius-sm);
+      overflow-wrap: anywhere;
+    }
+    .font-options button[aria-pressed="true"] { border-color: var(--color-text); box-shadow: none; }
+    .font-options .numeral-sample {
+      max-inline-size: 6.5rem;
+      block-size: 1.25rem;
+      object-fit: contain;
+      object-position: left center;
+    }
+  }
 
   .cart-page { --stack-space: 1.5rem; }
   .cart-lines { --stack-space: 1rem; }

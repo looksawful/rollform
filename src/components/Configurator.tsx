@@ -55,11 +55,13 @@ export default function Configurator() {
     }] : undefined} />
     <div className="page-heading"><h1 className="page-title">Собери сам</h1></div>
     <div className="configure-layout sidebar">
-      <div className="configure-preview"><DiceViewer config={config} /></div>
-      <div className="configure-controls stack">
+      <div className="configure-stage stack">
+        <div className="configure-preview"><DiceViewer config={config} /></div>
         <button type="button" className="button button-secondary random-dice-button" onClick={createRandomDice}>
           <span>Создать случайный кубик</span><Box className="icon" aria-hidden="true" />
         </button>
+      </div>
+      <div className="configure-controls stack">
         <div className="field stack">
           <h2 id="dice-shape">Количество граней</h2>
           <div className="option-list shape-options" role="group" aria-labelledby="dice-shape">
@@ -92,14 +94,14 @@ export default function Configurator() {
             ))}
           </div>
         </div>
+        <p className="configure-price">{price}</p>
+        <button type="button" className="button button-black button-fill" onClick={addCustom}><span>В корзину</span><ShoppingBag className="icon" aria-hidden="true" /></button>
         <div className="production-note stack">
           <h2>Кубики на заказ</h2>
           <p>Изготовление начинается после согласования формы, цвета и шрифта.</p>
           <p>Доставка кубиков под заказ по Москве и регионам — до 5 дней. Самовывоз бесплатный.</p>
           <Link href={'/production'}>Изготовление и доставка</Link>
         </div>
-        <p className="configure-price">{price}</p>
-        <button type="button" className="button button-black button-fill" onClick={addCustom}><span>В корзину</span><ShoppingBag className="icon" aria-hidden="true" /></button>
       </div>
     </div>
     <div className="configure-mobile-buy" aria-label="Выбранный кубик и добавление в корзину">
