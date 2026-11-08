@@ -42,6 +42,20 @@
   }
   .dice-preview-badge .icon { --icon-size: 1rem; }
   .dice-canvas:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -3px; }
+  .dice-preview-status:not(:empty) {
+    position: absolute;
+    z-index: 3;
+    inset-inline: 0.75rem;
+    inset-block-end: 0.75rem;
+    max-inline-size: calc(100% - 1.5rem);
+    padding: 0.4rem 0.7rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: var(--fs-small);
+    text-align: center;
+    pointer-events: none;
+  }
   .canvas-fallback {
     position: absolute;
     inset: 25%;
