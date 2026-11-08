@@ -28,6 +28,7 @@ export default function Storefront() {
         <button type="button" className="button button-black" onClick={createRandomDice}><span>Создать случайный кубик</span><Box className="icon" aria-hidden="true" /></button>
       </div>
     </section>
+    <BentoSection />
     <section className="section stack catalog-section" id="catalog">
       <div className="wrapper catalog-heading prose">
         <h2 className="section-title">В наличии</h2>
@@ -39,18 +40,7 @@ export default function Storefront() {
       </div>
     </section>
     <ProductionInfo onHome />
-    <BentoSection />
-    <section className="wrapper section about-section" id="about">
-      <figure className="about-panorama editorial-photo">
-        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/dice-02.webp`}
-          alt="Игральные кубики, панорамное изображение"
-          width={1600} height={640} loading="lazy" decoding="async" />
-      </figure>
-      <div className="editorial-copy prose">
-        <h2 className="section-title">О нас</h2>
-        <p>В этом разделе будет история проекта: как появилась идея и что определяет характер коллекции. Пока мы используем временный текст, чтобы проверить ритм длинного абзаца и сочетание с фотографиями. После утверждения содержания он будет заменён полноценным описанием.</p>
-      </div>
-    </section>
+    <DeliveryInfo />
     <section className="wrapper section stack" id="faq">
       <h2 className="section-title">Частые вопросы</h2>
       <div className="faq-list">
@@ -70,11 +60,25 @@ export default function Storefront() {
         </details>)}
       </div>
     </section>
+    <section className="wrapper section about-section" id="about">
+      <figure className="about-panorama editorial-photo">
+        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/photos/casting-vacuum-chamber.jpg`}
+          alt="Вакуумная камера с манометром для удаления пузырьков из смолы"
+          width={1065} height={1181} loading="lazy" decoding="async" />
+        <figcaption>
+          Иллюстрация оборудования: <a href="https://commons.wikimedia.org/wiki/File:Studio_vacuum_chamber.jpg" target="_blank" rel="noopener noreferrer">Emccorm / Wikimedia Commons</a>,
+          {' '}<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a> (кадрировано).
+        </figcaption>
+      </figure>
+      <div className="editorial-copy prose">
+        <h2 className="section-title">О нас</h2>
+        <p>В этом разделе будет история проекта: как появилась идея и что определяет характер коллекции. Пока мы используем временный текст, чтобы проверить ритм длинного абзаца и сочетание с фотографиями. После утверждения содержания он будет заменён полноценным описанием.</p>
+      </div>
+    </section>
     <section className="wrapper section stack" id="contacts">
       <h2 className="section-title">Контакты</h2>
       <ContactContent />
     </section>
-    <DeliveryInfo />
     <ScrollProgress />
   </>;
 }

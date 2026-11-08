@@ -143,12 +143,12 @@ test('header reveal stops listening after the first downward scroll', () => {
   assert.match(shell, /if \(window\.scrollY > 24\) \{\s*setRevealed\(true\);\s*window\.removeEventListener\('scroll', reveal\);/);
 });
 
-test('home shows manufacturing and collection after stock, separate from About Us', () => {
+test('home places manufacturing and delivery after stock, separate from About Us', () => {
   const home = source('src/components/Storefront.tsx');
   const production = source('src/components/ProductionInfo.tsx');
   const css = source('src/styles/pages.css');
   assert.match(home, /import ProductionInfo from/);
-  assert.match(home, /<ProductGallery mode="reel" \/>[\s\S]*?<\/section>\s*<ProductionInfo onHome \/>\s*<BentoSection \/>\s*<section className="wrapper section about-section"/);
+  assert.match(home, /<ProductGallery mode="reel" \/>[\s\S]*?<\/section>\s*<ProductionInfo onHome \/>\s*<DeliveryInfo \/>/);
   assert.doesNotMatch(home, /<p className="eyebrow">О проекте<\/p>/);
   assert.doesNotMatch(home, /<Link[^>]+\/production[^>]*>Изготовление и получение<\/Link>/);
   assert.match(production, /<h2 className="section-title">Как оформить заказ<\/h2>/);
