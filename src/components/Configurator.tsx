@@ -40,7 +40,10 @@ export default function Configurator() {
   const createRandomDice = () => router.replace(`/configure?${diceQuery(randomDiceConfig(Math.random, config.shell))}`);
   const addCustom = () => { if (add(config, { kind: 'preorder_custom' })) router.push('/cart'); };
 
-  return <section className="wrapper section page-section">
+  const price = formatPrice(priceForConfig(config));
+  const summary = `${config.shape.toUpperCase()} · ${shellColors.find(color => color.value === config.shell)?.name ?? ""} · ${fontNames[config.font]}`;
+
+  return <section className="wrapper section page-section configure-page">
     <div className="page-heading"><h1 className="page-title">Собери сам</h1></div>
     <div className="configure-layout sidebar">
       <div className="configure-preview"><DiceViewer config={config} /></div>
@@ -65,9 +68,16 @@ export default function Configurator() {
           <p>Доставка кубиков под заказ по Москве и регионам — до 5 дней. Самовывоз бесплатный.</p>
           <Link href={'/production'}>Изготовление и доставка</Link>
         </div>
-        <p className="configure-price">{formatPrice(priceForConfig(config))}</p>
-        <button type="button" className="button button-black button-fill" onClick={addCustom}><span>В корзину</span><ShoppingBag className="icon" aria-hidden="true" /></button>
+        <p className="configure-price">{price}</p>
+        <button type="button" className="button button-black button-fill configure-desktop-buy" onClick={addCustom}><span>В корзину</span><ShoppingBag className="icon" aria-hidden="true" /></button>
       </div>
+    </div>
+    <div className="configure-mobile-buy" aria-label="Выбранный кубик и добавление в корзину">
+      <div className="configure-mobile-buy-copy">
+        <span className="configure-mobile-buy-summary" title={summary}>{summary}</span>
+        <strong className="configure-mobile-buy-price">{price}</strong>
+      </div>
+      <button type="button" className="button button-black" onClick={addCustom}><span>В корзину</span><ShoppingBag className="icon" aria-hidden="true" /></button>
     </div>
   </section>;
 }
