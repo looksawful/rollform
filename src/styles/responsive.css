@@ -1,5 +1,37 @@
 @layer components {
+  /* One mobile purchase action; the desktop button stays in the document only on wide screens. */
+  .configure-mobile-buy { display: none; }
   @media (width <= 56rem) {
+    .configure-page { padding-block-end: 0; }
+    .configure-controls .configure-desktop-buy { display: none; }
+    .configure-mobile-buy {
+      position: sticky;
+      inset-block-end: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-inline-size: 0;
+      padding: 0.75rem max(var(--gutter), env(safe-area-inset-right))
+        max(0.75rem, env(safe-area-inset-bottom))
+        max(var(--gutter), env(safe-area-inset-left));
+      margin-inline: calc(-1 * var(--gutter));
+      border-block-start: var(--border-default);
+      background: var(--color-surface);
+      box-shadow: 0 -0.3rem 1.5rem rgb(0 0 0 / 0.07);
+    }
+    .configure-mobile-buy-copy { display: grid; gap: 0.1rem; min-inline-size: 0; flex: 1; }
+    .configure-mobile-buy-summary {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: var(--fs-small);
+      line-height: var(--lh-small);
+    }
+    .configure-mobile-buy-price { font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+    .configure-mobile-buy .button { flex: none; min-block-size: 2.75rem; padding-inline: 0.85rem; }
+    .configure-mobile-buy .icon { display: none; }
+
     .hero { padding-block: 1rem 4rem; }
     .hero-object { min-block-size: clamp(21rem, 48vw, 26rem); }
     .hero h1 { font-size: clamp(2.65rem, 2rem + 2.2vw, 4.25rem); }
