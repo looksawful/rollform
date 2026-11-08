@@ -24,11 +24,12 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
 
     (async () => {
       try {
-        const [THREE, { gsap }, { loadCastDie }, { HDRLoader }, { OrbitControls }] = await Promise.all([
+        const [THREE, { gsap }, { loadCastDie }, { HDRLoader }, { OrbitControls }, { colorRimLight }] = await Promise.all([
           import('three'), import('gsap'),
           import('@/lib/castDice'),
           import('three/addons/loaders/HDRLoader.js'),
           import('three/addons/controls/OrbitControls.js'),
+          import('@/lib/rimLight'),
         ]);
         if (closed) return;
         const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
@@ -60,10 +61,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         }
         canvas.style.touchAction = 'pan-y';
 
-        if (environment) {
-          environment.mapping = THREE.EquirectangularReflectionMapping;
-          scene.environment = environment;
-        }
+        let litShell: DiceConfig['shell'] | undefined;
 
         const dice = new THREE.Group();
         dice.rotation.set(-0.38, 0.4, 0.12);
@@ -232,6 +230,12 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         controls?.addEventListener('change', () => render(true));
         if (controls) host.addEventListener('keydown', onKeyDown);
         const update = (next: DiceConfig) => {
+          if (environment && litShell !== next.shell) {
+            const previous = scene.environment;
+            scene.environment = colorRimLight(environment, next.shell);
+            previous?.dispose();
+            litShell = next.shell;
+          }
           const shapeKey = `${next.shape}/${next.font}`;
           if (shapeKey !== renderedKey) {
             if (shapeKey !== pendingKey) void buildShape(next, shapeKey);
@@ -307,6 +311,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           canvas.removeEventListener('webglcontextrestored', onRestored);
           if (viewerRef.current?.update === update) viewerRef.current = null;
           clearShape();
+          scene.environment?.dispose();
           environment?.dispose();
           renderer.dispose();
           canvas.remove();

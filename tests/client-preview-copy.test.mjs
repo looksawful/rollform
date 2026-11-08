@@ -38,7 +38,7 @@ test('stock cards show a photo, a prominent price and a secondary add-to-cart ac
   assert.match(card,/href=\{detailsUrl\}/);
   assert.doesNotMatch(card,/className="product-description"|onPreview|product-zoom/);
   assert.match(card,/className="button button-secondary"/);
-  assert.match(card,/<span>Добавить в корзину<\/span>/);
+  assert.match(card,/<span\b[^>]*>Добавить в корзину<\/span>/);
   assert.match(card,/photoPath\(index\)/);
   assert.match(catalog,/>Кубики в наличии<\/h1>/);
 });

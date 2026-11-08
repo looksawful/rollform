@@ -6,6 +6,7 @@ import {
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { DiceConfig } from './catalog';
+import { rimFilters } from './rimLight';
 
 const tints: Record<DiceConfig['shell'], string> = {
   '#000000': '#55515e', '#196641': '#58d096', '#A62D35': '#dc5965', '#215BA8': '#6aa7ed',
@@ -39,8 +40,10 @@ export async function loadCastDie(config: DiceConfig, basePath: string) {
     color: '#fff1ea', transmission: 1, thickness: 1, flatShading: true,
     roughness: 0.088, ior: 1.52, envMapIntensity: 0.58,
   });
+  const rimFilter = new Vector3(1, 1, 1);
   surface.onBeforeCompile = shader => {
     shader.uniforms.uCastPlanes = { value: castPlanes };
+    shader.uniforms.uRimFilter = { value: rimFilter };
     shader.vertexShader = 'varying vec3 vCastPosition;\n' + shader.vertexShader.replace(
       '#include <begin_vertex>', '#include <begin_vertex>\nvCastPosition = position;',
     );
@@ -48,6 +51,7 @@ export async function loadCastDie(config: DiceConfig, basePath: string) {
     shader.fragmentShader = `
       varying vec3 vCastPosition;
       uniform vec4 uCastPlanes[${maxPlanes}];
+      uniform vec3 uRimFilter;
 
       float pathThroughCast(vec3 start, vec3 ray) {
         float distance = 4.0;
@@ -58,7 +62,11 @@ export async function loadCastDie(config: DiceConfig, basePath: string) {
         }
         return clamp(distance, 0.014, 3.4);
       }
-    ` + shader.fragmentShader.replace(
+    ` + shader.fragmentShader.replace('#include <lights_fragment_end>', `
+      #include <lights_fragment_end>
+      float grazing = 1.0 - saturate(dot(normal, normalize(vViewPosition)));
+      reflectedLight.indirectSpecular *= mix(vec3(1.0), uRimFilter, smoothstep(0.18, 0.75, grazing));
+    `).replace(
       '#include <transmission_fragment>',
       ShaderChunk.transmission_fragment.replace('vec4 transmitted =', `
         vec3 p = vCastPosition;
@@ -70,7 +78,13 @@ export async function loadCastDie(config: DiceConfig, basePath: string) {
         material.thickness = pathThroughCast(p, ray);
         float haze = 1.0 - exp(-material.thickness / material.attenuationDistance * 0.22);
         float transmissionRoughness = mix(material.roughness, 0.21, haze);
-        vec4 transmitted =`).replace('n, v, material.roughness,', 'n, v, transmissionRoughness,'),
+        vec4 transmitted =`).replace('n, v, material.roughness,', 'n, v, transmissionRoughness,')
+        .replace('material.transmissionAlpha = mix', `
+          // Colored bounce behind the cast is most visible through its thin edges.
+          float edgeBounce = 0.85 * exp(-1.3 * material.thickness);
+          transmitted.rgb *= mix(vec3(1.0), uRimFilter, edgeBounce);
+          material.transmissionAlpha = mix
+        `),
     );
   };
   const gold = new MeshStandardMaterial({
@@ -102,6 +116,8 @@ export async function loadCastDie(config: DiceConfig, basePath: string) {
     scene,
     normals,
     setShell(shell: DiceConfig['shell']) {
+      const [r, g, b] = rimFilters[shell];
+      rimFilter.set(r, g, b);
       surface.attenuationColor.set(tints[shell]);
       surface.attenuationDistance = shell === '#000000' ? 1.28 : 1.75;
     },
