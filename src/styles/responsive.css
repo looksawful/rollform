@@ -3,11 +3,9 @@
   .configure-mobile-buy { display: none; }
   @media (width <= 56rem) {
     .configure-page { padding-block-end: 0; }
-    .configure-controls > .button.button-fill { display: none; }
+    .configure-controls > .button.button-fill,
+    .configure-controls > .configure-price { display: none; }
     .configure-mobile-buy {
-      position: sticky;
-      inset-block-end: 0;
-      z-index: 20;
       display: flex;
       align-items: center;
       gap: 0.75rem;
@@ -18,13 +16,10 @@
       margin-inline: calc(-1 * var(--gutter));
       border-block-start: var(--border-default);
       background: var(--color-surface);
-      box-shadow: 0 -0.3rem 1.5rem rgb(0 0 0 / 0.07);
     }
     .configure-mobile-buy-copy { display: grid; gap: 0.1rem; min-inline-size: 0; flex: 1; }
     .configure-mobile-buy-summary {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      overflow-wrap: anywhere;
       font-size: var(--fs-small);
       line-height: var(--lh-small);
     }
@@ -32,12 +27,14 @@
     .configure-mobile-buy .button { flex: none; min-block-size: 2.75rem; padding-inline: 0.85rem; }
     .configure-mobile-buy .icon { display: none; }
 
-    .hero { padding-block: 1rem 4rem; }
+    .hero {
+      min-block-size: calc(100svh - 6rem - env(safe-area-inset-top));
+      padding-block: 1rem 4rem;
+    }
     .hero-object { min-block-size: clamp(21rem, 48vw, 26rem); }
     .hero h1 { font-size: clamp(2.65rem, 2rem + 2.2vw, 4.25rem); }
   }
   @media (width <= 36rem) {
-    .topbar-inner { min-block-size: 4.25rem; }
     .hero-object { min-block-size: 22rem; }
     .hero-copy { --stack-space: 1.2rem; }
   }

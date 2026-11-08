@@ -257,9 +257,24 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('${breadcrumb} a'), a => a.href)`),
           route.startsWith('product/') ? [base, new URL('catalog/',base).href] : [base]);
         assert.ok(await evaluate(`Array.from(document.querySelectorAll('${breadcrumb} li')).every(item => item.getBoundingClientRect().right <= innerWidth)`), route);
+        assert.ok(await evaluate(`(() => {
+          const header = document.querySelector('.topbar');
+          const crumbs = document.querySelector('${breadcrumb}');
+          return getComputedStyle(header).position === 'static' &&
+            header.getBoundingClientRect().bottom <= crumbs.getBoundingClientRect().top &&
+            [...header.querySelectorAll('nav a')].filter(link => link.getClientRects().length).length === 3;
+        })()`), `Mobile header stays above breadcrumbs: ${route}`);
       }
       await send('Page.navigate', {url:new URL('configure/?preset=demo-2&shape=d12',base).href});
       await until(`document.querySelector('${breadcrumb} li:nth-child(3) a')?.textContent === 'Вариант 02'`);
+      assert.ok(await evaluate(`(() => {
+        const buy = document.querySelector('.configure-mobile-buy');
+        const controls = document.querySelector('.configure-controls');
+        const preview = getComputedStyle(document.querySelector('.configure-preview'));
+        return getComputedStyle(buy).position === 'static' &&
+          buy.getBoundingClientRect().top >= controls.getBoundingClientRect().bottom &&
+          preview.borderTopWidth === '0px' && preview.backgroundColor === 'rgba(0, 0, 0, 0)';
+      })()`), 'Purchase row follows the settings, with an unframed preview');
       await clickCrumb('li:nth-child(3) a');
       await until(`location.pathname.endsWith('/product/') && location.search === '?item=demo-2'`);
       await until(`document.querySelector('${breadcrumb} li:nth-child(2) a')?.textContent === 'Кубики в наличии'`);

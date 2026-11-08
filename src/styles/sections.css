@@ -9,8 +9,6 @@
     place-items: center;
     min-block-size: clamp(23rem, 40vw, 44rem);
     overflow: hidden;
-    border-radius: var(--radius-md);
-    background: var(--color-preview);
   }
   .dice-canvas {
     position: absolute;

@@ -59,29 +59,6 @@
     font-weight: 600;
   }
   .cart-count { font-size: var(--fs-small); line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .mobile-menu { display: none; position: relative; }
-  .mobile-menu summary {
-    display: grid;
-    place-items: center;
-    inline-size: 2.75rem;
-    block-size: 2.75rem;
-    list-style: none;
-    cursor: pointer;
-  }
-  .mobile-menu summary::-webkit-details-marker { display: none; }
-  .mobile-nav {
-    position: absolute;
-    inset-block-start: calc(100% + 0.2rem);
-    inset-inline-end: 0;
-    inline-size: min(18rem, calc(100vw - 2rem));
-    background: var(--color-surface);
-    border: var(--border-default);
-    border-radius: var(--radius-sm);
-    padding: 0.75rem;
-    z-index: 30;
-  }
-  .mobile-nav a { padding: 0.7rem; min-block-size: 2.75rem; }
-  .mobile-nav a[aria-current="page"] { text-decoration: underline; }
   .nav a[aria-current="page"] { text-decoration: underline; text-underline-offset: 0.4em; }
 
   .page-section { padding-block: clamp(3rem, 8vw, 7rem); }
@@ -100,9 +77,6 @@
     align-self: flex-start;
     aspect-ratio: 1;
     min-block-size: clamp(23rem, 50vw, 43rem);
-    border: var(--border-default);
-    border-radius: var(--radius-md);
-    background: var(--color-preview);
     position: relative;
   }
   .configure-controls { --stack-space: 2rem; align-items: stretch; }
@@ -333,7 +307,7 @@
   }
 
   .product-detail { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.75fr); gap: clamp(2rem, 6vw, 6rem); align-items: start; }
-  .product-detail-main { position: relative; aspect-ratio: 1.1; overflow: hidden; border-radius: var(--radius-lg); background: var(--color-preview); }
+  .product-detail-main { position: relative; aspect-ratio: 1.1; }
   .product-detail-main img { inline-size: 100%; block-size: 100%; object-fit: cover; }
   .product-detail-photo-trigger {
     display: block;
@@ -341,7 +315,9 @@
     block-size: 100%;
     padding: 0;
     border: 0;
-    background: transparent;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-preview);
     cursor: zoom-in;
   }
   .product-detail-photo-trigger:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
@@ -499,9 +475,35 @@
     .product-detail { grid-template-columns: minmax(0,1fr); }
     .editorial-grid { grid-template-columns: minmax(0,1fr); }
 
-    .desktop-nav { display: none; }
-    .mobile-menu { display: block; }
+    .topbar {
+      position: static;
+      padding-block-start: env(safe-area-inset-top);
+      transform: none;
+      opacity: 1;
+      pointer-events: auto;
+      transition: none;
+    }
+    .topbar-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-rows: minmax(3.25rem, auto) auto;
+      gap: 0 var(--space-2);
+      min-block-size: 0;
+    }
+    .topbar-inner .logo-mark { inline-size: 2rem; block-size: auto; }
+    .topbar-inner .header-actions { grid-column: 2; grid-row: 1; }
+    .topbar-inner .desktop-nav {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      --cluster-gap: 0 var(--space-3);
+    }
+    .nav-desktop-only { display: none; }
+    .topbar-inner .nav a { min-block-size: 2.75rem; align-content: center; }
+    .cart-shortcut { min-inline-size: 2.75rem; justify-content: flex-end; }
     .cart-shortcut-label { display: none; }
+    .page-section { padding-block-start: var(--space-2); }
+    .site main > .page-section.stack { justify-content: flex-start; }
+    .page-heading { padding-block-end: var(--space-3); }
   }
 
   @media (width <= 55rem) {
@@ -520,14 +522,7 @@
     }
     .product-detail-thumbs button { font-size: 0.8rem; }
 
-    /* Inherited Cluster wraps header actions when enlarged Cyrillic needs room. */
-    .topbar-inner {
-      --cluster-gap: 0.5rem;
-      min-block-size: 4.25rem;
-      padding-block: 0.5rem;
-    }
     .logo { font-size: 1.1rem; }
-    .header-actions { margin-inline-start: auto; }
     .hero-object { min-block-size: clamp(13rem, 67vw, 18rem); }
     .hero-copy { --stack-space: 0.7rem; min-inline-size: 0; }
     .hero h1 { font-size: clamp(1.45rem, 7.5vw, 2.5rem); }

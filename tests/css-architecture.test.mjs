@@ -127,18 +127,17 @@ test('approved vector mark replaces the brand placeholder', () => {
   assert.match(layout, /title: 'ROLLFORM \| Кубики'/);
 });
 
-test('header reveals after scroll and always shows cart, with conditional count', () => {
+test('desktop header reveals after scroll and mobile navigation is in flow, with conditional cart count', () => {
   const shell = read('src/components/SiteShell.tsx');
   const css = read('src/styles/pages.css');
-  assert.match(shell, /<details className="mobile-menu"/);
-  assert.match(shell, /<summary aria-label="Меню"/);
+  assert.match(shell, /<nav[^>]+aria-label="Основное меню"/);
   assert.ok(shell.includes('<Link href={"/cart"} className="cart-shortcut"'));
   assert.ok(shell.includes('{count > 0 && <span className="cart-count"'));
   assert.ok(!shell.includes('{count > 0 && <Link'));
   assert.match(shell, /className="cart-shortcut"/);
   assert.match(shell, /setRevealed\(true\)/);
   assert.match(shell, /<ShoppingBag className="icon" aria-hidden="true"\s*\/>/);
-  assert.match(css, /\.mobile-menu\s*\{/);
+  assert.match(css, /@media \(width <= 56rem\)[\s\S]*?\.topbar\s*\{[^}]*position:\s*static/);
   assert.match(css, /\.cart-shortcut\s*\{/);
 });
 
@@ -190,7 +189,7 @@ test('site CSS uses semantic theme roles, not raw colors or legacy ink-paper tok
   assert.doesNotMatch(rest, /#[a-f0-9]{3,8}\b/i);
   assert.match(read('src/styles/components.css'), /--button-background:\s*var\(--color-action\)/);
   assert.match(read('src/styles/components.css'), /--button-text:\s*var\(--color-on-action\)/);
-  assert.match(read('src/styles/sections.css'), /background:\s*var\(--color-preview\)/);
+  assert.match(read('src/styles/pages.css'), /\.product-detail-photo-trigger\s*\{[^}]*background:\s*var\(--color-preview\)/);
   assert.match(read('src/styles/base.css'), /outline:\s*2px solid var\(--color-focus\)/);
   const topbarStyles = read('src/styles/pages.css');
   assert.match(topbarStyles, /\.topbar\s*\{[^}]*background:\s*transparent;/);
@@ -253,7 +252,6 @@ test('desktop topbar spans viewport with centered navigation and equal flexible 
   assert.match(desktop, /\.topbar-inner\s*>\s*\.logo,\s*\.topbar-inner\s*>\s*\.header-actions\s*\{[^}]*flex:\s*1 1 0/);
   assert.match(desktop, /\.topbar-inner\s*>\s*\.header-actions\s*\{[^}]*justify-content:\s*flex-end/);
   assert.match(desktop, /\.topbar-inner\s*>\s*\.desktop-nav\s*\{[^}]*flex-wrap:\s*nowrap/);
-  assert.match(read('src/styles/pages.css'), /\.mobile-menu\s*\{\s*display:\s*none/);
 });
 
 test('hero 3D canvas floats on the site background at desktop and mobile widths', () => {

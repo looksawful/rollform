@@ -2,16 +2,16 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { Menu, ShoppingBag } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { CartProvider, useCart } from './CartState';
 
 const menuLinks = [
-  { href: '/', label: 'Главная' },
+  { href: '/', label: 'Главная', desktopOnly: true },
   { href: '/catalog', label: 'Кубики' },
   { href: '/configure', label: 'Собери сам' },
-  { href: '/#about', label: 'О нас' },
+  { href: '/#about', label: 'О нас', desktopOnly: true },
   { href: '/contacts', label: 'Контакты' },
 ];
 
@@ -80,9 +80,9 @@ function SiteChrome({ children }: { children: ReactNode }) {
       media?.revert();
     };
   }, [pathname]);
-  const path = pathname.replace(/\/$/, '');
-  const navigation = menuLinks.map(({ href, label }) =>
-    <Link key={href} href={href} aria-current={path === href ? 'page' : undefined}>{label}</Link>
+  const path = pathname.replace(/\/$/, '') || '/';
+  const navigation = menuLinks.map(({ href, label, desktopOnly }) =>
+    <Link key={href} href={href} className={desktopOnly ? "nav-desktop-only" : undefined} aria-current={path === href ? 'page' : undefined}>{label}</Link>
   );
   return <div className="site" data-theme="light">
     <header className={revealed ? "topbar topbar-visible" : "topbar"}>
@@ -93,16 +93,6 @@ function SiteChrome({ children }: { children: ReactNode }) {
         </Link>
         <nav className="nav cluster desktop-nav" aria-label="Основное меню">{navigation}</nav>
         <div className="header-actions cluster">
-          <details className="mobile-menu" onKeyDown={e => {
-            if (e.key === 'Escape') { e.currentTarget.open = false; e.currentTarget.querySelector('summary')?.focus(); }
-          }}>
-            <summary aria-label="Меню">
-              <Menu className="icon" aria-hidden="true" />
-            </summary>
-            <nav className="mobile-nav stack" aria-label="Мобильное меню" onClick={e => {
-              e.currentTarget.closest('details')?.removeAttribute('open');
-            }}>{navigation}</nav>
-          </details>
           <Link href={"/cart"} className="cart-shortcut" aria-label={'Корзина, товаров: ' + count}
             aria-current={path === '/cart' ? 'page' : undefined}>
             <ShoppingBag className="icon" aria-hidden="true" />

@@ -13,14 +13,13 @@ const pkg = JSON.parse(read('package.json'));
 
 test('one free tree-shaken Lucide pack, with specific imports only', () => {
   assert.ok(pkg.dependencies?.['lucide-react'], 'Install lucide-react');
-  assert.match(shell, /import\s*\{\s*Menu,\s*ShoppingBag\s*\}\s*from\s*'lucide-react'/);
+  assert.match(shell, /import\s*\{\s*ShoppingBag\s*\}\s*from\s*'lucide-react'/);
   assert.match(cart, /import\s*\{\s*Minus,\s*Plus,\s*ShoppingBag,\s*Trash2\s*\}\s*from\s*'lucide-react'/);
   assert.match(config, /import\s*\{\s*Box,\s*ShoppingBag\s*\}\s*from\s*'lucide-react'/);
   assert.doesNotMatch(shell + cart + config, /import\s+\*\s+as\s+\w+\s+from\s+['"]lucide-react/);
 });
 
-test('mobile menu and basket use consistent accessible outline glyphs', () => {
-  assert.match(shell, /<summary aria-label="Меню">\s*<Menu\s+className="icon"\s+aria-hidden="true"\s*\/>/);
+test('basket uses an accessible outline glyph', () => {
   assert.match(shell, /<ShoppingBag\s+className="icon"\s+aria-hidden="true"\s*\/>/);
   assert.match(shell, /aria-label=\{'Корзина, товаров: '/);
   assert.doesNotMatch(shell, /hamburger-lines|<svg/);

@@ -26,13 +26,13 @@ test('primary, choice, quantity and catalog action buttons have capsule shapes',
   assert.match(pages, /\.product-actions \.button\s*\{[^}]*inline-size:\s*100%/);
 });
 
-test('cards, previews and menu share design-system corner sizes', () => {
+test('cards and photos use design-system corners while 3D previews stay open', () => {
   assert.match(patterns, /\.box\s*\{[^}]*border-radius:\s*var\(--radius-md\)/);
   assert.match(pages, /\.product-visual\s*\{[^}]*border-radius:\s*var\(--radius-md\)/);
-  assert.match(pages, /\.configure-preview\s*\{[^}]*border-radius:\s*var\(--radius-md\)/);
-  assert.match(sections, /\.hero-object\s*\{[^}]*border-radius:\s*var\(--radius-md\)/);
+  assert.doesNotMatch(pages.match(/\.configure-preview\s*\{[^}]*\}/)?.[0] ?? '', /border|background/);
+  assert.doesNotMatch(sections.match(/\.hero-object\s*\{[^}]*\}/)?.[0] ?? '', /border|background/);
   assert.match(pages, /\.product\s*\{[^}]*border-radius:\s*var\(--radius-lg\)/);
-  assert.match(pages, /\.mobile-nav\s*\{[^}]*border-radius:\s*var\(--radius-sm\)/);
+  assert.match(pages, /\.product-detail-photo-trigger\s*\{[^}]*border-radius:\s*var\(--radius-lg\)/);
 });
 
 test('text-only actions and physical dice stay independent of site shape scale', () => {
