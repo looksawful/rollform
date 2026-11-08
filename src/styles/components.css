@@ -86,22 +86,22 @@
   .button-secondary { color: var(--color-text); background: transparent; }
   .button-secondary:hover { background: var(--color-preview); }
   :where(.theme-toggle, .cart-shortcut, .mobile-menu summary, .quantity button, .pill-list button,
-    .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumb, .nav a, .mobile-nav a) {
+    .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumbs a, .nav a, .mobile-nav a) {
     transition: transform 160ms ease, background-color 160ms ease, opacity 160ms ease;
   }
   :where(.theme-toggle, .cart-shortcut, .mobile-menu summary, .quantity button):hover {
     background: var(--color-surface);
   }
-  :where(.product-detail-thumbs button, .text-action, .catalog-link, .breadcrumb, .nav a, .mobile-nav a):hover {
+  :where(.product-detail-thumbs button, .text-action, .catalog-link, .breadcrumbs a, .nav a, .mobile-nav a):hover {
     opacity: 0.75;
   }
   :where(.theme-toggle, .cart-shortcut, .mobile-menu summary, .quantity button, .pill-list button,
-    .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumb, .nav a, .mobile-nav a):active {
+    .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumbs a, .nav a, .mobile-nav a):active {
     transform: scale(0.96);
   }
   @media (prefers-reduced-motion: reduce) {
     :where(.theme-toggle, .cart-shortcut, .mobile-menu summary, .quantity button, .pill-list button,
-      .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumb, .nav a, .mobile-nav a) {
+      .product-detail-thumbs button, .text-action, .catalog-link, .breadcrumbs a, .nav a, .mobile-nav a) {
       transition: none;
     }
   }

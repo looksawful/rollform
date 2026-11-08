@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata: Metadata = { title: 'Пользовательское соглашение' };
 
 export default function TermsPage() {
   return <article className="wrapper section page-section stack">
+    <Breadcrumbs current="Пользовательское соглашение" />
     <h1 className="page-title">Пользовательское соглашение</h1>
     <div className="prose">
       <p>Проект условий использования демонстрационного сайта Rollform.</p>

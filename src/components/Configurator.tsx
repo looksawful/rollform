@@ -4,9 +4,10 @@ import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Box, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import Breadcrumbs, { catalogCrumb } from './Breadcrumbs';
 import DiceViewer from './DiceViewer';
 import { useCart } from './CartState';
-import { LAST_DICE_KEY, configFromParams, diceQuery, randomDiceConfig, readSavedDice, diceShapes, fontNames, fontStyles, shellColors } from '@/lib/catalog';
+import { LAST_DICE_KEY, configFromParams, diceQuery, randomDiceConfig, readSavedDice, diceShapes, fontNames, fontStyles, presets, shellColors } from '@/lib/catalog';
 import type { DiceConfig } from '@/lib/catalog';
 import { formatPrice, priceForConfig } from '@/lib/pricing';
 
@@ -15,6 +16,7 @@ export default function Configurator() {
   const params = useSearchParams();
   const query = params.toString();
   const config = configFromParams(params);
+  const preset = presets.find(item => item.id === params.get('preset'));
   useEffect(() => {
     try {
       const url = new URL(window.location.href);
@@ -37,13 +39,20 @@ export default function Configurator() {
     next.set(key, value);
     window.history.replaceState(null, '', `?${next}`);
   };
-  const createRandomDice = () => router.replace(`/configure?${diceQuery(randomDiceConfig(Math.random, config.shell))}`);
+  const createRandomDice = () => {
+    const next = new URLSearchParams(diceQuery(randomDiceConfig(Math.random, config.shell)));
+    if (preset) next.set('preset', preset.id);
+    router.replace(`/configure?${next}`);
+  };
   const addCustom = () => { if (add(config, { kind: 'preorder_custom' })) router.push('/cart'); };
 
   const price = formatPrice(priceForConfig(config));
   const summary = `${config.shape.toUpperCase()} · ${shellColors.find(color => color.value === config.shell)?.name ?? ""} · ${fontNames[config.font]}`;
 
   return <section className="wrapper section page-section configure-page">
+    <Breadcrumbs current="Собери сам" ancestors={preset ? [catalogCrumb, {
+      href: `/product?item=${preset.id}`, label: preset.title,
+    }] : undefined} />
     <div className="page-heading"><h1 className="page-title">Собери сам</h1></div>
     <div className="configure-layout sidebar">
       <div className="configure-preview"><DiceViewer config={config} /></div>

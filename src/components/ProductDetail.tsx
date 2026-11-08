@@ -5,10 +5,11 @@ import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Orbit, ShoppingBag } from 'lucide-react';
+import { Orbit, ShoppingBag } from 'lucide-react';
 import { presets, fontNames, shellColors } from '@/lib/catalog';
 import { photoPath } from '@/lib/photoAssets';
 import { formatPrice, priceForPreset } from '@/lib/pricing';
+import Breadcrumbs, { catalogCrumb } from './Breadcrumbs';
 import DiceViewer from './DiceViewer';
 import { useCart } from './CartState';
 
@@ -27,9 +28,7 @@ export default function ProductDetail() {
     }
   };
   return <section className="wrapper section page-section product-detail-page">
-    <Link className="breadcrumb" href={'/catalog'}>
-      <ArrowLeft className="icon" aria-hidden="true" /> Все кубики
-    </Link>
+    <Breadcrumbs current={product.title} ancestors={[catalogCrumb]} />
     <div className="product-detail">
       <div className="product-detail-gallery">
         <div className="product-detail-main">

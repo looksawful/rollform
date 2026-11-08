@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from './CartState';
+import Breadcrumbs from './Breadcrumbs';
 import { fontNames, shellColors, presets } from '@/lib/catalog';
 import { photoPath } from '@/lib/photoAssets';
 import { formatPrice, priceForCartItem } from '@/lib/pricing';
@@ -16,6 +17,7 @@ export default function CartView() {
   const { items, change, remove, clear } = useCart();
   const total = items.reduce((sum, item) => sum + priceForCartItem(item) * item.quantity, 0);
   return <section className="wrapper section page-section cart-page stack">
+    <Breadcrumbs current="Корзина" />
     <p className="eyebrow">Ваш выбор</p>
     <h1 className="page-title">Корзина</h1>
     {items.length === 0

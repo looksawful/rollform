@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { Box, Send, Clock, Truck } from 'lucide-react';
+import Breadcrumbs from './Breadcrumbs';
 
 export default function ProductionInfo({ onHome = false }: { onHome?: boolean }) {
   return <section id={onHome ? 'production' : undefined}
     className={`wrapper section order-process stack${onHome ? '' : ' page-section'}`}>
+    {!onHome && <Breadcrumbs current="Изготовление и доставка" />}
     <div className="production-intro prose">
       {onHome ? <h2 className="section-title">Как оформить заказ</h2> : <h1 className="page-title">Как оформить заказ</h1>}
       <p>Выберите готовый кубик или соберите свой вариант. Затем согласуйте детали, готовность и удобный способ получения через контактную форму.</p>

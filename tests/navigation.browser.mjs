@@ -224,6 +224,33 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         }
       }
     });
+    await t.test('internal pages show breadcrumbs with working parent links', async () => {
+      const breadcrumb = 'nav[aria-label="Хлебные крошки"]';
+      await send('Emulation.setDeviceMetricsOverride', { width:320, height:800, deviceScaleFactor:1, mobile:true });
+      for (const [route, current] of [
+        ['catalog/', 'Кубики в наличии'], ['configure/', 'Собери сам'], ['cart/', 'Корзина'],
+        ['contacts/', 'Контакты'], ['production/', 'Изготовление и доставка'],
+        ['product/?item=demo-2', 'Вариант 02'], ['terms/', 'Пользовательское соглашение'],
+      ]) {
+        await send('Page.navigate', {url:new URL(route,base).href});
+        await until(`document.querySelector('${breadcrumb} [aria-current="page"]')?.textContent === ${JSON.stringify(current)}`);
+        assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('${breadcrumb} a'), a => a.href)`),
+          route.startsWith('product/') ? [base, new URL('catalog/',base).href] : [base]);
+        assert.ok(await evaluate(`Array.from(document.querySelectorAll('${breadcrumb} li')).every(item => item.getBoundingClientRect().right <= innerWidth)`), route);
+      }
+      await send('Page.navigate', {url:new URL('configure/?preset=demo-2',base).href});
+      await until(`document.querySelector('${breadcrumb} li:nth-child(3) a')?.textContent === 'Вариант 02'`);
+      await evaluate(`document.querySelector('.random-dice-button').click()`);
+      await until(`new URLSearchParams(location.search).has('shape') && new URLSearchParams(location.search).get('preset') === 'demo-2'`);
+      await evaluate(`document.querySelector('${breadcrumb} li:nth-child(3) a').click()`);
+      await until(`location.pathname.endsWith('/product/') && location.search === '?item=demo-2'`);
+      await until(`document.querySelector('${breadcrumb} li:nth-child(2) a')?.textContent === 'Кубики в наличии'`);
+      await evaluate(`document.querySelector('${breadcrumb} li:nth-child(2) a').click()`);
+      await until(`location.pathname.endsWith('/catalog/') && !!document.querySelector('.product-grid')`);
+      await evaluate(`document.querySelector('${breadcrumb} a').click()`);
+      await until(`location.href === ${JSON.stringify(base)} && !!document.querySelector('.hero')`);
+      assert.equal(await evaluate(`document.querySelectorAll('${breadcrumb}').length`), 0);
+    });
     for (const theme of ['']) {
       await t.test('light-only review, catalog count, random color and 3D interaction', async () => {
         await send('Emulation.setDeviceMetricsOverride', {width:1440,height:1100,deviceScaleFactor:1,mobile:false});
