@@ -82,7 +82,7 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
         return smoothstep(-0.26, 0.70, vein + wisps * 0.17);
       }
       // Sample inclusions on the refracted ray, in D20-normalized model coordinates.
-      float internalBubble(vec3 start, vec3 ray, float path, vec3 light, vec3 center, float radius) {
+      vec2 internalBubble(vec3 start, vec3 ray, float path, vec3 light, vec3 center, float radius) {
         vec3 offset = center - start;
         float depth = dot(offset, ray);
         vec3 radial = ray * depth - offset;
@@ -95,8 +95,8 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
         float glint = rim * smoothstep(0.16, 0.76, facing);
         float shade = rim * smoothstep(0.0, 0.82, -facing);
         float inside = smoothstep(0.0, radius, depth) * smoothstep(0.0, radius, path - depth);
-        float visibility = inside * exp(-0.36 * max(0.0, depth)) * (1.0 - smoothstep(0.35, 1.2, pixel));
-        return (0.46 * glint - 0.26 * shade - 0.06 * body) * visibility;
+        float visibility = inside * exp(-0.28 * max(0.0, depth)) * (1.0 - smoothstep(0.65, 1.65, pixel));
+        return vec2(glint, 0.32 * shade + 0.06 * body) * visibility;
       }
 
       float pigmentFleck(vec3 start, vec3 ray, float path) {
@@ -133,14 +133,17 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
           vec3 start = p / uCastScale;
           float path = material.thickness / uCastScale;
           vec3 light = normalize(toLocal * vec3(-0.8, 0.6, 0.25));
-          float bubbles = internalBubble(start, ray, path, light, vec3(-0.45, 0.31, 0.55), 0.034);
-          bubbles += internalBubble(start, ray, path, light, vec3(0.28, -0.27, 0.12), 0.048);
-          bubbles += internalBubble(start, ray, path, light, vec3(-0.12, -0.39, -0.61), 0.023);
-          transmitted.rgb *= 1.0 + bubbles - 0.085 * pigmentFleck(start, ray, path);
+          vec2 bubbles = internalBubble(start, ray, path, light, vec3(-0.45, 0.31, 0.55), 0.043);
+          bubbles += internalBubble(start, ray, path, light, vec3(0.28, -0.27, 0.12), 0.058);
+          bubbles += internalBubble(start, ray, path, light, vec3(-0.12, -0.39, -0.61), 0.031);
+          transmitted.rgb *= 1.0 - bubbles.y - 0.085 * pigmentFleck(start, ray, path);
           // Approximate the tinted skin at the thinnest corners, as in the lab study.
           float skinDepth = 0.22 * uCastScale * exp(-material.thickness * 2.5 / uCastScale);
           transmitted.rgb *= volumeAttenuation(skinDepth * castModelScale,
             material.attenuationColor, material.attenuationDistance);
+          // An internal glint stays legible even where the transmitted background is dark.
+          vec3 bubbleLight = 0.10 * sqrt(material.attenuationColor);
+          transmitted.rgb += bubbleLight * bubbles.x;
           material.transmissionAlpha = mix
         `),
     );
