@@ -236,11 +236,21 @@ test('page motion and navigation', { timeout: 180000, skip: Boolean(process.env.
         await until(`document.readyState === 'complete' && document.querySelector('.site').dataset.theme === 'light'`);
         assert.equal(await evaluate(`!!document.querySelector('.theme-toggle')`),false,'Theme control is absent');
         assert.equal(await evaluate(`location.pathname.includes('/dark')`),false);
-        for (const width of [320,390,768,1024,1440]) {
+        for (const width of [320,390,430,768,1024,1440]) {
           await send('Emulation.setDeviceMetricsOverride',{width,height:1100,deviceScaleFactor:1,mobile:false});
           const columns=await evaluate(`getComputedStyle(document.querySelector('.product-grid')).gridTemplateColumns.split(' ').length`);
           assert.equal(columns,width<=960?2:3,`Catalog columns at ${width}`);
           assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`));
+          assert.ok(await evaluate(`[...document.querySelectorAll('.product-grid .product')].every(card => !!card.querySelector('.product-attributes')?.textContent?.match(/D(?:4|6|8|10|12|20|%) · /))`), 'Catalog derives shape/color labels from presets');
+          if (width <= 430) {
+            const metrics = await evaluate(`(() => {
+              const button = document.querySelector('.product-grid .product-actions button');
+              const rect = button.getBoundingClientRect();
+              return { fontSize: parseFloat(getComputedStyle(button).fontSize), width: rect.width, height: rect.height };
+            })()`);
+            assert.ok(metrics.fontSize >= 14, 'Mobile catalog CTA font >= 14px');
+            assert.ok(metrics.width >= 44 && metrics.height >= 44, 'Mobile catalog CTA target >= 44px');
+          }
         }
         await evaluate(`document.querySelector('.product-grid button').click()`);
         await until(`Number(document.querySelector('.product-add-count')?.textContent)>0`);
