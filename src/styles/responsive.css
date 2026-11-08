@@ -3,7 +3,7 @@
   .configure-mobile-buy { display: none; }
   @media (width <= 56rem) {
     .configure-page { padding-block-end: 0; }
-    .configure-controls .configure-desktop-buy { display: none; }
+    .configure-controls > .button.button-fill { display: none; }
     .configure-mobile-buy {
       position: sticky;
       inset-block-end: 0;
