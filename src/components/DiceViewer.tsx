@@ -160,7 +160,7 @@ export default function DiceViewer({ config, continuous = false, animateConfig =
             setStatus('ready');
           }
         };
-        const play = () => {
+        const play = (keepPose = false) => {
           timeline?.kill();
           if (!normals.length) return;
           if (interacted) { host.dataset.motion = 'manual'; render(true); return; }
@@ -194,7 +194,7 @@ export default function DiceViewer({ config, continuous = false, animateConfig =
             repeatDelay: duration('--dice-hold-duration', 2.2),
             onRepeat: choose,
           });
-          timeline.fromTo(phase, { windup: 0 }, { windup: 1,
+          timeline.fromTo(phase, { windup: 0 }, { windup: 1, immediateRender: false,
             duration: duration('--dice-anticipate-duration', 0.18),
             ease: 'sine.inOut', onStart: () => { host.dataset.motion = 'anticipating'; },
             onUpdate: () => {
@@ -202,7 +202,7 @@ export default function DiceViewer({ config, continuous = false, animateConfig =
               render();
             },
           });
-          timeline.fromTo(phase, { roll: 0 }, { roll: 1,
+          timeline.fromTo(phase, { roll: 0 }, { roll: 1, immediateRender: false,
             duration: duration('--dice-roll-duration', 4.5),
             ease: 'sine.inOut', onStart: () => { host.dataset.motion = 'rolling'; },
             onUpdate: () => {
@@ -212,7 +212,7 @@ export default function DiceViewer({ config, continuous = false, animateConfig =
               render();
             },
           });
-          timeline.fromTo(phase, { wobble: 0.045 }, { wobble: 0,
+          timeline.fromTo(phase, { wobble: 0.045 }, { wobble: 0, immediateRender: false,
             duration: duration('--dice-settle-duration', 0.38),
             ease: 'elastic.out(1, 0.3)',
             onStart: () => { host.dataset.motion = 'settling'; },
@@ -230,7 +230,7 @@ export default function DiceViewer({ config, continuous = false, animateConfig =
           });
           if (motion.matches) {
             timeline.pause();
-            dice.quaternion.copy(target);
+            if (!keepPose) dice.quaternion.copy(target);
             host.dataset.motion = 'paused';
             render();
           } else if (!visible || document.hidden) timeline.pause();
@@ -239,7 +239,10 @@ export default function DiceViewer({ config, continuous = false, animateConfig =
           if (!controls) return;
           controls.enabled = true;
           canvas.style.touchAction = 'none';
-          if (interacted) return;
+          if (interacted) {
+            configMotion?.finishThrow();
+            return;
+          }
           interacted = true;
           stopRoll();
           configMotion?.finishThrow();
@@ -268,11 +271,12 @@ export default function DiceViewer({ config, continuous = false, animateConfig =
         controls?.addEventListener('change', () => render(true));
         if (controls) host.addEventListener('keydown', onKeyDown);
         configMotion = transitionModule?.createConfigureMotion({
-          dice, scene, basePath, install, light, stop: stopRoll, resume: play, render,
+          dice, basePath, install, light, stop: stopRoll, resume: () => play(true), render,
+          prepareTexture: texture => { if (!lost && visible && !document.hidden) renderer.initTexture(texture); },
           reduced: () => motion.matches,
           canRender: () => !closed && !lost && visible && !document.hidden,
           ready: () => { if (!needsFirstFrame && !lost) setStatus('ready'); },
-          unavailable: error => { console.warn('3D option unavailable', error); setStatus('error'); },
+          unavailable: error => { console.warn('3D option unavailable', error); },
         });
         const update = (next: DiceConfig) => {
           if (configMotion && cast) { configMotion.update(next); return; }

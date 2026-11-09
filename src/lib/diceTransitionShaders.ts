@@ -1,44 +1,5 @@
 // Adapted from AwfulShading (MIT).
-export const streakVertex = `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    vec4 center = modelViewMatrix * vec4(0., 0., 0., 1.);
-    center.xy += position.xy * length(modelMatrix[0].xyz);
-    gl_Position = projectionMatrix * center;
-  }
-`;
-
-export const streakFragment = `
-  uniform float uStrength;
-  uniform float uAngle;
-  uniform float uDirection;
-  uniform vec3 uTint;
-  varying vec2 vUv;
-  float ribbon(float angle, float radius, float orbit, float span, float phase, float width) {
-    float along = fract((angle - phase) / 6.2831853);
-    float taper = smoothstep(0., .10, along) * (1. - smoothstep(span - .14, span, along));
-    float distance = abs(radius - orbit + along * .25);
-    return taper * (1. - smoothstep(width * .15, width, distance));
-  }
-  void main() {
-    vec2 p = (vUv - .5) * 2.;
-      vec2 spin = vec2(.96 * p.x + .26 * p.y, 1.44 * p.y - .38 * p.x);
-      float angle = atan(spin.y, spin.x + .00001) * uDirection;
-      float radius = length(spin);
-      float phase = uAngle * uDirection * .48;
-      float sweep = ribbon(angle, radius, .82, .68, phase, .105)
-        + .58 * ribbon(angle, radius, .65, .55, phase + 2.55, .066)
-        + .42 * ribbon(angle, radius, .53, .40, phase + 4.1, .055);
-      float blur = exp(-5.2 * dot(spin, spin));
-      float trail = (.64 * sweep + .22 * blur) * uStrength;
-    gl_FragColor = vec4(mix(uTint * .75, vec3(1., .63, .29), .30), min(.8, trail));
-    #include <colorspace_fragment>
-  }
-`;
-
 export const numeralUniforms = `
-  uniform float uFade;
   uniform float uInk;
   uniform float uGlint;
     float grain(vec2 cell) {
@@ -52,7 +13,7 @@ export const numeralDissolve = `
     float threshold = .12 + .76 * (.48 * grain(floor(numeralUv * 56.))
       + .19 * grain(floor(numeralUv * 23.)) + .33 * drift);
     float reveal = smoothstep(threshold - .065, threshold + .065, uInk);
-  diffuseColor.a *= uFade * reveal;
+  diffuseColor.a *= reveal;
   if (diffuseColor.a <= .001) discard;
 `;
 

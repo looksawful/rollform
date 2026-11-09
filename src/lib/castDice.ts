@@ -10,7 +10,7 @@ import { rimFilters } from './rimLight';
 
 import { numeralDissolve, numeralHighlight, numeralUniforms, pigmentRefraction, pigmentUniforms } from './diceTransitionShaders';
 
-export const castTints: Record<DiceConfig['shell'], string> = {
+const castTints: Record<DiceConfig['shell'], string> = {
   '#000000': '#55515e', '#196641': '#58d096', '#A62D35': '#dc5965', '#215BA8': '#6aa7ed',
 };
 
@@ -60,11 +60,11 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
   const normals = markings.map(marking => new Vector3(...marking.normal));
   const surface = new MeshPhysicalMaterial({
     color: '#fff1ea', transmission: 1, thickness: 1, flatShading: true,
-    roughness: 0.105, ior: 1.52, envMapIntensity: 0.58, transparent: animated,
+    roughness: 0.105, ior: 1.52, envMapIntensity: 0.58,
   });
   const rimFilter = new Vector3(1, 1, 1);
   const dyeDensity = new Vector3();
-  const effects = { fade: { value: 1 }, ink: { value: 1 }, glint: { value: 1.7 } };
+  const effects = { ink: { value: 1 }, glint: { value: 1.7 } };
   const paint = {
     uNextTint: { value: new Color() },
     uNextDye: { value: new Vector3() },
@@ -185,7 +185,6 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
     transparent: true, alphaTest: 0.28,
   });
   if (animated) gold.onBeforeCompile = shader => {
-    shader.uniforms.uFade = effects.fade;
     shader.uniforms.uInk = effects.ink;
     shader.uniforms.uGlint = effects.glint;
     shader.fragmentShader = numeralUniforms + shader.fragmentShader
@@ -218,6 +217,7 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
     normals,
     effects,
     paintProgress: paint.uPaintFlow,
+    texture: map,
     setShell(shell: DiceConfig['shell']) {
       const [r, g, b] = rimFilters[shell];
       rimFilter.set(r, g, b);
@@ -231,11 +231,6 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
       paint.uNextRim.value.set(r, g, b);
       paint.uNextDistance.value = distance(shell);
       paint.uFlowDirection.value = shell === '#196641' || shell === '#215BA8' ? -1 : 1;
-    },
-    setFade(value: number) {
-      effects.fade.value = value;
-      surface.opacity = value;
-      scene.visible = value > .001;
     },
     setFont(texture: Texture) {
       gold.map?.dispose();
