@@ -298,7 +298,7 @@ test('page motion and navigation', { timeout: 180000 }, async t => {
         for (const width of [320,390,430,768,1024,1440]) {
           await send('Emulation.setDeviceMetricsOverride',{width,height:1100,deviceScaleFactor:1,mobile:false});
           const columns=await evaluate(`getComputedStyle(document.querySelector('.product-grid')).gridTemplateColumns.split(' ').length`);
-          assert.equal(columns,width<=960?2:3,`Catalog columns at ${width}`);
+          assert.equal(columns,width<=576?1:width<=960?2:3,`Catalog columns at ${width}`);
           assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`));
           assert.ok(await evaluate(`[...document.querySelectorAll('.product-grid .product')].every(card => !!card.querySelector('.product-attributes')?.textContent?.match(/D(?:4|6|8|10|12|20|%) · /))`), 'Catalog derives shape/color labels from presets');
           if (width <= 430) {

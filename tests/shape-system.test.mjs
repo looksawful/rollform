@@ -38,7 +38,7 @@ test('cards and photos use design-system corners while 3D previews stay open', (
 test('text-only actions and physical dice stay independent of site shape scale', () => {
   assert.doesNotMatch(pages.match(/\.legal-links button\s*\{[^}]*\}/)?.[0] ?? '', /border-radius/);
   assert.doesNotMatch(pages.match(/\.text-action\s*\{[^}]*\}/)?.[0] ?? '', /border-radius/);
-  assert.match(pages, /\.swatch\s*\{[^}]*border-radius:\s*var\(--radius-sm\)/);
+  assert.match(pages, /\.swatch\s*\{[^}]*border-radius:\s*var\(--radius-full\)/);
 });
 
 test('no per-component literal corner radii are introduced', () => {

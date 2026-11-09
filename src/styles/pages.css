@@ -101,12 +101,18 @@
     gap: var(--space-1);
   }
   .shape-options button {
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem;
     border: var(--border-default);
     border-radius: var(--radius-sm);
     font-variant-numeric: tabular-nums;
   }
   .shape-options button:is([aria-pressed="true"], :hover) { background: var(--color-surface); }
-  .shape-options button[aria-pressed="true"] { border-color: var(--color-text); }
+  .shape-options button[aria-pressed="true"] { border-color: var(--color-text); outline: 2px solid var(--color-text); outline-offset: -2px; }
+  .shape-thumbnail { inline-size: min(3rem, 100%); block-size: auto; aspect-ratio: 1; }
+  .shape-options button:focus-visible { outline-offset: 3px; }
 
   .color-options button {
     display: grid;
@@ -120,10 +126,10 @@
     inline-size: 2.75rem;
     block-size: 2.75rem;
     border: var(--border-default);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-full);
   }
   .color-options button[aria-pressed="true"] .swatch {
-    outline: 1px solid var(--color-text);
+    outline: 2px solid var(--color-text);
     outline-offset: 3px;
   }
 
@@ -264,10 +270,10 @@
     .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (width <= 36rem) {
-    .product-grid { gap: 0.5rem; }
+    .product-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
     .product-grid .product { padding: 0.5rem; }
     .product-grid .product-copy { padding-inline: 0; }
-    .product-grid .product-copy h3 { font-size: 1rem; }
+    .product-grid .product-copy h3 { font-size: var(--fs-title); }
     .product-grid .product-price { font-size: 1.25rem; }
     .product-grid .product-actions .button {
       position: relative;
@@ -552,7 +558,7 @@
   .editorial-copy { --stack-space: 1rem; }
   .editorial-photo { margin: 0; min-inline-size: 0; }
   .editorial-photo img { inline-size: 100%; block-size: 100%; aspect-ratio: 1.4; object-fit: cover; border-radius: var(--radius-lg); background: var(--color-preview); }
-  .editorial-photo figcaption { padding-block-start: 0.5rem; font-size: var(--fs-small); opacity: 0.65; }
+  .editorial-photo figcaption { padding-block-start: 0.5rem; font-size: var(--fs-small); opacity: 0.75; }
   .about-section {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

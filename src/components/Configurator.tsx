@@ -72,7 +72,8 @@ export default function Configurator() {
           <div className="option-list shape-options" role="group" aria-labelledby="dice-shape">
             {diceShapes.map(shape => (
               <button key={shape} type="button" aria-pressed={config.shape === shape} onClick={() => change('shape', shape)}>
-                {shape.toUpperCase()}
+                <img className="shape-thumbnail" src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/shape-thumbnails/${shape === 'd%' ? 'd00' : shape}.svg`} alt="" width={48} height={48} />
+                <span>{shape.toUpperCase()}</span>
               </button>
             ))}
           </div>
@@ -112,6 +113,7 @@ export default function Configurator() {
       </div>
     </div>
     <div className="configure-mobile-buy" aria-label="Выбранный кубик и добавление в корзину">
+      <img className="configure-buy-thumbnail" src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/shape-thumbnails/${config.shape === 'd%' ? 'd00' : config.shape}.svg`} alt="" width={44} height={44} />
       <div className="configure-mobile-buy-copy">
         <span className="configure-mobile-buy-summary" title={summary}>{summary}</span>
         <strong className="configure-mobile-buy-price">{price}</strong>

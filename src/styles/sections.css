@@ -101,6 +101,7 @@
   /* Full-screen editorial panels; keep the horizontally scrolled catalog content-sized. */
   main > .section:not(.catalog-section) { min-block-size: 100svh; }
   main > .section.stack:not(.catalog-section) { justify-content: center; }
+  main > :is(#faq, #contacts).section { min-block-size: 0; }
 
   /* Centered monochrome Hero study: 3D dice acts as a passive backdrop. */
   .hero.hero-centered {

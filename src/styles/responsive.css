@@ -3,7 +3,7 @@
   .configure-mobile-buy { display: none; }
   @media (width <= 56rem) {
     html:has(.configure-page) {
-      scroll-padding-block-end: calc(5rem + env(safe-area-inset-bottom));
+      scroll-padding-block-end: calc(9rem + env(safe-area-inset-bottom));
     }
     .configure-page { padding-block-end: 0; }
     .configure-controls > .button.button-fill,
@@ -23,11 +23,10 @@
       border-block-start: var(--border-default);
       background: var(--color-surface);
     }
+    .configure-buy-thumbnail { flex: none; inline-size: 2.75rem; block-size: 2.75rem; }
     .configure-mobile-buy-copy { display: grid; gap: 0.1rem; min-inline-size: 0; flex: 1; }
     .configure-mobile-buy-summary {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      overflow-wrap: anywhere;
       font-size: var(--fs-small);
       line-height: var(--lh-small);
     }
