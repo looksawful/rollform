@@ -2,17 +2,19 @@
 // See public/models/cast/awfulshading-code-license.txt.
 import {
   Color, Matrix4, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, PlaneGeometry,
-  ShaderChunk, SRGBColorSpace, TextureLoader, Vector3,
+  ShaderChunk, SRGBColorSpace, TextureLoader, Vector3, type Texture,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { DiceConfig } from './catalog';
 import { rimFilters } from './rimLight';
 
-const tints: Record<DiceConfig['shell'], string> = {
+import { numeralDissolve, numeralHighlight, numeralUniforms, pigmentRefraction, pigmentUniforms } from './diceTransitionShaders';
+
+export const castTints: Record<DiceConfig['shell'], string> = {
   '#000000': '#55515e', '#196641': '#58d096', '#A62D35': '#dc5965', '#215BA8': '#6aa7ed',
 };
 
-const redTint = new Color(tints['#A62D35']);
+const redTint = new Color(castTints['#A62D35']);
 const maxPlanes = 24;
 
 // One cell per value, in row-major order. Ten and twenty are shared with D%.
@@ -23,7 +25,21 @@ const labels = [
 type Point = [number, number, number];
 type Marking = { normal: Point; center: Point; up: Point; size: number; label: string };
 
-export async function loadCastDie(config: DiceConfig, basePath: string, onAssetReady?: () => void) {
+export async function loadNumerals(font: DiceConfig['font'], basePath: string) {
+  const map = await new TextureLoader().loadAsync(`${basePath}/numerals/${font}.webp`);
+  map.colorSpace = SRGBColorSpace;
+  return map;
+}
+
+function setDye(dye: Vector3, tint: Color) {
+  dye.set(
+    0.72 * Math.log(tint.r) / Math.log(redTint.r),
+    1.65 * Math.log(tint.g) / Math.log(redTint.g),
+    1.26 * Math.log(tint.b) / Math.log(redTint.b),
+  );
+}
+
+export async function loadCastDie(config: DiceConfig, basePath: string, onAssetReady?: () => void, animated = false) {
   const report = <T,>(asset: Promise<T>) => asset.then(result => {
     onAssetReady?.();
     return result;
@@ -32,9 +48,8 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
   const [{ scene }, map] = await Promise.all([
     // The face-marking metadata is absent from meshes cached by the previous release.
     report(new GLTFLoader().loadAsync(`${basePath}/models/cast/${filename}.glb?v=2`)),
-    report(new TextureLoader().loadAsync(`${basePath}/numerals/${config.font}.webp`)),
+    report(loadNumerals(config.font, basePath)),
   ]);
-  map.colorSpace = SRGBColorSpace;
   const { castPlanes: planes, markings } = scene.children[0].userData as {
     castPlanes: number[][]; markings: Marking[];
   };
@@ -45,15 +60,27 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
   const normals = markings.map(marking => new Vector3(...marking.normal));
   const surface = new MeshPhysicalMaterial({
     color: '#fff1ea', transmission: 1, thickness: 1, flatShading: true,
-    roughness: 0.105, ior: 1.52, envMapIntensity: 0.58,
+    roughness: 0.105, ior: 1.52, envMapIntensity: 0.58, transparent: animated,
   });
   const rimFilter = new Vector3(1, 1, 1);
   const dyeDensity = new Vector3();
+  const effects = { fade: { value: 1 }, ink: { value: 1 }, glint: { value: 1.7 } };
+  const paint = {
+    uNextTint: { value: new Color() },
+    uNextDye: { value: new Vector3() },
+    uNextRim: { value: new Vector3() },
+    uNextDistance: { value: 1 },
+    uPaintFlow: { value: 0 },
+    uFlowDirection: { value: 1 },
+  };
+  const distance = (shell: DiceConfig['shell']) => castScale * (shell === '#000000' ? 0.97 : 1.32);
+  surface.customProgramCacheKey = () => animated ? 'cast-transition' : 'cast-still';
   surface.onBeforeCompile = shader => {
     shader.uniforms.uCastPlanes = { value: castPlanes };
     shader.uniforms.uRimFilter = { value: rimFilter };
     shader.uniforms.uDyeDensity = { value: dyeDensity };
     shader.uniforms.uCastScale = { value: castScale };
+    if (animated) Object.assign(shader.uniforms, paint);
     shader.vertexShader = 'varying vec3 vCastPosition;\n' + shader.vertexShader.replace(
       '#include <begin_vertex>', '#include <begin_vertex>\nvCastPosition = position;',
     );
@@ -64,6 +91,7 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
       uniform vec3 uRimFilter;
       uniform vec3 uDyeDensity;
       uniform float uCastScale;
+      ${animated ? pigmentUniforms : ''}
 
       float pathThroughCast(vec3 start, vec3 ray) {
         float distance = 4.0;
@@ -109,7 +137,8 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
     ` + shader.fragmentShader.replace('#include <lights_fragment_end>', `
       #include <lights_fragment_end>
       float grazing = 1.0 - saturate(dot(normal, normalize(vViewPosition)));
-      reflectedLight.indirectSpecular *= mix(vec3(1.0), uRimFilter, smoothstep(0.18, 0.75, grazing));
+      vec3 rim = ${animated ? 'mix(uRimFilter, uNextRim, uPaintFlow)' : 'uRimFilter'};
+      reflectedLight.indirectSpecular *= mix(vec3(1.0), rim, smoothstep(0.18, 0.75, grazing));
     `).replace(
       '#include <transmission_fragment>',
       ShaderChunk.transmission_fragment.replace('vec4 transmitted =', `
@@ -117,6 +146,9 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
         mat3 toLocal = transpose(mat3(modelMatrix));
         vec3 ray = refract(-normalize(toLocal * v), normalize(toLocal * n), 1.0 / material.ior);
         material.thickness = pathThroughCast(p, ray);
+        vec3 dyeDensity = uDyeDensity;
+        float seam = 0.;
+        ${animated ? pigmentRefraction : ''}
         float opticalDepth = material.thickness / material.attenuationDistance;
         float haze = 1.0 - exp(-opticalDepth * 0.22);
         float castModelScale = length(modelMatrix[0].xyz);
@@ -129,7 +161,7 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
             vec3 point = p + ray * material.thickness * ((float(step) + 0.5) / 6.0);
             stain += dyeConcentration(point / uCastScale);
           }
-          transmitted.rgb *= exp(-opticalDepth * (stain / 6.0) * uDyeDensity);
+          transmitted.rgb *= exp(-opticalDepth * (stain / 6.0) * dyeDensity) * (1.0 - .22 * seam);
           vec3 start = p / uCastScale;
           float path = material.thickness / uCastScale;
           vec3 light = normalize(toLocal * vec3(-0.8, 0.6, 0.25));
@@ -152,6 +184,14 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
     color: '#d49b38', metalness: 0.69, roughness: 0.33, map,
     transparent: true, alphaTest: 0.28,
   });
+  if (animated) gold.onBeforeCompile = shader => {
+    shader.uniforms.uFade = effects.fade;
+    shader.uniforms.uInk = effects.ink;
+    shader.uniforms.uGlint = effects.glint;
+    shader.fragmentShader = numeralUniforms + shader.fragmentShader
+      .replace('#include <alphatest_fragment>', '#include <alphatest_fragment>\n' + numeralDissolve)
+      .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + numeralHighlight);
+  };
   scene.traverse(node => {
     if (!(node instanceof Mesh)) return;
     node.material.dispose();
@@ -176,17 +216,30 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
   return {
     scene,
     normals,
+    effects,
+    paintProgress: paint.uPaintFlow,
     setShell(shell: DiceConfig['shell']) {
       const [r, g, b] = rimFilters[shell];
       rimFilter.set(r, g, b);
-      const tint = surface.attenuationColor.set(tints[shell]);
-      surface.attenuationDistance = castScale * (shell === '#000000' ? 0.97 : 1.32);
-      // Preserve the red study's density and adapt the spectrum to each dye.
-      dyeDensity.set(
-        0.72 * Math.log(tint.r) / Math.log(redTint.r),
-        1.65 * Math.log(tint.g) / Math.log(redTint.g),
-        1.26 * Math.log(tint.b) / Math.log(redTint.b),
-      );
+      setDye(dyeDensity, surface.attenuationColor.set(castTints[shell]));
+      surface.attenuationDistance = distance(shell);
+      paint.uPaintFlow.value = 0;
+    },
+    preparePaint(shell: DiceConfig['shell']) {
+      const [r, g, b] = rimFilters[shell];
+      setDye(paint.uNextDye.value, paint.uNextTint.value.set(castTints[shell]));
+      paint.uNextRim.value.set(r, g, b);
+      paint.uNextDistance.value = distance(shell);
+      paint.uFlowDirection.value = shell === '#196641' || shell === '#215BA8' ? -1 : 1;
+    },
+    setFade(value: number) {
+      effects.fade.value = value;
+      surface.opacity = value;
+      scene.visible = value > .001;
+    },
+    setFont(texture: Texture) {
+      gold.map?.dispose();
+      gold.map = texture;
     },
     dispose() {
       scene.traverse(node => {
@@ -194,7 +247,7 @@ export async function loadCastDie(config: DiceConfig, basePath: string, onAssetR
       });
       surface.dispose();
       gold.dispose();
-      map.dispose();
+      gold.map?.dispose();
     },
   };
 }

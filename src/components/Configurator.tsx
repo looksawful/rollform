@@ -61,7 +61,7 @@ export default function Configurator() {
     <div className="page-heading"><h1 className="page-title">Собери сам</h1></div>
     <div className="configure-layout sidebar">
       <div className="configure-stage stack">
-        <div className="configure-preview"><DiceViewer config={config} /></div>
+        <div className="configure-preview"><DiceViewer config={config} animateConfig /></div>
         <button type="button" className="button button-secondary random-dice-button" onClick={createRandomDice}>
           <span>Создать случайный кубик</span><Box className="icon" aria-hidden="true" />
         </button>

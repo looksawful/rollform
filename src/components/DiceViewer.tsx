@@ -7,8 +7,9 @@ import type { DiceConfig } from '@/lib/catalog';
 import type { Vector3 } from 'three';
 import { cssTimeSeconds } from '@/lib/cssTime';
 import type { loadCastDie } from '@/lib/castDice';
+import type { createConfigureMotion } from '@/lib/configureMotion';
 
-export default function DiceViewer({ config, continuous = false }: { config: DiceConfig; continuous?: boolean }) {
+export default function DiceViewer({ config, continuous = false, animateConfig = false }: { config: DiceConfig; continuous?: boolean; animateConfig?: boolean }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const configRef = useRef(config);
   const viewerRef = useRef<{ update: (config: DiceConfig) => void } | null>(null);
@@ -29,12 +30,13 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
 
     (async () => {
       try {
-        const [THREE, { gsap }, { loadCastDie }, { HDRLoader }, { OrbitControls }, { colorRimLight }] = await Promise.all([
+        const [THREE, { gsap }, { loadCastDie }, { HDRLoader }, { OrbitControls }, { colorRimLight }, transitionModule] = await Promise.all([
           import('three'), import('gsap'),
           import('@/lib/castDice'),
           import('three/addons/loaders/HDRLoader.js'),
           import('three/addons/controls/OrbitControls.js'),
           import('@/lib/rimLight'),
+          animateConfig ? import('@/lib/configureMotion') : null,
         ]);
         if (closed) return;
         setProgress(25);
@@ -87,12 +89,32 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         let timeline: ReturnType<typeof gsap.timeline> | null = null;
         let interacted = false;
 
-        const clearShape = () => {
+        let configMotion: ReturnType<typeof createConfigureMotion> | undefined;
+        const stopRoll = () => {
           timeline?.kill();
           timeline = null;
+        };
+        const clearShape = () => {
+          stopRoll();
           cast?.dispose();
           cast = undefined;
           dice.clear();
+        };
+
+        const install = (model: Awaited<ReturnType<typeof loadCastDie>>) => {
+          clearShape();
+          cast = model;
+          normals = model.normals;
+          dice.add(model.scene);
+          lastFace = -1;
+          needsFirstFrame = true;
+        };
+        const light = (shell: DiceConfig['shell']) => {
+          if (!environment || litShell === shell) return;
+          const previous = scene.environment;
+          scene.environment = colorRimLight(environment, shell);
+          previous?.dispose();
+          litShell = shell;
         };
 
         const buildShape = async (next: DiceConfig, shapeKey: string) => {
@@ -107,18 +129,15 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
             let completed = 0;
             const model = await loadCastDie(next, basePath, () => {
               if (firstModel && !closed && id === request) setProgress(50 + ++completed * 20);
-            });
+            }, animateConfig);
             if (closed || id !== request) { model.dispose(); return; }
-            clearShape();
-            cast = model;
             model.setShell(configRef.current.shell);
-            normals = model.normals;
-            dice.add(model.scene);
+            install(model);
             renderedKey = shapeKey;
             pendingKey = undefined;
-            lastFace = -1;
-            needsFirstFrame = true;
             play();
+            configMotion?.initialize(model, { ...next, shell: configRef.current.shell });
+            configMotion?.update(configRef.current);
           } catch (error) {
             if (!closed && id === request) {
               pendingKey = undefined;
@@ -222,8 +241,8 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           canvas.style.touchAction = 'none';
           if (interacted) return;
           interacted = true;
-          timeline?.kill();
-          timeline = null;
+          stopRoll();
+          configMotion?.finishThrow();
           host.dataset.motion = 'manual';
           render(true);
         };
@@ -248,13 +267,16 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
         controls?.addEventListener('start', stopAuto);
         controls?.addEventListener('change', () => render(true));
         if (controls) host.addEventListener('keydown', onKeyDown);
+        configMotion = transitionModule?.createConfigureMotion({
+          dice, scene, basePath, install, light, stop: stopRoll, resume: play, render,
+          reduced: () => motion.matches,
+          canRender: () => !closed && !lost && visible && !document.hidden,
+          ready: () => { if (!needsFirstFrame && !lost) setStatus('ready'); },
+          unavailable: error => { console.warn('3D option unavailable', error); setStatus('error'); },
+        });
         const update = (next: DiceConfig) => {
-          if (environment && litShell !== next.shell) {
-            const previous = scene.environment;
-            scene.environment = colorRimLight(environment, next.shell);
-            previous?.dispose();
-            litShell = next.shell;
-          }
+          if (configMotion && cast) { configMotion.update(next); return; }
+          light(next.shell);
           const shapeKey = `${next.shape}/${next.font}`;
           if (shapeKey !== renderedKey) {
             if (shapeKey !== pendingKey) void buildShape(next, shapeKey);
@@ -274,6 +296,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
             timeline?.resume();
             if (continuous) host.dataset.motion = 'rolling';
           }
+          configMotion?.playback();
           render();
         };
         motion.addEventListener('change', onMotion);
@@ -281,6 +304,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           event.preventDefault();
           lost = true;
           timeline?.pause();
+          configMotion?.playback();
           canvas.style.visibility = 'hidden';
           setStatus('error');
         };
@@ -305,6 +329,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           visible = entry.intersectionRatio > 0.12;
           if (visible && !document.hidden && !motion.matches) timeline?.resume();
           else timeline?.pause();
+          configMotion?.playback();
           if (visible) render(true);
         }, { threshold: [0, 0.12] });
         visibility.observe(host);
@@ -314,6 +339,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
             if (!motion.matches) timeline?.resume();
             if (needsFirstFrame) render(true);
           }
+          configMotion?.playback();
         };
         document.addEventListener('visibilitychange', onVisibility);
         resize();
@@ -332,6 +358,7 @@ export default function DiceViewer({ config, continuous = false }: { config: Dic
           canvas.removeEventListener('webglcontextlost', onLost);
           canvas.removeEventListener('webglcontextrestored', onRestored);
           if (viewerRef.current?.update === update) viewerRef.current = null;
+          configMotion?.dispose();
           clearShape();
           scene.environment?.dispose();
           environment?.dispose();
